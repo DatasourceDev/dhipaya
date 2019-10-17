@@ -1,0 +1,36 @@
+﻿@model Dhipaya.Models.Contact;
+@using Dhipaya.DTO
+@{
+}
+<style>
+   
+.footer-main {
+      background-color: #1c3e95;
+      color: #fff;
+      padding: 2em 0;
+   }
+
+</style>
+<div class="site-wrapper">
+   <main class="main">
+    <p>
+ชื่อ : @Model.Name<br/>
+เบอร์ติดต่อ : @Model.ContactNo<br/>
+อีเมล : @Model.Email<br/>
+หัวข้อติดต่อ : @Model.Title<br/>
+เรื่องที่ต้องการสอบถาม : @Model.Information<br/>
+</p>
+   </main>
+   <footer class="footer footer-main">
+      <div class="container">
+         <div class="footer-row">
+            <div class="footer-block">
+               <div class="footer-logo">
+                  <img src="https://tipsociety.dhipaya.co.th/tip/img/logo.png">
+               </div><!-- .footer-logo -->
+            </div><!-- .footer-block -->
+         </div><!-- .footer-row -->
+      </div><!-- .container -->
+   </footer><!-- .footer-main -->
+
+</div>

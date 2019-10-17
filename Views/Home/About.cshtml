@@ -1,0 +1,163 @@
+﻿@model Dhipaya.Models.AboutUs
+@{
+   ViewData["Title"] = "เกี่ยวกับเรา";
+   Layout = "_LayoutTIP";
+}
+<div class="faq-banner">
+   <div class="container">
+      <h4>เกี่ยวกับ</h4>
+      <h3>เรา</h3>
+   </div>
+</div>
+<div class="faq">
+   <nav class="faq-navigation">
+      <div class="container">
+         <ul class="faq-main-menu">
+            <li class="faq-main-menu-item is-active">
+               <a href="#faq-about" class="faq-main-menu-link"><span class="faq-main-menu-text">เกี่ยวกับเรา</span></a>
+            </li>
+            <li class="faq-main-menu-item">
+               <a href="#faq-privilege" class="faq-main-menu-link"><span class="faq-main-menu-text">สิทธิพิเศษ สำหรับสมาชิก</span></a>
+            </li>
+            <li class="faq-main-menu-item">
+               <a href="#faq-condition" class="faq-main-menu-link"><span class="faq-main-menu-text">เงื่อนไขการรับสิทธิพิเศษ</span></a>
+            </li>
+            <li class="faq-main-menu-item">
+               <a href="#faq-howto" class="faq-main-menu-link"><span class="faq-main-menu-text">การใช้สิทธิพิเศษ</span></a>
+            </li>
+            <li class="faq-main-menu-item">
+               <a href="#faq-cancel" class="faq-main-menu-link"><span class="faq-main-menu-text">เงื่อนไขการยกเลิกสิทธิพิเศษ</span></a>
+            </li>
+         </ul>
+      </div><!-- .container -->
+   </nav>
+   <div id="faq-about" class="faq-content">
+      <div class="container">
+         <h3>@Model.Title</h3>
+         <div class="row">
+            <div class="col-2">
+               @if (Model.MediaType == MediaType.Video && !string.IsNullOrEmpty(Model.VideoUrl))
+               {
+                  <video class="video-js vjs-default-skin" controls preload="auto" height="350" width="100%" poster="" data-setup="{}">
+                     <source src="@Url.Content(Model.VideoUrl)" type='video/mp4' />
+                  </video>
+               }
+               else
+               {
+                  <img src="@Url.Content(Model.Url)">
+               }
+            </div><!-- .col-2 -->
+            <div class="col-2">
+               <p>@Html.Raw(Model.Description)</p>
+            </div><!-- .col-2 -->
+         </div><!-- .row -->
+      </div><!-- .container -->
+   </div><!-- #faq-about -->
+   <div id="faq-privilege" class="faq-content">
+      <div class="container">
+         <h3><small>สิทธิพิเศษสำหรับสมาชิก</small></h3>
+         <ul class="faq-privilege-list">
+            <li class="faq-privilege-item">
+               <div class="faq-privilege-icon"><img src="~/tip/img/faq-icon-1.png"></div>
+               <div class="faq-privilege-info">
+                  <h3><small>รับส่วนลด</small></h3>
+                  <p>หรือสิทธิพิเศษอื่นๆ เมื่อซื้อสินค้า หรือบริการจากร้านค้าที่ร่วมรายการ</p>
+               </div>
+            </li>
+            <li class="faq-privilege-item">
+               <div class="faq-privilege-icon"><img src="~/tip/img/faq-icon-2.png"></div>
+               <div class="faq-privilege-info">
+                  <h3><small>รับข่าวสาร</small></h3>
+                  <p>เกี่ยวกับสิทธิพิเศษ และกิจกรรมของ TIP Society</p>
+               </div>
+            </li>
+            <li class="faq-privilege-item">
+               <div class="faq-privilege-icon"><img src="~/tip/img/faq-icon-3.png"></div>
+               <div class="faq-privilege-info">
+                  <h3><small>รับสิทธิ์ร่วมกิจกรรม</small></h3>
+                  <p>และคะแนนสะสมตามเงื่อนไขที่บริษัทฯ กำหนด</p>
+               </div>
+            </li>
+            <li class="faq-privilege-item">
+               <div class="faq-privilege-icon"><img src="~/tip/img/faq-icon-4.png"></div>
+               <div class="faq-privilege-info">
+                  <h3><small>ตรวจสอบสิทธิพิเศษ</small></h3>
+                  <p>ได้ที่ tipsociety.dhipaya.co.th</p>
+               </div>
+            </li>
+            <li class="faq-privilege-item">
+               <div class="faq-privilege-icon"><img src="~/tip/img/faq-icon-5.png"></div>
+               <div class="faq-privilege-info">
+                  <h3><small>ขอสงวนสิทธิ์</small></h3>
+                  <p>ในการเปลี่ยนแปลงเงื่อนไขการรับสิทธิพิเศษ โดยไม่ต้องแจ้งให้ทราบล่วงหน้า</p>
+               </div>
+            </li>
+         </ul><!-- .faq-privilege-list -->
+         <div class="faq-privilege-action">
+            <a href="@Url.Action("Register","Accounts")" class="button button-red">สมัครสมาชิก</a>
+         </div>
+      </div><!-- .container -->
+   </div><!-- #faq-privilege -->
+   <div id="faq-condition" class="faq-content">
+      <div class="container">
+         <h3>เงื่อนไขการรับสิทธิพิเศษ</h3>
+         <ul class="faq-condition-list">
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><img src="~/tip/img/faq-condition-1.png"></div>
+               <h3 class="faq-condition-title"><small>โปรดแสดง Code</small></h3>
+               <p class="faq-condition-text">
+                  แก่พนักงานของร้านค้าและบริการที่ร่วมรายการทุกครั้ง<br />เพื่อรับสิทธิพิเศษหรือแลกคะแนน<br />มิฉะนั้นจะถือว่าสละสิทธิ์
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><img src="~/tip/img/faq-condition-2.png"></div>
+               <h3 class="faq-condition-title"><small>สิทธิพิเศษนี้จัดทำขึ้น สำหรับผู้ใช้ประเภทบุคคลธรรมดาเท่านั้น</small></h3>
+               <p class="faq-condition-text">
+                  ไม่สามารถใช้เพื่อประกอบธุรกิจ หรือกิจการใดๆ
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><img src="~/tip/img/faq-condition-3.png"></div>
+               <h3 class="faq-condition-title"><small>สิทธิพิเศษนี้ไม่สามารถใช้ร่วมกับโปรแกรมส่งเสริมการขายบางรายการที่บริษัทฯ กำหนด</small></h3>
+            </li>
+         </ul>
+      </div><!-- .container -->
+   </div><!-- #faq-condition -->
+   <div class="container">
+      <div class="faq-container">
+         <div id="faq-howto" class="faq-content">
+            <h3>การใช้สิทธิพิเศษ</h3>
+            <ul class="faq-howto-list">
+               <li class="faq-howto-item">
+                  <div class="faq-howto-icon"><img src="~/tip/img/qrcode.png"></div>
+                  <div class="faq-howto-info">
+                     <h3><small>SCAN QR Code</small></h3>
+                     <p>ที่แสดงไว้ในร้านค้าเพื่อเข้าสู่ website TIP Society แล้วเลือกสิทธิพิเศษที่ต้องการ กดเลือกใช้สิทธิ์สมาชิกจะได้รับ Code ทางโทรศัพท์มือถือและนำไปแสดงให้กับทางร้านค้าเพื่อใช้สิทธิ์</p>
+                  </div>
+               </li>
+               <li class="faq-howto-item">
+                  <div class="faq-howto-icon"><img src="~/tip/img/card.png"></div>
+                  <div class="faq-howto-info">
+                     <h3><small>แสดง e-card member</small></h3>
+                     <p>แก่ร้านค้าและบริการ เพื่อใช้สิทธิพิเศษ ตามเงื่อนไขของร้านค้าและบริการนั้นๆ</p>
+                  </div>
+               </li>
+            </ul>
+         </div><!-- #faq-howto -->
+         <div id="faq-cancel" class="faq-content">
+            <h3>เงื่อนไขการยกเลิกสิทธิพิเศษ</h3>
+            <ol>
+               <li>บริษัทฯ ขอสงวนสิทธิในการยกเลิกการมอบสิทธิพิเศษกรณีที่พบการทุจริตในการแลกรับสิทธิ์ ทั้งนี้ การยกเลิกสิทธิพิเศษดังกล่าว มีผลให้คะแนนสะสมที่สมาชิกมีอยู่ทั้งหมดถูกยกเลิกทันที และถือว่าบริษัทฯ ไม่มีภาระผูกพัน หนี้ หรือหน้าที่ในการจ่ายเงินชดเชยใดๆ จากคะแนนสะสมที่มีอยู่ให้แก่สมาชิก และสมาชิกไม่สามารถอ้างสิทธิ์ใดๆ จากบริษัทฯได้ </li>
+               <li>บริษัทฯขอสงวนสิทธิ์ในการยกเลิกการรับสิทธิพิเศษ โดยไม่ต้องแจ้งให้สมาชิกทราบล่วงหน้า</li>
+            </ol>
+         </div><!-- #faq-cancel -->
+      </div><!-- .faq-container -->
+   </div><!-- .container -->
+</div><!-- .faq-main -->
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('faq-main');
+      });
+   </script>
+}

@@ -1,0 +1,152 @@
+﻿@model Dhipaya.Models.NewsActivity
+@using System.Text.RegularExpressions;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = Model.Title;
+   Layout = "_LayoutTIP";
+
+   var url = "https://" + ViewContext.HttpContext.Request.Host.Value + "/Home/NewsActivityInfo/" + Model.ID;
+   var urlhost = "https://" + ViewContext.HttpContext.Request.Host.Value;
+   var img = Model.ImgUrl;
+   if (!string.IsNullOrEmpty(img))
+   {
+      img = urlhost + img.Replace("~", "");
+   }
+
+   var desc1 = "";
+   @if (!string.IsNullOrEmpty(Model.Description))
+   {
+      desc1 = Model.Description;
+      Regex regex = new Regex("\\<[^\\>]*\\>");
+      desc1 = regex.Replace(desc1, String.Empty);
+      desc1 = desc1.Replace("&nbsp;", " ");
+      if (desc1.Length > 150)
+      {
+         desc1 = (desc1).Substring(0, 150) + "...";
+      }
+   }
+}
+@section head{
+   <meta name="description" content="@ViewData["Title"]" />
+   <meta name="keywords" content="@ViewData["Title"] ทิพยประกันภัย" />
+   <meta property="og:url" content="@url" />
+   <meta property="fb:app_id" content="@ViewData["FBAppID"]" />
+   <meta property="og:title" content="@ViewData["Title"]" />
+   <meta property="og:description" content="@desc1" />
+   <meta property="og:image" content="@Url.Content(img)" />
+   <meta property="og:image:width" content="1200" />
+   <meta property="og:image:height" content="630" />
+}
+<div class="news-detail-banner">
+   <div class="container">
+      @if (Model.MediaType == MediaType.Video && !string.IsNullOrEmpty(Model.VideoUrl))
+      {
+         <video class="video-js vjs-default-skin" controls preload="auto" height="300" width="100%" poster="" data-setup="{}">
+            <source src="@Url.Content(Model.VideoUrl)" type='video/mp4' />
+         </video>
+      }
+      else
+      {
+         @if (Model.NewsActivityImages.Count() > 0)
+         {
+            <div class="slideshow slideshow-main">
+               @foreach (var item in Model.NewsActivityImages)
+               {
+
+                  <div class="slideshow-item">
+                     <div class="image-slideshow-container">
+                        <img class="image-slideshow-full" src="@Url.Content(item.Url)">
+                     </div><!-- .slideshow-container -->
+                  </div> <!-- .slideshow-item -->
+               }
+            </div>
+         }
+      }
+   </div>
+</div>
+<div class="news-detail">
+   <div class="news-detail-content">
+      <div class="container">
+         <h3>@Model.Title</h3>
+         <p>
+            @Html.Raw(Model.Description)
+         </p>
+         <br />
+         <div class="profile-row">
+            <div class="profile-col-full text-center">
+               <a href="@Url.Action("NewsActivity","Home")" class="button button-blue">ย้อนกลับ</a>
+               <a href="#" onclick="share_fb('@url','','','@Url.Content(img)');return false;" class="button button-blue"><i class="fab fa-facebook-square"></i> แชร์ลงเฟสบุ๊ค</a>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="news-latest">
+      <div class="container">
+         <h3>ข่าวสาร <small>อื่นๆ</small></h3>
+         <ul class="news-condition-list">
+
+            @foreach (NewsActivity item in ViewBag.Favorities)
+            {
+               <li class="news-condition-item">
+                  <div class="news-condition-icon">
+                     @if (item.MediaType == MediaType.Video && !string.IsNullOrEmpty(item.VideoUrl))
+                     {
+                        <video class="video-js vjs-default-skin" controls preload="auto" height="280" width="100%" poster="" data-setup="{}">
+                           <source src="@Url.Content(item.VideoUrl)" type='video/mp4' />
+                        </video>
+                     }
+                     else
+                     {
+                        <img src="@Url.Content(item.ImgUrl)" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                     }
+                  </div>
+                  <div class="news-condition-title" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                     <h4>
+                        @if (!string.IsNullOrEmpty(item.Title))
+                        {
+                           var title = item.Title;
+                           if (title.Length > 23)
+                           {
+                              @((title).Substring(0, 23) + "...")
+                           }
+                           else
+                           {
+                              @(title)
+                           }
+                        }
+                     </h4>
+                  </div>
+                  <p class="news-condition-text">
+                     @if (!string.IsNullOrEmpty(item.Description))
+                     {
+                        string desc = item.Description;
+                        Regex regex = new Regex("\\<[^\\>]*\\>");
+                        desc = regex.Replace(desc, String.Empty);
+                        if (desc.Length > 150)
+                        {
+                           @Html.Raw((desc).Substring(0, 150) + "...")
+                        }
+                        else
+                        {
+                           @Html.Raw(desc)
+                        }
+                     }
+                  </p>
+
+                  <div class="read-more">
+                     <a href="@Url.Action("NewsActivityInfo","Home", new { id=item.ID})" target="_blank">Read more <i class="fas fa-chevron-circle-right"></i></a>
+                  </div>
+               </li>
+            }
+         </ul>
+      </div><!-- .container -->
+   </div><!-- #faq-privilege -->
+   <!-- .container -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('news-main');
+      });
+   </script>
+}

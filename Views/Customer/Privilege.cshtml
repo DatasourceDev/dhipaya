@@ -1,0 +1,97 @@
+﻿@model Dhipaya.DTO.PrivilegeDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "แลกสิทธิประโยชน์";
+
+}
+
+<div class="page-content-wrapper ">
+   <div class="content ">
+      <div class="jumbotron" data-pages="parallax">
+         <div class=" container-fluid   container-fixed-lg sm-p-l-0 sm-p-r-0">
+            <div class="inner">
+               <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Home</a></li>
+                  <li class="breadcrumb-item active">แลกสิทธิประโยชน์</li>
+               </ol>
+            </div>
+         </div>
+      </div>
+      <div class=" container-fluid   container-fixed-lg">
+         <div class="row">
+            <div class="col-lg-12 no-padding">
+               <!-- START card -->
+               <div class="card card-transparent">
+                  <div class="card-block">
+                     <ul class="nav nav-tabs nav-tabs-simple" role="tablist" data-init-reponsive-tabs="dropdownfx">
+                        @if (Model != null)
+                        {
+                           var i = 0;
+                           foreach (var item in Model.MerchantCategorys)
+                           {
+                              <li class="nav-item">
+                                 <a class="@(i==0 ? "active" : "")" data-toggle="tab" role="tab" data-target="#@item.CategoryID" href="#">@item.CategoryName</a>
+                              </li>
+                              i++;
+                           }
+                        }
+                     </ul>
+                     <div class="tab-content">
+                        @if (Model != null)
+                        {
+                           var i = 0;
+                           foreach (var item in Model.MerchantCategorys)
+                           {
+                              <div class="tab-pane @(i==0 ? "active" : "")" id="@item.CategoryID">
+                                 @foreach (var itemdtl in Model.Privileges.Where(w => w.CategoryID == item.CategoryID))
+                                 {
+                                    <div class="card social-card share share-other col1" data-social="item" onclick="window.location = '@Url.Action("PrivilegeInfo","Customer", new { pID= itemdtl.PrivilegeID })'">
+                                       <div class="circle" data-toggle="tooltip" title="Label" data-container="body">
+                                       </div>
+                                       <div class="card-content">
+                                          <ul class="buttons ">
+                                             <li>
+                                                <a href="#">
+                                                   <i class="fa fa-expand"></i>
+                                                </a>
+                                             </li>
+                                             <li>
+                                                <a href="#">
+                                                   <i class="fa fa-heart-o"></i>
+                                                </a>
+                                             </li>
+                                          </ul>
+                                          @if (!string.IsNullOrEmpty(itemdtl.Merchant.Url))
+                                          {
+                                             <img src="@Url.Content(itemdtl.Merchant.Url)" height="255" />
+                                          }
+                                          else
+                                          {
+                                             <img src="~/assets/img/gallery/5.jpg" height="255"/>
+
+                                          }
+
+                                       </div>
+                                       <div class="card-header clearfix last">
+                                          <h5>@itemdtl.Merchant.MerchantName</h5>
+                                          <h6>@itemdtl.PrivilegeName</h6>
+                                       </div>
+                                    </div>
+
+
+                                 }
+                              </div>
+                              i++;
+                           }
+                        }
+                     </div>
+                  </div>
+               </div>
+               <!-- END card -->
+            </div>
+         </div>
+      </div>
+      <!-- END CONTAINER FLUID -->
+   </div>
+   <!-- END PAGE CONTENT -->
+</div>

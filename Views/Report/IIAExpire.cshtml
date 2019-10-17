@@ -1,0 +1,86 @@
+﻿@model Dhipaya.DTO.ReportDTO
+@using Dhipaya.DTO;
+@using  Dhipaya.ModelsDapper;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "สมาชิกหมดอายุ/ต่ออายุ";
+   Layout = "_LayoutTIP";
+}
+
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>สมาชิก</small>หมดอายุ<small>/</small>ต่ออายุ</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("ExcelIIAExpire","Report", new { search_text= Model.search_text,search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="IIAExpire" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(Model.IIAExpires.Count()) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่สร้างไฟล์" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               @*<h4 class="sub-heading-right">
+                  <input type="text" class="input-text col90" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน">
+               </h4>*@
+            </form>
+         </div><!-- .profile-title-block -->
+         @if (!string.IsNullOrEmpty(Model.search_sdate) | !string.IsNullOrEmpty(Model.search_edate))
+         {
+            <div class="profile-block-with-bg">
+               <table class="table table-hover">
+                  <thead>
+                     <tr>
+                        <th>ชื่อ</th>
+                        <th>นามสกุล</th>
+                        <th>รหัสบัตรประชาชน</th>
+                        <th>ประเภท</th>
+                        <th>วันที่ทำรายการ</th>
+                        <th>กรมธรรม์</th>
+                        <th>วันที่เริ่ม</th>
+                        <th>วันที่สิ้นสุด</th>
+                        <th>policy no.</th>
+                        <th>policy no. เดิม</th>
+                        <th>email</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     @foreach (var item in Model.IIAExpires)
+                     {
+                        <tr>
+                           <td>@item.t_firstname</td>
+                           <td>@item.t_lastname</td>
+                           <td>@item.idcardno</td>
+                           <td>@item.typereport</td>
+                           <td>@item.transdate</td>
+                           <td>@item.insuranceclass [@item.subclass]</td>
+                           <td>@item.effectivedate</td>
+                           <td>@item.expirydate</td>
+                           <td>@item.newpolicyno</td>
+                           <td>@item.oldpolicyno</td>
+                           <td>@item.email</td>
+                        </tr>
+                     }
+
+                  </tbody>
+
+               </table>
+            </div>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+
+}

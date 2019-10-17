@@ -1,0 +1,80 @@
+﻿@model Dhipaya.DTO.QuestionDTO
+@{
+   ViewData["Title"] = "คำถามที่พบบ่อย";
+   Layout = "_LayoutTIP";
+}
+<div class="faq-banner">
+   <div class="container">
+      <h3>คำถาม</h3>
+      <h4>ที่พบบ่อย</h4>
+   </div>
+</div>
+<div class="faq">
+   <div id="faq-question" class="faq-question">
+      <div class="container">
+         <div class="faq-question-container ">
+            <div class="faq-header">
+               <h3 class="faq-header-title"></h3>
+               <div class="faq-filter">
+                  <form class="faq-filter-form" asp-action="Question" asp-controller="Home" method="get">
+                     <div class="input-block input-member-block">
+
+                     </div>
+                     <div class="input-block input-text-block">
+                        <input asp-for="search_text" type="text" class="input-text" placeholder="พิมพ์ค้นหาคำถาม">
+                     </div>
+                     <div class="input-block input-group-block">
+                        <select asp-for="GroupID" asp-items="@(new SelectList(ViewBag.ListGroups, "ID", "Name"))">
+                           <option value="" selected>หมวดหมู่คำถาม</option>
+                        </select>
+                     </div>
+                     <div class="submit-block">
+                        <button type="submit" class="submit-button"><i class="fa fa-search"></i></button>
+                     </div>
+                  </form>
+               </div>
+            </div><!-- .faq-header -->
+            @foreach (var item in Model.Questions)
+            {
+               <button class="faq-accordion">@item.Title <i class="fas fa-chevron-circle-down"></i></button>
+               <div class="faq-panel">
+                  <p>@Html.Raw(item.Description)</p>
+               </div>
+
+            }
+         </div>
+      </div><!-- .container -->
+   </div><!-- #faq-condition -->
+</div><!-- .faq-main -->
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('faq-main');
+         $('body').removeClass('login-page');
+      });
+      var acc = document.getElementsByClassName("faq-accordion");
+      var i;
+
+      for (i = 0; i < acc.length; i++) {
+         acc[i].addEventListener("click", function () {
+            /* Toggle between adding and removing the "active" class,
+            to highlight the button that controls the panel */
+            this.classList.toggle("active");
+
+            /* Toggle between hiding and showing the active panel */
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+               panel.style.display = "none";
+            } else {
+               panel.style.display = "block";
+            }
+            if (this.getElementsByClassName("fa-chevron-circle-down")[0] != null)
+               this.getElementsByClassName("fa-chevron-circle-down")[0].className = "fas fa-chevron-circle-up";
+            else if (this.getElementsByClassName("fa-chevron-circle-up")[0] != null)
+               this.getElementsByClassName("fa-chevron-circle-up")[0].className = "fas fa-chevron-circle-down";
+         });
+
+      }
+
+   </script>
+}

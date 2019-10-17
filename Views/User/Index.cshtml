@@ -1,0 +1,200 @@
+﻿@using Dhipaya.Extensions;
+@model Dhipaya.DTO.UserDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "ผู้ใช้งาน";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool isSuperUser(string userName)
+{
+   return userName.ToLower() == "admin";
+
+}
+
+bool canDelete(int Id)
+{
+   bool retVal = true;
+   var user = context.Users.Where(c => c.ID == Id).FirstOrDefault();
+   if (user == null || isSuperUser(user.UserName))
+   {
+      return false;
+   }
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">ผู้<small>ใช้งาน</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","User")" class="button button-blue">เพิ่มผู้ใช้งาน</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="User" asp-action="Index" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right"></h4>
+            </form>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @foreach (var item in Model.Users)
+               {
+                  <div class="history-table-container">
+                     <div class="history-date"></div>
+                     <div class="history-table-wrapper @(item.Status == UserStatusType.Active ? "add-point" :"minus-point")">
+                        <div class="history-detail">
+                           <div class="history-detail-logo">
+                           </div>
+                           <div class="history-detail-text">
+                              <a href="@Url.Action("Update", "User", new { id = item.ID })">@item.UserName</a>
+                              <span>@item.FirstName @item.LastName</span>
+                           </div>
+                        </div>
+
+                        <div class="history-total-point">
+                           @item.Status.toStatusName()
+                        </div>
+                        <div class="history-point">
+                           <a href="@Url.Action("Update", "User", new { id = item.ID })"
+                              class="btn btn-link">
+                              แก้ไข
+                           </a>
+                           @if (canDelete(item.ID))
+                           {
+
+                              <a href="@Url.Action("Delete", "User", new { id = item.ID })"
+                                 onclick="return confirm('ต้องการลบรายการนี้?')"
+                                 class="btn btn-link">
+                                 ลบ
+                              </a>
+                           }
+                        </div>
+                     </div>
+
+                  </div> <!-- .history-table-container -->
+
+               }
+            </div>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("Index", "User", new { id = 1, pno = i })" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+
+
+
+@*<div class="page-content-wrapper ">
+       <div class="content ">
+           <div class="jumbotron" data-pages="parallax">
+               <div class=" container-fluid   container-fixed-lg sm-p-l-0 sm-p-r-0">
+                   <div class="inner">
+                       <ol class="breadcrumb">
+                           <li class="breadcrumb-item"><a href="#">Home</a></li>
+                           <li class="breadcrumb-item active">ผู้ใช้งานในระบบ</li>
+                       </ol>
+                   </div>
+               </div>
+           </div>
+           <div class=" container-fluid   container-fixed-lg">
+               <div class="row">
+                   <div class="col-lg-12 no-padding">
+                       <!-- START card -->
+                       <div class="card card-transparent">
+                           <div class="card-header ">
+                               <div class="card-title">
+                                   ผู้ใช้งานในระบบ
+                               </div>
+                               <div class="pull-right">
+                                   <div class="col-xs-12">
+                                       <a href="@Url.Action("Create","User")" class="btn btn-primary btn-cons">
+                                           <i class="fa fa-plus"></i> เพิ่มผู้ใช้งานในระบบ
+                                       </a>
+                                   </div>
+                               </div>
+                           </div>
+                           <div class="card-block">
+                               <div class="table-responsive">
+                                   <table class="table table-hover" id="basicTable">
+                                       <thead>
+                                           <tr>
+                                               <th style="width:10%">รหัส</th>
+                                               <th style="width:20%">ชื่อในระบบ</th>
+                                               <th style="width:20%">อีเมล</th>
+                                               <th style="width:10%">เบอร์โทร</th>
+                                               <th style="width:10%">สิทธิ์การใช้งาน</th>
+                                               <th style="width:10%">สถานะ</th>
+                                            <th></th>
+                                           </tr>
+                                       </thead>
+                                       <tbody>
+                                           @foreach (var item in Model)
+                                           {
+                                               <tr>
+                                                   <td class="v-align-middle">@item.ID </td>
+                                                   <td class="v-align-middle semi-bold">@item.UserName</td>
+                                                   <td class="v-align-middle">@item.Email</td>
+                                                   <td class="v-align-middle">@item.PhoneNumber</td>
+                                                   <td class="v-align-middle">@item.UserRole.RoleName</td>
+                                                   <td class="v-align-middle">@item.Status.toStatusName()</td>
+                                                   <td style="width:1%;white-space: nowrap;" class="v-align-middle">
+                                                       <a href="@Url.Action("Update", "User", new { id = item.ID })" class="btn btn-link">
+                                                           <i class="fa fa-edit"></i>
+                                                       </a>
+                                                       @if (canDelete(item.ID))
+                                                       {
+                                                           <a href="@Url.Action("Delete", "User", new { id = item.ID })"
+                                                              onclick="return confirm('ต้องการลบรายการนี้?')"
+                                                              class="btn btn-link">
+                                                               <i class="pg-trash"></i>
+                                                           </a>
+                                                       }
+                                                       else
+                                                       {
+                                                           <a class="btn btn-link" style="visibility: hidden;"> <i class="pg-trash"></i></a>
+                                                       }
+                                                   </td>
+                                               </tr>
+                                           }
+                                       </tbody>
+                                   </table>
+                               </div>
+                           </div>
+                       </div>
+                       <!-- END card -->
+                   </div>
+               </div>
+           </div>
+           <!-- END CONTAINER FLUID -->
+       </div>
+       <!-- END PAGE CONTENT -->
+   </div>*@

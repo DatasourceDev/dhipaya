@@ -1,0 +1,89 @@
+﻿@model Dhipaya.Models.Customer
+@using Dhipaya.DTO;
+@using Dhipaya.Services;
+
+@{
+   ViewData["Title"] = "MailActivateAcc";
+   //Layout = null;
+}
+
+<style type="text/css">
+   .button:hover {
+      color: #d9192b !important;
+   }
+</style>
+@if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+{
+   <style type="text/css">
+
+      .image-slideshow-full {
+         display: block !important;
+      }
+
+      .image-slideshow-mobile {
+         display: none !important;
+      }
+
+      @@media (max-width: 640px) and (min-width: 320px) {
+         .image-slideshow-full {
+            display: none !important;
+         }
+
+         .image-slideshow-mobile {
+            display: block !important;
+         }
+      }
+   </style>
+
+}
+
+<div class="site-wrapper" style="max-width: @(Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com") ? "1000px" : "430px");color: #000;font-size: 12pt;text-align:left;">
+   <main class="main">
+
+      <div style="text-align:center;">
+         @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+         {
+            <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top.jpg" />
+         }
+         else
+         {
+            <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
+         }
+      </div>
+      <p style="text-align:center; padding: 5px;">
+         <br />
+         <span style="font-size:64pt;color:#8a6326;line-height: 0px;"><i>ส</i></span> วัสดีค่ะ คุณ @Model.NameTh @Model.SurNameTh
+         <br />
+         <br />
+         ท่านเคยลงทะเบียนสมัครเป็นสมาชิก TIP Society แล้ว
+         <br />
+            <span>สามารถ log in โดยใช้</span>
+            <br />
+            <br />
+            <span>รหัสผู้ใช้งาน: @Model.User.UserName</span>
+            <br />
+            <br />
+            <span>เพื่อรับสิทธิพิเศษกับร้านค้าที่ร่วมโครงการฯได้เลยค่ะ</span>
+         <br />
+         ขอบคุณค่ะ
+         <br />
+         <br />
+         ติดตามรายละเอียดได้ที่
+         <br />
+         <a href="https://tipsociety.dhipaya.co.th" target="_blank" style="text-decoration:underline;color: #15c !important;">tipsociety.dhipaya.co.th</a> หรือ Line : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a>
+      </p>
+      <div style="text-align:center;">
+         @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+         {
+            <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom.jpg" />
+         }
+         else
+         {
+            <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
+         }
+      </div>
+
+   </main>
+</div>
+<br />
+<br />

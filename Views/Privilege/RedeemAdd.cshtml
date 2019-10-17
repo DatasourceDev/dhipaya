@@ -1,0 +1,128 @@
+﻿@model Dhipaya.DTO.ReportDTO
+@{
+   ViewData["Title"] = "การใช้สิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>การใช้</small>สิทธิพิเศษ <small>@ViewBag.MerchantName</small></h2>
+               <div class="title-right">
+                  <a href="#" onchange="create_redeem_onclick()" class="button button-blue">แลกสิทธิพิเศษ</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Privilege" asp-action="Redeem" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน, เบอร์โทรศัพท์, หมายเลขสมาชิก, Friend Code">
+                  <select class="disable-search col20" asp-for="customerClassID">
+                     <option value="" class="blank">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+                  <input type="hidden" asp-for="search_privilege" />
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่จาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>ชื่อสมาชิก</th>
+                     <th>ประเภทสมาชิก</th>
+                     <th>รหัสรับสิทธิพิเศษ</th>
+                     <th>วันเวลาที่ใช้สิทธิพิเศษ</th>
+                     <th class="number">คะแนน</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Redeems)
+                  {
+                     <tr>
+                        <td>@item.Customer.NameTh @item.Customer.SurNameTh</td>
+                        <td>
+                           @if (item.Customer.CustomerClass != null)
+                           {
+                              @item.Customer.CustomerClass.Name
+                           }
+                        </td>
+                        <td>@item.RedeemCode</td>
+                        <td>@DateUtil.ToDisplayDateTime(item.RedeemDate)</td>
+                        <td class="number">@NumUtil.FormatCurrency(item.Point)</td>
+                        <td class="number" id="div@(item.RedeemID)">
+                           @if (item.Confirmed)
+                           {
+                              @("ยืนยันแล้ว")
+                           }
+                           else
+                           {
+                              <a href="#"
+                                 class="btn btn-link" onclick="confirm_onclick(@item.RedeemID); return false;">
+                                 ยืนยัน
+                              </a>
+                           }
+                        </td>
+                     </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("Privilege", "Report", new { id = 1, pno=i, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+      function create_redeem_onclick() {
+
+      }
+      function confirm_onclick(id) {
+         $.ajax({
+            type: 'Get',
+            url: '@Url.Action("Confirm", "MerchantU")?id=' + id,
+            success: function (data) {
+               if (data != null && data.result == 1) {
+                  $('#div' + id).html('ยืนยันแล้ว');
+               }
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+               alert(errorThrown);
+            }
+         });
+      }
+   </script>
+}
+

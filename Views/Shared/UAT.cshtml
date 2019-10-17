@@ -1,0 +1,73 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.DTO.MobilePointDTO
+@{
+   Layout = "_LayoutTIP";
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <h2>
+               UAT
+               <small>@ViewBag.Message</small>
+            </h2>
+            <div class="icon"><i class="fa fa-store-alt"></i></div>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <form id="form" class="profile-edit-form" asp-controller="Home" asp-action="UAT" role="form" method="post">
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>UserName<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="UserName" class="input-text" required placeholder="UserName">
+                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>Product<span class="text-red">*</span></td>
+                              <td>
+                                <select asp-for="ProductID"  required>
+                                  @foreach (Product item in ViewBag.ListProduct)
+                                  {
+                                    <option value="@item.ProductID">@item.ProductCode @item.ProductName</option>
+
+                                  }
+
+                                </select>
+                                 @Html.ValidationMessageFor(m => m.ProductID, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>Amount<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="Amount" class="input-text number" required placeholder="Amount">
+                                 @Html.ValidationMessageFor(m => m.Amount, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+
+                  </div>
+
+               </div><!-- .profile-row -->
+            </form>
+         </div>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+}
+
+

@@ -1,0 +1,144 @@
+﻿@model Dhipaya.DTO.PointAdjustDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "ปรับปรุงคะแนน";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">ปรับปรุง<small>คะแนน</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Template","PointAdjust")" class="button button-white" target="_blank">ดาวน์โหลดไฟล์ตัวอย่าง</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="PointAdjust" asp-action="Modify" role="form" autocomplete="off" asp-route-id="" method="post" enctype="multipart/form-data">
+               <div class="profile-block-with-bg">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>
+                                 <input type="file" name="file" class="" accept=".xlsx, .xls, .csv" />
+                              </td>
+                              <td>
+                                 <button class="button button-blue" type="submit">ตรวจสอบไฟล์</button>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+               @if (Model.PointAdjusts != null && Model.PointAdjusts.Count() > 0)
+               {
+                  <br />
+                  <div class="profile-title-block">
+                     <h2><small>รายการปรับปรุงคะแนน</small>ได้<small></small></h2>
+                  </div><!-- .profile-title-block -->
+                  <div class="profile-block-with-bg">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>ชื่อสมาชิก</th>
+                              <th>รหัสเงื่อนไข</th>
+                              <th>คะแนน</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @for (var i = 0; i < Model.PointAdjusts.Count(); i++)
+                           {
+                              <tr>
+                                 <td>
+                                    <input type="hidden" asp-for="PointAdjusts[i].ConditionCode" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].CustomerID" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].CustomerChanal" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Point" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].TransacionTypeID" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Name" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Create_On" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Create_By" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Update_On" />
+                                    <input type="hidden" asp-for="PointAdjusts[i].Update_By" />
+
+                                    @Model.PointAdjusts[i].Customer.NameTh @Model.PointAdjusts[i].Customer.SurNameTh
+                                 </td>
+                                 <td>@Model.PointAdjusts[i].ConditionCode</td>
+                                 <td>@NumUtil.FormatCurrency(Model.PointAdjusts[i].Point)</td>
+                              </tr>
+                           }
+                        </tbody>
+
+                     </table>
+                     <div class="profile-row">
+                        <div class="profile-col">
+                        </div>
+                        <div class="profile-col align-right">
+                           <button class="button button-blue" type="submit" value="true" name="valid">บันทึกข้อมูล</button>
+                        </div>
+                     </div>
+                  </div><!-- .profile-title-block -->
+               }
+
+               @if (Model.PointAdjustFails != null && Model.PointAdjustFails.Count() > 0)
+               {
+                  <br />
+                  <div class="profile-title-block">
+                     <h2><small>รายการที่ปรับปรุงคะแนน</small>ไม่ได้<small></small></h2>
+                  </div><!-- .profile-title-block -->
+                  <div class="profile-block-with-bg">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>บรรทัดที่</th>
+                              <th>รหัสผู้ใช้</th>
+                              <th>รหัสเงื่อนไข</th>
+                              <th>รายละเอียด</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @for (var i = 0; i < Model.PointAdjustFails.Count(); i++)
+                           {
+                              <tr style="color:red">
+                                 <td>@Model.PointAdjustFails[i].row</td>
+                                 <td>@Model.PointAdjustFails[i].username</td>
+                                 <td>@Model.PointAdjustFails[i].conditioncode</td>
+                                 <td><p>@Model.PointAdjustFails[i].message</p></td>
+                              </tr>
+                           }
+                        </tbody>
+
+                     </table>
+                  </div><!-- .profile-title-block -->
+               }
+            </form>
+
+         </div><!-- .container -->
+
+      </div>
+   </div>
+</div>
+
+@section scripts{
+   <script>
+         $(document).ready(function () {
+            $('main').addClass('profile-main');
+
+            if (parseInt('@Model.result') > 0) {
+               alert('ปรับปรุงคะแนนสำเร็จ');
+            }
+         });
+
+   </script>
+}
+

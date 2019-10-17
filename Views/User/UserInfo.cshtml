@@ -1,0 +1,198 @@
+﻿@using Dhipaya.Services;
+@using Dhipaya.Extensions;
+@model Dhipaya.Models.User
+@inject Dhipaya.DAL.ChFrontContext context;
+@{
+   ViewData["Title"] = "ผู้ใช้งาน";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool isNotSuperAdmin()
+{
+   return false;
+   //return Model == null || Model.UserName == null || Model.UserName.ToLower() != "admin";
+}
+}
+<div class="profile-container">
+   <nav class="profile-navigation">
+      <div class="container">
+         <ul class="profile-menu">
+            <li class="profile-menu-item is-active">
+               <div class="profile-menu-icon">
+                  <a href="@Url.Action("Update","User",new {id=Model.ID })"><img src="~/tip/img/icon-9.png"></a>
+               </div>
+               <a href="@Url.Action("Update","User",new {id=Model.ID })"><span class="profile-menu-text">ข้อมูลผู้ใช้</span></a>
+            </li>
+            @if (Model.ID > 0)
+            {
+               <li class="profile-menu-item">
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("ResetPwdO","User", new { id = Model.ID})">
+                        <img src="~/tip/img/icon-12.png">
+                     </a>
+                  </div>
+                  <a href="@Url.Action("ResetPwdO","User", new { id = Model.ID})">
+                     <span class="profile-menu-text">เปลี่ยนรหัสผ่าน</span>
+                  </a>
+               </li>
+            }
+         </ul>
+      </div><!-- .container -->
+   </nav><!-- .profile-navigation -->
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <h2>ข้อมูล<small>ผู้ใช้งาน</small></h2>
+            <div class="icon"><i class="fa fa-user"></i></div>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <form id="form-profile" class="profile-edit-form" asp-controller="User" asp-action="Modify" role="form" method="post">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>รหัสผู้ใช้<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="UserName" required placeholder="รหัสผู้ใช้" />
+                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           @if (Model.ID <= 0)
+                           {
+
+                              <tr>
+                                 <td>รหัสผ่าน<span class="text-red">*</span></td>
+                                 <td>
+                                    <input class="input-text" type="password" placeholder="รหัสผ่าน" asp-for="Password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
+                                    <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+
+                                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ยืนยันรหัสผ่าน<span class="text-red">*</span></td>
+                                 <td>
+                                    <input class="input-text" type="password" placeholder="ยืนยันรหัสผ่าน" asp-for="ConfirmPassword" required autocomplete="off" maxlength="12" equalTo="#Password">
+                                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                           }
+                           <tr>
+                              <td>ชื่อ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="FirstName" required placeholder="ชื่อ" />
+                                 @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>นามสกุล<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="LastName" required placeholder="นามสกุล" />
+                                 @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เบอร์โทรศัพท์มือถือ</td>
+                              <td>
+                                 <input type="tel" class="input-text digits" asp-for="PhoneNumber" maxlength="10" minlength="10" placeholder="เบอร์โทรศัพท์มือถือ" />
+                                 @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>อีเมล<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="email" class="input-text email" asp-for="Email" required placeholder="อีเมล" />
+                                 @Html.ValidationMessageFor(m => m.Email, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สิทธิ์การเข้าถึงระบบ<span class="text-red">*</span></td>
+                              <td>
+
+                                 <select asp-for="UserRoleID" class="disable-search">
+                                    @foreach (UserRole item in ViewBag.Roles)
+                                    {
+                                       if (item.RoleName != RoleName.Member & item.RoleName != RoleName.Merchant)
+                                       {
+                                          <option value="@item.UserRoleID">@item.RoleName</option>
+                                       }
+                                    }
+                                 </select>
+                              </td>
+                           </tr>
+
+                           <tr>
+                              <td>สถานะผู้ใช้<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" class="disable-search">
+                                    @foreach (var item in Model.Status.ToReverseDictionary())
+                                    {
+                                       if (item.Key == (int)UserStatusType.Active | item.Key == (int)UserStatusType.InActive)
+                                       {
+                                          <option value="@item.Key">@item.Value</option>
+                                       }
+
+                                    }
+                                 </select>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="button" class="button button-blue" onclick="save_onclick()">บันทึกข้อมูล</button>
+                  </div>
+               </div><!-- .profile-row -->
+            </form>
+            <!-- .profile-row -->
+         </div>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+      });
+
+
+      function save_onclick() {
+         var valid = $("#form-profile").valid();
+         $('#error_userConfirm').hide();
+         $('#error_password').hide();
+
+         if ($('#password').get(0) != null) {
+            if (!validatepwd($('#password').val())) {
+               $('#error_password').show();
+               valid = false;
+            }
+         }
+         if (valid)
+            document.forms['form-profile'].submit();
+      }
+
+   </script>
+}

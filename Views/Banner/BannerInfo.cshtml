@@ -1,0 +1,144 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.Banner
+@{
+  ViewData["Title"] = "แบนเนอร์";
+  Layout = "_LayoutTIP";
+}
+<div class="profile-container">
+  <div class="profile-information">
+    <div class="container">
+      <div class="profile-title-block">
+        @if (Model.ID > 0)
+        {
+          <h2>แก้ไข<small>แบนเนอร์</small></h2>
+        }
+        else
+        {
+          <h2>เพิ่ม<small>แบนเนอร์</small></h2>
+        }
+        <div class="icon"><i class="fa fa-store-alt"></i></div>
+      </div><!-- .profile-title-block -->
+      <div class="profile-block-with-bg">
+        <form id="form" class="profile-edit-form" asp-controller="Banner" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+          @Html.HiddenFor(m => m.ID)
+          @Html.HiddenFor(m => m.Create_By)
+          @Html.HiddenFor(m => m.Create_On)
+          @Html.HiddenFor(m => m.Update_By)
+          @Html.HiddenFor(m => m.Update_On)
+          @Html.HiddenFor(m => m.Url)
+          @Html.HiddenFor(m => m.MobileUrl)
+          @Html.HiddenFor(m => m.Index)
+          <div class="profile-row">
+            <div class="profile-col-full">
+              <table class="profile-table">
+                <tbody>
+                  <tr>
+                    <td>รูปแบนเนอร์บนเว็บ<span class="text-red">*</span></td>
+                    <td>
+                      @if (!string.IsNullOrEmpty(Model.Url))
+                      {
+                        <img src="@Url.Content(Model.Url)" height="200" />
+                        <br />
+                      }
+                      <input type="file" id="web" name="web" accept="image/*" />
+                      <br />
+                      1920x800 px
+                      <p class="warning" id="error_web_img" style="display:none;">กรุณาระบุรูปแบนเนอร์บนเว็บ</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>รูปแบนเนอร์บนโมบาย<span class="text-red">*</span></td>
+                    <td>
+                      @if (!string.IsNullOrEmpty(Model.MobileUrl))
+                      {
+                        <img src="@Url.Content(Model.MobileUrl)" height="200" />
+                        <br />
+
+                      }
+                      <input type="file" id="mobile" name="mobile" accept="image/*" />
+                      <br />
+                      930x800 px
+                      <p class="warning" id="error_mobile_img" style="display:none;">กรุณาระบุรูปแบนเนอร์บนโมบาย</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="profile-col">
+              <table class="profile-table">
+                <tbody>
+                  <tr>
+                    <td>เริ่มแสดงตั้งแต่</td>
+                    <td>
+                      <input type="text" data-toggle="datepicker" class="input-text" asp-for="sDate" placeholder="วว/ดด/ปปปป" />
+                      @Html.ValidationMessageFor(m => m.sDate, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>ถึงวันที่</td>
+                    <td>
+                      <input type="text" data-toggle="datepicker" class="input-text" asp-for="eDate" placeholder="วว/ดด/ปปปป" />
+                      @Html.ValidationMessageFor(m => m.eDate, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                    <td>
+                      <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                      @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>ผู้แก้ไขล่าสุด</td>
+                    <td>
+                      @Model.Update_By
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>แก้ไขล่าสุด</td>
+                    <td>
+                      @Html.DisplayFor(m => m.Update_On)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="profile-col align-right ">
+              <button type="button" class="button button-blue" onclick="submit_onclick()">บันทึกข้อมูล</button>
+            </div>
+          </div><!-- .profile-row -->
+        </form>
+      </div>
+    </div><!-- .container -->
+  </div><!-- .profile-information -->
+</div>
+@section scripts{
+  <script>
+    $(document).ready(function () {
+      $('main').addClass('profile-main');
+    });
+
+    function submit_onclick() {
+      var valid = $("#form").valid();
+      $('#error_web_img').hide();
+      $('#error_mobile_img').hide();
+      if ('@Model.Url' == null || '@Model.Url' == '') {
+        if ($('#web').val() == null || $('#web').val() == '') {
+          $('#error_web_img').show();
+          valid = false;
+        }
+      }
+      if ('@Model.MobileUrl' == null || '@Model.MobileUrl' == '') {
+        if ($('#mobile').val() == null || $('#mobile').val() == '') {
+          $('#error_mobile_img').show();
+          valid = false;
+        }
+      }
+      if (valid)
+        document.forms['form'].submit();
+    }
+  </script>
+}
+
+

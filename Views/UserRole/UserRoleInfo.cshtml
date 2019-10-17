@@ -1,0 +1,157 @@
+﻿@using Dhipaya.Services;
+@using Dhipaya.Extensions;
+@model Dhipaya.Models.UserRole
+@inject Dhipaya.DAL.ChFrontContext context;
+@{
+   ViewData["Title"] = "สิทธิ์การเข้าถึง";
+   Layout = "_LayoutTIP";
+   var itemCount = 0;
+
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <h2>สิทธิ์<small>การเข้าถึง</small></h2>
+            <div class="icon"><i class="fa fa-key"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form-profile" class="profile-edit-form" asp-controller="UserRole" asp-action="Modify" role="form" method="post">
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.UserRoleID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ชื่อสิทธิ์ผู้ใช้<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="RoleName" required placeholder="ชื่อสิทธิ์ผู้ใช้" />
+                                 @Html.ValidationMessageFor(m => m.RoleName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รายละเอียด</td>
+                              <td>
+                                 <textarea asp-for="Description" placeholder="รายละเอียด"></textarea>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+
+                        </tbody>
+                     </table>
+                  </div>
+               </div><!-- .profile-row -->
+               <!-- .profile-row -->
+            </div>
+            @if (Model.RoleName == RoleName.Admin)
+            {
+               <br />
+               <div class="profile-block-with-bg">
+                  <div class="profile-row">
+                     @foreach (Page item in ViewBag.Pages)
+                     {
+                        <div class="profile-col">
+                           <table class="profile-table">
+                              <tbody>
+                                 <tr>
+                                    <td style="width: auto;text-align: left;">
+                                       <label class="full-block">
+                                          <input type="checkbox" class="with-gap filled-in"  checked disabled>
+                                          <span>@item.PageName</span>
+                                       </label>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                        itemCount++;
+                     }
+                     <div class="profile-col">
+                     </div>
+                     <div class="profile-col align-right">
+                        <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                     </div>
+                  </div><!-- .profile-row -->
+                  <!-- .profile-row -->
+               </div>
+
+            }
+            else
+            {
+               <br />
+               <div class="profile-block-with-bg">
+                  <div class="profile-row">
+                     @foreach (Page item in ViewBag.Pages)
+                     {
+                        var selected = Model.PageRoleList.Where(w => w.PageID == item.PageID).FirstOrDefault();
+                        <div class="profile-col">
+                           <table class="profile-table">
+                              <tbody>
+                                 <tr>
+                                    <td style="width: auto;text-align: left;">
+                                       <label class="full-block">
+                                          @if (selected != null)
+                                          {
+                                             <input type="hidden" name="PageRoleList[@itemCount].ID" value="@selected.ID">
+                                             <input type="checkbox" class="with-gap filled-in" name="PageRoleList[@itemCount].PageID" value="@item.PageID" checked>
+                                          }
+                                          else
+                                          {
+                                             <input type="hidden" name="PageRoleList[@itemCount].ID" value="0">
+                                             <input type="checkbox" class="with-gap filled-in" name="PageRoleList[@itemCount].PageID" value="@item.PageID">
+                                          }
+                                          <span>@item.PageName</span>
+                                       </label>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                        itemCount++;
+                     }
+                     <div class="profile-col">
+                     </div>
+                     <div class="profile-col align-right">
+                        <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                     </div>
+                  </div><!-- .profile-row -->
+                  <!-- .profile-row -->
+               </div>
+
+            }
+         </form>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}

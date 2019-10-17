@@ -1,0 +1,166 @@
+﻿@model Dhipaya.DTO.ReportDTO
+@{
+   ViewData["Title"] = "การสะสมคะแนน";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>การสะสม</small>คะแนน</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("ExcelPoint","Report", new { search_product_id = Model.search_product_id,  search_trantype = Model.search_trantype, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="Point" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน, เบอร์โทรศัพท์, หมายเลขสมาชิก, Friend Code">
+                 
+                  <select class="disable-search col20" asp-for="customerClassID">
+                     <option value="" class="blank">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่จาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+                  <select asp-for="search_trantype" asp-items="@(new SelectList(ViewBag.ListTransacionType, "TransacionTypeID", "Name"))" onchange="tran_onchange(this)">
+                     <option value="" class="blank">ค้นหาจากประเภทการทำรายการ</option>
+                  </select>
+
+                  <select asp-for="search_product_id">
+                     <option value="" class="blank">ค้นหาจากประกันภัย</option>
+                     @foreach (Product item in ViewBag.ListProduct)
+                     {
+                        <option value="@item.ProductID">@item.ProductCode @item.ProductName</option>
+
+                     }
+                  </select>
+               </h4>
+            </form>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>รหัสสมาชิก</th>
+                     <th>ชื่อสมาชิก</th>
+                     <th>รหัส</th>
+                     <th>Order No.</th>
+                     <th>Policy No.</th>
+                     <th>วันเวลาที่ได้รับคะแนน</th>
+                     <th>วันเริ่มคุ้มครอง</th>
+                     <th>วันที่สิ้นสุด</th>
+                     <th>ราคาประกันภัย</th>
+                     <th>ช่องทาง</th>
+                     <th>รายละเอียด</th>
+                     <th>คะแนน</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.CustomerPoints)
+                  {
+
+                  <tr>
+                     <td><a target="_blank" href="@Url.Action("Point", "Customer", new { id = item.CustomerID })"><small>@item.Customer.RefCode</small></a></td>
+                     <td><small>@item.Customer.NameTh @item.Customer.SurNameTh</small></td>
+                     <td><small>@item.Code</small></td>
+                     <td><small>@item.OrderNo</small></td>
+                     <td><small>@item.PolicyNo</small></td>
+                     <td><small>@DateUtil.ToDisplayDateTime(item.Create_On)</small></td>
+                     <td><small>@DateUtil.ToDisplayDateTime(item.EffectiveDate)</small></td>
+                     <td><small>@DateUtil.ToDisplayDateTime(item.ExpiryDate)</small></td>
+                     <td><small>@NumUtil.FormatCurrency(item.PurchaseAmt)</small></td>
+                     <td><small>@item.Source</small></td>
+                     <td><small>@item.Name</small></td>
+                     <td><small>@NumUtil.FormatCurrency(item.Point)</small></td>
+                  </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pno = ViewBag.PageNo;
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("Point", "Report", new { id = 1, pno= pnumber - 10,search_product_id = Model.search_product_id,  search_trantype = Model.search_trantype, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("Point", "Report", new { id = 1, pno=i,search_product_id = Model.search_product_id,  search_trantype = Model.search_trantype, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("Point", "Report", new { id = 1, pno=pnumber +10,search_product_id = Model.search_product_id,  search_trantype = Model.search_trantype, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("Point", "Report", new { id = 1, pno=i,search_product_id = Model.search_product_id,  search_trantype = Model.search_trantype, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+
+         }
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

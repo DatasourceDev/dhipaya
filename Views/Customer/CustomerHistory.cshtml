@@ -1,0 +1,154 @@
+﻿@using Dhipaya.Extensions;
+@model Dhipaya.DTO.CustomerDTO;
+@{
+   ViewData["Title"] = "ประวัติการใช้สิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+   var totalpoint = 0M;
+
+}
+
+@{
+   Html.RenderPartial("_CustomerHdr", Model);
+}
+<div class="profile-container">
+   <nav class="profile-navigation">
+      <div class="container">
+         <ul class="profile-menu">
+            <li class="profile-menu-item ">
+               <div class="profile-menu-icon">
+                  <a href="@Url.Action("Info","Customer",new {id=Model.ID })"><img src="~/tip/img/icon-9.png"></a>
+               </div>
+               <a href="@Url.Action("Info","Customer",new {id=Model.ID })"><span class="profile-menu-text">ข้อมูลสมาชิก</span></a>
+            </li>
+            <li class="profile-menu-item ">
+               <div class="profile-menu-icon">
+                  <a href="@Url.Action("Point","Customer",new {id=Model.ID })">
+                     <img src="~/tip/img/icon-10.png">
+                  </a>
+               </div>
+               <a href="@Url.Action("Point","Customer",new {id=Model.ID })">
+                  <span class="profile-menu-text">คะแนนสะสม</span>
+               </a>
+            </li>
+            <li class="profile-menu-item is-active">
+               <div class="profile-menu-icon">
+                  <a href="@Url.Action("History","Customer",new {id=Model.ID })">
+                     <img src="~/tip/img/icon-11.png">
+                  </a>
+               </div>
+               <a href="@Url.Action("History","Customer",new {id=Model.ID })">
+                  <span class="profile-menu-text">ประวัติการใช้สิทธิพิเศษ</span>
+               </a>
+            </li>
+            @if (Model.username.Contains("@"))
+            {
+               <li class="profile-menu-item">
+
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("ResetPwdO","Customer", new { id = Model.ID})">
+                        <img src="~/tip/img/icon-12.png">
+                     </a>
+                  </div>
+
+                  <a href="@Url.Action("ResetPwdO","Customer", new { id = Model.ID})">
+                     <span class="profile-menu-text">เปลี่ยนรหัสผ่าน</span>
+                  </a>
+               </li>
+            }
+         </ul>
+      </div><!-- .container -->
+   </nav><!-- .profile-navigation -->
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">ประวัติ<small>การใช้สิทธิพิเศษ</small></h2>
+               <div class="title-right">
+                  @if (ViewBag.TotalPoint != null)
+                  {
+                     totalpoint = ViewBag.TotalPoint;
+                     <h2><small>@NumUtil.FormatCurrency(ViewBag.TotalPoint) คะแนน</small></h2>
+                  }
+               </div>
+            </div>
+                <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @if (ViewBag.ListRedeems != null)
+               {
+                  foreach (Redeem item in ViewBag.ListRedeems)
+                  {
+                     var period = item.RedeemDate.Value.Day + " " + DateUtil.GetShortMonth(item.RedeemDate.Value.Month) + " " + item.RedeemDate.Value.Year + " " + item.RedeemDate.Value.Hour.ToString("00") + ":" + item.RedeemDate.Value.Minute.ToString("00");
+                     var url = Url.Content("~/tip/img/privilege-default.jpg");
+
+                     if (!string.IsNullOrEmpty(item.Privilege.Merchant.Url))
+                     {
+                        url = Url.Content(item.Privilege.Merchant.Url);
+                     }
+                     <div class="history-table-container">
+                        <div class="history-date">@period</div>
+                        <div class="history-table-wrapper minus-point">
+                           <div class="history-detail">
+                              <div class="history-detail-logo">
+                                 <img src="@Url.Content(url)" width="40">
+                              </div>
+                              <div class="history-detail-text">
+                                 ใช้สิทธิ์
+                                 <span>@item.Privilege.Merchant.MerchantName</span>
+                              </div>
+                           </div>
+                           <div class="history-point">
+                              @if (item.RedeemType == RedeemType.Delivery)
+                              {
+                                 @item.Address
+                              }
+                              else
+                              {
+                                 @item.RedeemCode
+                              }
+                           </div>
+                           <div class="history-point">
+                              @if (item.Point > 0)
+                              {
+                                 @NumUtil.FormatCurrency(item.Point) @(" คะแนน")
+                              }
+                              else
+                              {
+                                 @("ไม่ใช้คะแนน")
+                              }
+                           </div>
+                        </div>
+                     </div><!-- .history-table-container -->
+                     totalpoint += item.Point;
+
+                  }
+               }
+            </div>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("History","Customer", new { id=Model.ID, pno=i})" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div><!-- .profile-container -->
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+}

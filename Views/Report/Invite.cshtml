@@ -1,0 +1,153 @@
+﻿
+@model Dhipaya.DTO.CustomersDTO
+@using Dhipaya.DTO;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "Invite friend";
+   Layout = "_LayoutTIP";
+}
+
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>Invite</small> Friend</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("ExcelInvite","Report", new { customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="Invite" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน, เบอร์โทรศัพท์, หมายเลขสมาชิก, Friend Code">
+                  <select class="disable-search col20" asp-for="customerClassID">
+                     <option value="">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่จาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+                  <select asp-for="customer_chanal" class="col20">
+                     <option value="" class="blank">ค้นหาจากช่องทางการสมัคร</option>
+                     <option value="@CustomerChanal.TIP">@CustomerChanal.TIP.toName()</option>
+                     <option value="@CustomerChanal.Mobile">@CustomerChanal.Mobile.toName()</option>
+                     <option value="@CustomerChanal.MobileImport">@CustomerChanal.MobileImport.toName()</option>
+                     <option value="@CustomerChanal.ShareHolderImport">@CustomerChanal.ShareHolderImport.toName()</option>
+                     <option value="@CustomerChanal.AmazonImport">@CustomerChanal.AmazonImport.toName()</option>
+                     <option value="@CustomerChanal.DhiMemberImport">@CustomerChanal.DhiMemberImport.toName()</option>
+                     <option value="@CustomerChanal.INTIntersect">@CustomerChanal.INTIntersect.toName()</option>
+                     <option value="@CustomerChanal.TipInsure">@CustomerChanal.TipInsure.toName()</option>
+
+                  </select>
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>หมายเลขสมาชิก</th>
+                     <th>Friend Code</th>
+                     <th>ชื่อสมาชิก</th>
+                     <th>รหัสผู้ใช้งาน</th>
+                     <th>ประเภทสมาชิก</th>
+                     <th>ช่องทางการสมัคร</th>
+                     <th>วันที่สมัคร</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Customers)
+                  {
+                  <tr>
+                     <td><a target="_blank" href="@Url.Action("Update", "Customer", new { id = item.ID })">@item.RefCode</a></td>
+                     <td>@item.FriendCode</td>
+                     <td>@item.NameTh @item.SurNameTh</td>
+                     <td>@item.User.UserName</td>
+                     <td>
+                        @if (item.CustomerClass != null)
+                        {
+                           @item.CustomerClass.Name
+                        }
+                     </td>
+                     <td>@item.Channel.toName()</td>
+                     <td>@DateUtil.ToDisplayDateTime(item.Create_On)</td>
+                  </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pno = ViewBag.PageNo;
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("Invite", "Report", new { id = 1, pno= pnumber - 10,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("Invite", "Report", new { id = 1, pno=i,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("Invite", "Report", new { id = 1, pno=pnumber +10,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("Invite", "Report", new { id = 1, pno=i,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+         }
+      </div><!-- .container -->
+   </div>
+</div>
+
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}

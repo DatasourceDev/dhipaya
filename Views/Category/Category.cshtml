@@ -1,0 +1,123 @@
+﻿@model Dhipaya.DTO.CategoryDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "กลุ่มร้านค้า/บริการ";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+   var result = context.Privileges.Where(c => c.CategoryID == Id);
+   if (result.Count() > 0)
+   {
+      retVal = false;
+   }
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">กลุ่ม<small>สิทธิพิเศษ</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","Category")" class="button button-blue">เพิ่มกลุ่มร้านค้า/บริการ</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Category" asp-action="Index" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col90" asp-for="search_text" placeholder="ค้นหาจากชื่อกลุ่มร้านค้า/บริการ">
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+            </form>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @foreach (var item in Model.MerchantCategories)
+               {
+                  var url = Url.Content("~/tip/img/privilege-default.jpg");
+                  if (!string.IsNullOrEmpty(item.Url))
+                  {
+                     url = Url.Content(item.Url);
+                  }
+                  <div class="history-table-container">
+                     <div class="history-date"></div>
+                     <div class="history-table-wrapper @( item.Status == StatusType.Active ? "add-point" :"minus-point")">
+                        <div class="history-detail">
+                           <div class="history-detail-logo">
+                              <img src="@Url.Content(url)" width="40">
+                           </div>
+                           <div class="history-detail-text">
+                              <a href="@Url.Action("Update", "Category", new { id = item.CategoryID })">@item.CategoryName</a>
+                           </div>
+                        </div>
+
+                        <div class="history-total-point">
+                           @item.Status.toStatusName()
+                        </div>
+                        <div class="history-point">
+                           <a href="@Url.Action("MoveUp", "Category", new { id = item.CategoryID })"
+                              class="btn btn-link">
+                              ย้ายขึ้น
+                           </a>
+                           <a href="@Url.Action("MoveDown", "Category", new { id = item.CategoryID })"
+                              class="btn btn-link">
+                              ย้ายลง
+                           </a>
+
+                           <a href="@Url.Action("Update", "Category", new { id = item.CategoryID })"
+                              class="btn btn-link">
+                              แก้ไข
+                           </a>
+                           @if (canDelete(item.CategoryID))
+                           {
+
+                              <a href="@Url.Action("Delete", "Category", new { id = item.CategoryID, pno = ViewBag.PageNo ,  search_text =Model.search_text })"
+                                 onclick="return confirm('ต้องการลบรายการนี้?')"
+                                 class="btn btn-link">
+                                 ลบ
+                              </a>
+                           }
+                        </div>
+                     </div>
+
+                  </div> <!-- .history-table-container -->
+
+               }
+            </div>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("Index", "Category", new { id = 1, pno=i, search_text = Model.search_text})" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

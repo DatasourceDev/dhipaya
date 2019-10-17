@@ -1,0 +1,149 @@
+﻿@model Dhipaya.DTO.PrivilegeDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "สิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+   var index = 0;
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+   var result = context.Redeems.Where(c => c.PrivilegeID == Id);
+   if (result.Count() > 0)
+   {
+      retVal = false;
+   }
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">สิทธิ<small>พิเศษ</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","Privilege")" class="button button-blue">เพิ่มสิทธิพิเศษ</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Privilege" asp-action="Index" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ ร้านค้า/บริการ, สิทธิพิเศษ, เงื่อนไข, ที่อยู่">
+                  <select class="disable-search col20" asp-for="CategoryID">
+                     <option value="">ค้นหาจากประเภทสิทธิพิเศษ</option>
+                     @foreach (var item in Model.MerchantCategorys)
+                     {
+                        <option value="@item.CategoryID">@item.CategoryName</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+            </form>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>ลำดับ</th>
+                     <th></th>
+                     <th>สิทธิพิเศษ</th>
+                     <th>ใช้สิทธิ์</th>
+                     <th>สถานะ</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Privileges)
+                  {
+                     index++;
+                     var url = Url.Content("~/tip/img/privilege-default.jpg");
+                     if (!string.IsNullOrEmpty(item.ImgUrl))
+                     {
+                        url = Url.Content(item.ImgUrl);
+                     }
+                     else if (!string.IsNullOrEmpty(item.Merchant.Url))
+                     {
+                        url = Url.Content(item.Merchant.Url);
+                     }
+                     <tr>
+                        <td><input type="text" class="input-text digits" onkeypress="return isNumber(event);" style="width:30px" value="@item.Index" onchange="index_onchange(this,@item.PrivilegeID)" /></td>
+                        <td>  <img src="@Url.Content(url)" width="40"></td>
+                        <td>
+                           <a href="@Url.Action("Update", "Privilege", new { id = item.PrivilegeID, tab = item.NextInit })">@item.Merchant.MerchantName</a><br />
+                           <small>@item.PrivilegeName</small>
+                        </td>
+                        <td >
+                           <a href="@Url.Action("Redeem", "Privilege", new { search_privilege = item.PrivilegeID })"
+                              class="btn btn-link" target="_blank">
+                              @NumUtil.FormatCurrency(item.Redeems.Count())
+                           </a>
+                        </td>
+                        <td>
+                           @item.Status.toStatusName()
+                        </td>
+                        <td>
+                           <a href="@Url.Action("Update", "Privilege", new { id = item.PrivilegeID, tab = item.NextInit })"
+                              class="btn btn-link">
+                              แก้ไข
+                           </a>
+                           @if (canDelete(item.PrivilegeID))
+                           {
+
+                              <a href="@Url.Action("Delete", "Privilege", new { id = item.PrivilegeID })"
+                                 onclick="return confirm('ต้องการลบรายการนี้?')"
+                                 class="btn btn-link">
+                                 ลบ
+                              </a>
+                           }
+                        </td>
+                     </tr>
+                  }
+
+               </tbody>
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("Index", "Privilege", new { id = 1, pno=i, search_text = Model.search_text, CategoryID = Model.CategoryID})" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+      function index_onchange(opt, id) {
+         window.location = '@Url.Action("ReOrder", "Privilege")?id=' + id + '&index=' + opt.value + '&pno=' + '@ViewBag.PageNo' + '&search_text=' + '@Model.search_text' + '&CategoryID=' + '@Model.CategoryID' ;
+      }
+
+      function isNumber(e) {
+         if (e.keyCode == 13)
+            return;
+         e = e || window.event;
+         var charCode = e.which ? e.which : e.keyCode;
+         return /\d/.test(String.fromCharCode(charCode));
+      }
+   </script>
+}
+

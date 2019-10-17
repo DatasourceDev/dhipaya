@@ -1,0 +1,216 @@
+﻿@model Dhipaya.Models.Customer
+@using Dhipaya.DTO;
+@using Dhipaya.Services;
+
+@{
+   ViewData["Title"] = "MailActivateAcc";
+   //Layout = null;
+}
+
+<style type="text/css">
+   .button:hover {
+      color: #d9192b !important;
+   }
+</style>
+@if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+{
+   <style type="text/css">
+
+      .image-slideshow-full {
+         display: block !important;
+      }
+
+      .image-slideshow-mobile {
+         display: none !important;
+      }
+
+      @@media (max-width: 640px) and (min-width: 320px) {
+         .image-slideshow-full {
+            display: none !important;
+         }
+
+         .image-slideshow-mobile {
+            display: block !important;
+         }
+      }
+   </style>
+
+}
+
+<div class="site-wrapper" style="max-width: @(Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com") ? "1000px" : "430px");color: #000;font-size: 12pt;text-align:left;">
+   <main class="main">
+      @if (Model.Channel == CustomerChanal.ShareHolderImport)
+      {
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top.jpg" />
+
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
+
+            }
+
+         </div>
+         <p style="text-align:center; padding: 5px;">
+            <br />
+            <span style="font-size:64pt;color:#8a6326;line-height: 0px;"><i>ส</i></span> วัสดีค่ะ คุณ @Model.NameTh @Model.SurNameTh
+            <br />
+            <br />
+            เพื่อตอบแทนความไว้วางใจของท่าน ที่ร่วมลงทุนกับทิพยประกันภัย
+            <br />
+            บริษัทฯจึงขอมอบสิทธิพิเศษ ในการเป็นสมาชิก
+            <br />
+            TIP Society ระดับ @(Model.CustomerClass != null ? Model.CustomerClass.Name : "TIP Silver") ให้ท่าน
+            <br />
+            <br />
+            เพียงท่านดาวน์โหลดและลงทะเบียนเพื่อยืนยันสิทธิ
+            <br />
+            ที่แอปพลิเคชัน <a href="http://onelink.to/qdjyan" target="_blank" style="text-decoration:underline;color: #15c !important;">TIP Insure</a> หรือ <a href="https://tipsociety.dhipaya.co.th" target="_blank" style="text-decoration:underline;color: #15c !important;">tipsociety.dhipaya.co.th</a>
+            <br />
+            ซึ่งในการเป็นสมาชิกท่านจะได้ ทั้งรับ และลุ้นของรางวัลมากมาย
+            <br />
+            ช้อป กิน เที่ยว ฟรี ประจำทุกเดือน
+            <br />
+            <br />
+            ยืนยันการป็นสมาชิก โดยใช้ รหัสผู้ใช้งาน : <span>@Model.User.UserName</span>
+            <br />
+            และ รหัสผ่าน : @DataEncryptor.Decrypt(Model.User.Password)
+            <br />
+            เพื่อเปลี่ยนแปลงข้อมูล และกำหนดรหัสผ่านเองได้
+            <br />
+            <br />
+            <a class="button" style="color: #be1e2d !important;font-size: 18pt;text-decoration: underline;" href="https://bit.ly/2OXlpYS" target="_blank">ลงทะเบียนฟรี ไม่มีค่าใช้จ่าย</a>
+            <br />
+            <br />
+            หากท่านไม่ประสงค์จะเป็นสมาชิกฯ สามารถแจ้งกลับมาที่
+            <br />
+            Line : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a>
+            <br />
+            ติดต่อสอบถาม โทร. <a href="tel:1736" style="text-decoration: underline;" target="_blank">1736</a>
+         </p>
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom.jpg" />
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
+
+            }
+         </div>
+      }
+      else if (Model.Channel == CustomerChanal.AmazonImport)
+      {
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top.jpg" />
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
+            }
+         </div>
+         <p style="text-align:center; padding: 5px;">
+            <br />
+            <span style="font-size:64pt;color:#8a6326;line-height: 0px;"><i>ส</i></span> วัสดีค่ะ คุณ @Model.NameTh @Model.SurNameTh
+            <br />
+            <br />
+            ทิพยประกันภัย ขอมอบสิทธิ์ในการเป็นสมาชิก TIP Society ให้ฟรี ไม่เสียค่าใช้จ่าย
+            <br />
+            <br />
+            เพียงดาวน์โหลดและลงทะเบียนเพื่อยืนยันสิทธิ์
+            <br />
+            ที่แอปพลิเคชัน <a href="http://onelink.to/qdjyan" target="_blank" style="text-decoration:underline;color: #15c !important;">TIP Insure</a> หรือ <a href="https://tipsociety.dhipaya.co.th" target="_blank" style="text-decoration:underline;color: #15c !important;">tipsociety.dhipaya.co.th</a>
+            <br />
+            ซึ่งในการเป็นสมาชิกคุณจะได้ ทั้งรับ และลุ้นของรางวัลมากมาย
+            <br />
+            ช้อป กิน เที่ยว ฟรี ประจำทุกเดือน
+            <br />
+            <br />
+            ยืนยันการป็นสมาชิก โดยใช้ รหัสผู้ใช้งาน : <span>@Model.User.UserName</span>
+            <br />
+            และ รหัสผ่าน : @DataEncryptor.Decrypt(Model.User.Password)
+            <br />
+            เพื่อเปลี่ยนแปลงข้อมูล และกำหนดรหัสผ่านเองได้
+            <br />
+            <br />
+            <a class="button" style="color: #be1e2d !important;font-size: 18pt;text-decoration: underline;" href="https://bit.ly/2OXlpYS" target="_blank">ลงทะเบียนฟรี ไม่มีค่าใช้จ่าย</a>
+            <br />
+            <br />
+            สอบถามเพื่มเติมได้ที่
+            <br />
+            Line : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a> หรือ โทร. <a href="tel:1736" style="text-decoration: underline;" target="_blank">1736</a>
+         </p>
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom.jpg" />
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
+
+            }
+         </div>
+      }
+      else
+      {
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top.jpg" />
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
+            }
+         </div>
+         <p style="text-align:center; padding: 5px;">
+            <br />
+            <span style="font-size:64pt;color:#8a6326;line-height: 0px;"><i>ส</i></span> วัสดีค่ะ คุณ @Model.NameTh @Model.SurNameTh
+            <br />
+            <br />
+            ยินดีต้อนรับ สู่ TIP Society โซเชียลแห่งความสุข สนุกได้ทุกไลฟ์สไตล์ค่ะ
+            <br />
+            <br />
+            คุณเป็นสมาชิกระดับ @(Model.CustomerClass != null ? Model.CustomerClass.Name : "TIP Silver")
+            <br />
+            หมายเลขสมาชิก @Model.RefCode
+            <br />
+            <br />
+            รหัสผู้ใช้งาน : <span>@Model.User.UserName</span>
+            <br />
+            รหัสผ่าน : @DataEncryptor.Decrypt(Model.User.Password)
+            <br />
+            <br />
+            TIP Society สิทธิพิเศษแห่งการใช้ชีวิตที่คุณเลือกได้ตามไลฟ์สไตล์ของคุณ
+            <br />
+            ทั้งร้านอาหารยอดนิยม ที่พักแสนสบายบรรยาศดี Car Care ระดับคุณภาพ
+            <br />
+            สถานเสริมความงามและสุขภาพชื่อดัง และอีกมากมายที่คุณเลือกได้
+            <br />
+            <br />
+            ติดตามรายละเอียดได้ที่
+            <br />
+            <a href="https://tipsociety.dhipaya.co.th" target="_blank" style="text-decoration:underline;color: #15c !important;">tipsociety.dhipaya.co.th</a> หรือ Line : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a>
+         </p>
+         <div style="text-align:center;">
+            @if (Model.Email.Contains("@gmail.com") | Model.Email.Contains("@hotmail.com"))
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom.jpg" />
+            }
+            else
+            {
+               <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
+            }
+         </div>
+      }
+   </main>
+</div>
+<br />
+<br />

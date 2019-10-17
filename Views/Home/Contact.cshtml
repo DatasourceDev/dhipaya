@@ -1,0 +1,95 @@
+﻿@using Dhipaya.Extensions;
+@model Dhipaya.Models.Contact;
+@{
+  ViewData["Title"] = "ที่อยู่ติดต่อ";
+   Layout = "_LayoutTIP";
+}
+<div class="contact-google-map">
+   <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.2846329820018!2d100.54311276561401!3d13.7012032403802!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29f44969e3b49%3A0x6b175135869fe35f!2sDhipaya+Insurance+Headquarters!5e0!3m2!1sen!2sth!4v1533618017831" width="800" height="400" frameborder="0" style="border:0" allowfullscreen></iframe>
+</div>
+<div class="container">
+   <ul class="contact-list">
+      <li class="contact-item">
+         <div class="contact-icon">
+            <i class="fas fa-map-marker-alt"></i>
+         </div>
+         <div class="contact-info">
+            <h3><small>Location</small></h3>
+            <p><small>1115 ถ.พระราม 3 ช่องนนทรี<br />เขตยานนาวา กรุงเทพฯ 10120</small></p>
+         </div>
+      </li>
+      <li class="contact-item">
+         <div class="contact-icon">
+            <i class="fas fa-desktop"></i>
+         </div>
+         <div class="contact-info">
+            <h3><small>Website</small></h3>
+            <p><a href="https://tipsociety.dhipaya.co.th" target="_blank"><small>tipsociety.dhipaya.co.th</small></a></p>
+            <p><a href="https://www.dhipaya.co.th" target="_blank"><small>dhipaya.co.th</small></a></p>
+         </div>
+      </li>
+      <li class="contact-item">
+         <div class="contact-icon">
+            <i class="fas fa-mobile-alt"></i>
+         </div>
+         <div class="contact-info">
+            <h3><small>Phone</small></h3>
+            <p><small><a href="tel:1736" >1736</a></small></p>
+         </div>
+      </li>
+   </ul>
+</div><!-- .container -->
+<div class="contact-container">
+   <div class="container">
+      <h3 class="contact-title">สอบถามข้อมูล</h3>
+      <form class="contact-form" id="form-contact" asp-controller="Home" asp-action="Contact" role="form" method="post">
+         <div class="contact-form-block">
+            <div class="contact-input-block">
+               <input type="text" placeholder="ชื่อ" asp-for="Name" required>
+               @Html.ValidationMessageFor(m => m.Name, "", new { @class = "warning" })
+            </div>
+            <div class="contact-input-block">
+               <input type="tel" class="digits" asp-for="ContactNo" required maxlength="10" minlength="10" placeholder="เบอร์ติดต่อ" />
+               @Html.ValidationMessageFor(m => m.ContactNo, "", new { @class = "warning" })
+
+            </div>
+            <div class="contact-input-block">
+               <input type="email" class="email" placeholder="อีเมล" asp-for="Email" required>
+               @Html.ValidationMessageFor(m => m.Title, "", new { @class = "warning" })
+
+            </div>
+         </div><!-- .contact-input-block -->
+         <div class="contact-form-block">
+            <div class="contact-input-block">
+               <input type="text" placeholder="หัวข้อติดต่อ" asp-for="Title" required>
+               @Html.ValidationMessageFor(m => m.Title, "", new { @class = "warning" })
+
+            </div>
+            <div class="contact-input-block">
+               <textarea placeholder="เรื่องที่ต้องการสอบถาม" asp-for="Information" required></textarea>
+               @Html.ValidationMessageFor(m => m.Information, "", new { @class = "warning" })
+
+            </div>
+         </div><!-- .contact-input-block -->
+         <div class="contact-action">
+            <a href="https://www.google.com/maps?ll=13.701178,100.545329&z=16&t=m&hl=en&gl=TH&mapclient=embed&cid=7716725776856376159" class="button button-blue" target="_blank">โหลดแผนที่</a>
+            <button type="submit" class="button button-red">ส่งคำถาม</button>
+            @if (ViewData["Message"] != null && ViewData["Message"].ToString() != string.Empty)
+            {
+               <p>@ViewData["Message"]</p>
+            }
+            @if (ViewData["ErrorMessage"] != null && ViewData["ErrorMessage"].ToString() != string.Empty)
+            {
+               <span class="warning">@ViewData["ErrorMessage"]</span>
+            }
+         </div>
+      </form>
+   </div>
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('contact-main');
+      });
+   </script>
+}

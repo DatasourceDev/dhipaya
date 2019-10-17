@@ -1,0 +1,72 @@
+﻿@model Dhipaya.DTO.MailFriendGetFriendDTO
+@using Dhipaya.DTO;
+@using Dhipaya.Services;
+
+@{
+   ViewData["Title"] = "MailInviteFriend";
+   //Layout = null;
+}
+
+<style type="text/css">
+   .button:hover {
+      color: #d9192b !important;
+   }
+</style>
+@if (Model.friend.Email.Contains("@gmail.com") | Model.friend.Email.Contains("@hotmail.com"))
+{
+   <style type="text/css">
+
+      .image-slideshow-full {
+         display: block !important;
+      }
+
+      .image-slideshow-mobile {
+         display: none !important;
+      }
+
+      @@media (max-width: 640px) and (min-width: 320px) {
+         .image-slideshow-full {
+            display: none !important;
+         }
+
+         .image-slideshow-mobile {
+            display: block !important;
+         }
+      }
+   </style>
+
+}
+
+<div class="site-wrapper" style="max-width: @(Model.friend.Email.Contains("@gmail.com") | Model.friend.Email.Contains("@hotmail.com") ? "1000px" : "430px");color: #000;font-size: 12pt;text-align:left;">
+   <main class="main">
+      <div style="text-align:right;">
+         <img src="https://tipsociety.dhipaya.co.th/tip/img/logo-tipsociety.png" />
+      </div>
+      <p>
+         <br />
+         สวัสดีค่ะ คุณ @Model.friend.NameTh @Model.friend.SurNameTh
+         <br />
+         <br />
+         ท่านได้รับคะแนนสะสม TIP Point จำนวน @NumUtil.FormatCurrency(Model.point) คะแนน
+         <br />
+         จากการใช้ Friend Code ของคุณแนะนำสมาชิกใหม่ให้กับคุณ @Model.customer.NameTh @Model.customer.SurNameTh
+         <br />
+         <br />
+      </p>
+      <p style="text-align:center;">
+         TIP Society ชวนร่วมกิจกรรม Friend get Friend ใครหาเพื่อนสมัครสมาชิก TIP Society ได้มากสุด
+         <br />
+         รับเลย บัตรกำนัล Tesco Lotus หรือ Gift Voucher Bon chon มูลค่า 1,000 บาท
+         <br />
+         ใครเพื่อนเยอะ ญาติแยะ ชวนมารวมตัวกันได้เลย
+         <br />
+         <br />
+         สอบถามเพิ่มเติม Line@("@") : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a> / Inbox : <a style="text-decoration:underline;color: #15c !important;" href="https://www.facebook.com/tipsociety.dhipaya/">facebook TIP Society</a>
+         <br />
+         "TIP Society โซเชียลแห่งความสุข สนุกได้ทุกไลฟ์สไตล์"
+         <br />
+      </p>
+   </main>
+</div>
+<br />
+<br />

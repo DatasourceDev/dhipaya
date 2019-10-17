@@ -1,0 +1,21 @@
+﻿@{
+   ViewData["Title"] = "ส่งอีเมลสำเร็จ";
+   Layout = "_LayoutTIP";
+}
+<main class="main register-end">
+   <div class="register-block">
+      <h1>ส่งอีเมลสำเร็จ</h1>
+      <h3>โปรดตรวจสอบรายละเอียดที่อีเมลของท่าน</h3>
+      <div class="register-action text-center" style="display:block">
+         @*<a href="@Url.Action("Login","Accounts")" class="button button-red">เข้าสู่ระบบ</a>*@
+      </div>
+   </div><!-- .register-block -->
+</main>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+      });
+   </script>
+}

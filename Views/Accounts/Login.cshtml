@@ -1,0 +1,62 @@
+﻿@model Dhipaya.DTO.Accounts.Login
+@{
+   ViewData["Title"] = "เข้าสู่ระบบ";
+   Layout = "_LayoutTIP";
+}
+
+<!-- START Login Form -->
+<main class="main login-main">
+   <div class="login-block">
+      <div class="login-hero">
+         <h2>ยินดีต้อนรับ</h2>
+         <p>หากท่านยังไม่ได้เป็นสมาชิก ลงทะเบียน<br/>กับเราง่ายๆ เพื่อร่วมเป็นส่วนหนึ่งกับเรา<br/>พร้อมรับสิทธิพิเศษมากมาย</p>
+         <ul>
+            <li>ส่วนลดร้านค้าและบริการต่างๆ</li>
+            <li>สิทธิการรับข่าวสาร และข้อมูลก่อนใคร</li>
+            <li>ลงทะเบียนฟรี ไม่มีค่าใช้จ่าย</li>
+         </ul>
+         <a href="@Url.Action("Register", "Accounts")" class="button button-white">ลงทะเบียน</a>
+      </div><!-- .login-hero -->
+      <div class="login-body">
+         <h3 class="login-title">Login</h3>
+         <form class="login-form" id="form-login" name="form-login" role="form" asp-action="Login">
+            <div class="login-input-block">
+               <input type="text" asp-for="UserName" placeholder="อีเมล (รหัสผู้ใช้งาน)" required>
+               @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "warning" })
+            </div>
+            <div class="login-input-block">
+               <input type="password" placeholder="รหัสผ่าน" asp-for="Password" required>
+               @Html.ValidationMessageFor(m => m.Password, "", new { @class = "warning" })
+
+               @if (ViewData["ErrorMessage"] != null && ViewData["ErrorMessage"].ToString() != string.Empty)
+               {
+                  <span class="warning">@ViewData["ErrorMessage"]</span>
+               }
+            </div>
+            <div class="login-input-block">
+               <label>
+                  <input type="checkbox" class="filled-in" asp-for="RememberMe">
+                  <span>เข้าสู่ระบบโดยอัตโนมัติในครั้งถัดไป</span>
+               </label>
+            </div>
+            <p class="login-forget-link">ลืมรหัสผ่าน คลิก<a href="@Url.Action("Forgot", "Accounts")">ที่นี่</a></p>
+
+            <button type="submit" class="submit-button button button-red">เข้าสู่ระบบ</button>
+         </form>
+      </div><!-- .login-body -->
+   </div><!-- .login-block -->
+</main>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+         
+      });
+   </script>
+}
+
+
+
+
+

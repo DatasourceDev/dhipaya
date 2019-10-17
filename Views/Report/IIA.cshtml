@@ -1,0 +1,197 @@
+﻿
+@model Dhipaya.DTO.CustomersDTO
+@using Dhipaya.DTO;
+@using  Dhipaya.ModelsDapper;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "IIA";
+   Layout = "_LayoutTIP";
+}
+
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">IIA</h2>
+               <div class="title-right">
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="IIA" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน, เบอร์โทรศัพท์, หมายเลขสมาชิก, Friend Code">
+                  <select class="disable-search col20" asp-for="customerClassID">
+                     <option value="">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่จาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+                  @*<input type="text" asp-for="search_birthday" data-toggle="datepicker" class="input-text col15" placeholder="วันเกิด" />*@
+                  <select asp-for="search_birthmonth" class="col20">
+                     <option value="" class="blank">ค้นหาจากเดือนเกิด</option>
+                     @for (var i = 1; i < 13; i++)
+                     {
+                        <option value="@i">@DateUtil.GetFullMonth(i)</option>
+                     }
+                  </select>
+                  <select asp-for="customer_chanal" class="col20">
+                     <option value="" class="blank">ค้นหาจากช่องทางการสมัคร</option>
+                     <option value="@CustomerChanal.TIP">@CustomerChanal.TIP.toName()</option>
+                     <option value="@CustomerChanal.Mobile">@CustomerChanal.Mobile.toName()</option>
+                     <option value="@CustomerChanal.MobileImport">@CustomerChanal.MobileImport.toName()</option>
+                     <option value="@CustomerChanal.ShareHolderImport">@CustomerChanal.ShareHolderImport.toName()</option>
+                     <option value="@CustomerChanal.AmazonImport">@CustomerChanal.AmazonImport.toName()</option>
+                     <option value="@CustomerChanal.DhiMemberImport">@CustomerChanal.DhiMemberImport.toName()</option>
+                     <option value="@CustomerChanal.INTIntersect">@CustomerChanal.INTIntersect.toName()</option>
+                  </select>
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>หมายเลขสมาชิก</th>
+                     <th>ชื่อสมาชิก</th>
+                     <th>รหัสผู้ใช้งาน</th>
+                     <th>ประเภทสมาชิก</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Customers)
+                  {
+                     <tr>
+                        <td><a target="_blank" href="@Url.Action("Update", "Customer", new { id = item.ID })">@item.RefCode</a></td>
+                        <td>@item.NameTh @item.SurNameTh</td>
+                        <td>@item.User.UserName</td>
+                        <td>
+                           @if (item.CustomerClass != null)
+                           {
+                              @item.CustomerClass.Name
+                           }
+                        </td>
+                        <td><a href="#" onclick="iia_check('@item.NameTh','@item.SurNameTh','@item.IDCard'); return false;">IIA Check</a></td>
+                     </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pno = ViewBag.PageNo;
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("IIA", "Report", new { id = 1, pno= pnumber - 10,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("IIA", "Report", new { id = 1, pno=i,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("IIA", "Report", new { id = 1, pno=pnumber +10,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("IIA", "Report", new { id = 1, pno=i,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+
+         }
+      </div><!-- .container -->
+   </div>
+</div>
+
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+      function iia_check(name, surname, idc) {
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Action("IIACheck", "Report")',
+            data: { name: name, surname: surname, idc: idc },
+            success: function (data) {
+               if (data != null) {
+                  var text = "";
+                  if (data.resultCode == "Y") {
+                     text += "ลูกค้าทิพยประกันภัย\n"
+                     if (data.data != null && data.data.length > 0) {
+                        for (var i = 0; i < data.data.length; i++) {
+                           var item = data.data[i];
+                           var effectiveDate = "";
+                           if (item.effectiveDate != null && item.effectiveDate != '') {
+                              var split = item.effectiveDate.split(' ');
+                              split = split[0].split('/');
+                              effectiveDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           var expiryDate = "";
+                           if (item.expiryDate != null && item.expiryDate != '') {
+                              var split = item.expiryDate.split(' ');
+                              split = split[0].split('/');
+                              expiryDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           text += item.projectName + '[' + item.projectCode + ']' + ': ' + effectiveDate + ' - ' + expiryDate + "\n";
+                        }
+
+                     }
+                  }
+                  else {
+                     text += "ไม่ใช่ลูกค้าทิพยประกันภัยหรือระบุข้อมูลไม่ถูกต้อง";
+                  }
+                  alert(text);
+               }
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+               alert(errorThrown);
+            }
+         });
+      }
+
+   </script>
+}

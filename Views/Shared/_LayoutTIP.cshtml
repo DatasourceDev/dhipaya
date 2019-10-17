@@ -1,0 +1,985 @@
+﻿@inject Dhipaya.Services.LoginServices loginServices
+@inject Dhipaya.DAL.ChFrontContext context
+@using Microsoft.EntityFrameworkCore;
+@using System.Configuration;
+@{
+   var version = "v21032019";
+   var rv = ViewContext.RouteData.Values;
+   var action = rv["action"].ToString();
+   var controller = rv["controller"].ToString();
+   Customer customer = null;
+   IQueryable<string> codes = null;
+   @if (loginServices.isAuthen())
+   {
+      var user = this.context.Users.Where(w => w.UserName == loginServices.AuthenName()).FirstOrDefault();
+      if (user != null)
+      {
+
+         if (loginServices.isInRoles(new string[] { RoleName.Member }))
+         {
+            customer = this.context.Customers.Include(i => i.CustomerClass).Where(w => w.UserID == user.ID).FirstOrDefault();
+
+            if (ViewBag.TotalPoint == null)
+            {
+               var redeems = this.context.Redeems.Where(w => w.CustomerID == customer.ID);
+               var points = this.context.CustomerPoints.Where(w => w.CustomerID == customer.ID);
+               ViewBag.TotalPoint = points.Sum(s => s.Point) - redeems.Sum(s => s.Point);
+            }
+            if (ViewBag.CustomerClass == null)
+            {
+               if (customer.CustomerClass == null)
+               {
+                  customer.CustomerClass = this.context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+                  if (customer.CustomerClass != null)
+                  {
+                     ViewBag.CustomerClass = customer.CustomerClass.Name;
+                  }
+               }
+               else
+               {
+                  ViewBag.CustomerClass = customer.CustomerClass.Name;
+               }
+            }
+         }
+         else
+         {
+            codes = GetPageCode(user.UserRoleID);
+         }
+      }
+   }
+}
+@functions {
+public IQueryable<string> GetPageCode(int useroleID)
+{
+   if (loginServices.UserRole() == RoleName.Admin)
+   {
+      return null;
+   }
+   return this.context.Pages.Where(w => this.context.PageRoles.Where(w2 => w2.UserRoleID == useroleID).Select(s => s.PageID).Contains(w.PageID)).Select(s => s.PageCode);
+}
+
+public bool isValidRoles(IQueryable<string> codes, string[] controllers)
+{
+   if (loginServices.UserRole() == RoleName.Admin)
+   {
+      return true;
+   }
+   if (controllers != null && codes != null)
+   {
+      foreach (var controller in controllers)
+      {
+         if (codes.Contains(controller))
+         {
+            return true;
+         }
+      }
+   }
+   return false;
+
+}
+}
+<!DOCTYPE html>
+<html>
+<head>
+   <title>@ViewData["Title"]</title>
+   <meta charset="UTF-8">
+   <meta http-equiv="x-ua-compatible" content="ie=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <meta http-equiv="content-language" content="th" />
+   <meta name="robots" content="index, follow" />
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+   @RenderSection("head", required: false)
+   <link rel="icon" href="~/tip/img/logo/favicon-32x32.png" type="image/x-icon">
+   <link rel="stylesheet" href="~/tip/css/normalize.css">
+   <link rel="stylesheet" href="~/tip/vendor/fontawesome/css/all.css">
+   <link rel="stylesheet" href="~/tip/css/component.css">
+   <link rel="stylesheet" href="~/tip/vendor/slick/slick.css">
+   <link rel="stylesheet" href="~/tip/vendor/select2/css/select2.min.css">
+   <link rel="stylesheet" href="~/tip/vendor/datepicker/datepicker.css">
+   <link rel="stylesheet" href="~/tip/vendor/dropzone/dropzone.css">
+   <link rel="stylesheet" href="~/tip/vendor/video/video-js.css" type="text/css">
+   <link rel="stylesheet" href="~/tip/vendor/summernote/summernote-lite.css" type="text/css">
+
+   <link rel="stylesheet" href="~/tip/css/style.css?v=@version">
+   <link rel="stylesheet" href="~/tip/css/custom.css?v=@version">
+
+   <!-- Google Tag Manager -->
+   <script>
+      (function (w, d, s, l, i) {
+         w[l] = w[l] || []; w[l].push({
+            'gtm.start':
+               new Date().getTime(), event: 'gtm.js'
+         }); var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+               'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-WSGGHFL');</script>
+   <!-- End Google Tag Manager -->
+</head>
+<body>
+   <nav class="stick-hdr-nav stick-hdr-nav-mobile">
+      <ul class="stick-hdr-nav-menu">
+         <li class="stick-hdr-nav-item stick-hdr-nav-more"><a href="tipinsure://" class="stick-hdr-nav-link"><i class="fas fa-angle-left"></i><span>TIP Insure</span></a></li>
+      </ul>
+   </nav>
+   <div class="site-wrapper">
+      <header class="header header-main">
+         <div class="header-bg"></div>
+         <div class="container">
+            <nav class="nav-main">
+               <ul class="nav-main-list">
+                  @if (loginServices.isInRoles(new string[] { RoleName.Member }) | !loginServices.isAuthen())
+                  {
+                     <li class="nav-main-item @(action == "Index" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Index", "Home")"><img src="~/tip/img/logo-tipsociety.png" /></a></li>
+                     <li class="nav-main-item @(action == "Privilege" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Privilege", "Home")">สิทธิพิเศษ</a></li>
+                     @if (loginServices.isAuthen())
+                     {
+                        <li class="nav-main-item @((action == "Info" | action == "Create" | action == "Update" | action == "Point" | action == "History") & controller == "Customer" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Info", "Customer")">ข้อมูลสมาชิก</a></li>
+                     }
+                     <li class="nav-main-item @(action == "About" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("About","Home")">เกี่ยวกับเรา</a></li>
+                     <li class="nav-main-item @((action == "NewsActivity" | action == "NewsActivityInfo") & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("NewsActivity","Home")">ข่าวสารและกิจกรรม</a></li>
+                     <li class="nav-main-item @(action == "Question" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Question","Home")">คำถามที่พบบ่อย</a></li>
+                     <li class="nav-main-item @(action == "Contact" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Contact","Home")">ติดต่อเรา</a></li>
+                  }
+                  @if (loginServices.isInRoles(new string[] { RoleName.Merchant }))
+                  {
+                     <li class="nav-main-item @(action == "Index" & controller == "MerchantU" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Index", "MerchantU")">การใช้สิทธิพิเศษ</li>
+                  }
+                  @if (loginServices.isAuthen())
+                  {
+                     @if (isValidRoles(codes, new string[] { "Category", "Merchant", "Privilege" }))
+                     {
+                        var active = "";
+                        if (controller == "Category" | controller == "Merchant" | controller == "Privilege")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">สิทธิพิเศษ</a>
+                           <ul>
+                              @if (isValidRoles(codes, new string[] { "Category" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Category")">กลุ่มร้านค้า/บริการ</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Merchant" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Merchant")">ร้านค้า/บริการ</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Privilege" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Privilege")">สิทธิพิเศษ</a></li>
+                              }
+                           </ul>
+                        </li>
+                     }
+                     @if (isValidRoles(codes, new string[] { "Condition", "Product" }))
+                     {
+                        var active = "";
+                        if (controller == "Condition" | controller == "Product")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">สะสมคะแนน</a>
+                           <ul>
+                              @if (isValidRoles(codes, new string[] { "Product" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Product")">ประกันภัย</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Limit" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Limit")">การจำกัดคะแนน</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Condition" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Condition")">เงื่อนไขการสะสมคะแนน</a></li>
+                              }
+                           </ul>
+                        </li>
+                     }
+                     @if (isValidRoles(codes, new string[] { "Customer" }))
+                     {
+                        var active = "";
+                        if (controller == "Customer" | controller == "PointAdjust" | controller == "CustomerClass")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">สมาชิก</a>
+                           <ul>
+                              @if (isValidRoles(codes, new string[] { "CustomerClass" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "CustomerClass")">ประเภทสมาชิก</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Customer" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Customer")">สมาชิก</a></li>
+                                 <li><a href="@Url.Action("Import", "Customer")">นำเข้าสมาชิก</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "PointAdjust" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "PointAdjust")">ปรับปรุงคะแนน</a></li>
+                              }
+
+                           </ul>
+                        </li>
+                     }
+                     @if (isValidRoles(codes, new string[] { "User", "UserRole" }))
+                     {
+                        var active = "";
+                        if (controller == "User" | controller == "UserRole")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">สิทธิ์การเข้าถึงระบบ</a>
+                           <ul>
+                              @if (isValidRoles(codes, new string[] { "UserRole" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "UserRole")">สิทธิ์การเข้าถึง</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "User" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "User")">ผู้ใช้งาน</a></li>
+                              }
+                           </ul>
+                        </li>
+                     }
+                     @if (isValidRoles(codes, new string[] { "Report" }))
+                     {
+                        var active = "";
+                        if (controller == "Report")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">รายงาน</a>
+                           <ul>
+                              <li><a href="@Url.Action("Customer", "Report")">สมาชิก</a></li>
+                              <li><a href="@Url.Action("CustomerClass", "Report")">เปลี่ยนแปลงประเภทสมาชิก</a></li>
+                              <li><a href="@Url.Action("Invite", "Report")">Invite Friend</a></li>
+                              <li><a href="@Url.Action("InviteRank", "Report")">อันดับการ Invite Friend</a></li>
+                              <li><a href="@Url.Action("Point", "Report")">คะแนนสะสม</a></li>
+                              <li><a href="@Url.Action("Privilege", "Report")">แลกสิทธิพิเศษ</a></li>
+                              <li><a href="@Url.Action("PrivilegeDelivery", "Report")">จัดส่งสิทธิพิเศษ</a></li>
+                              <li><a href="@Url.Action("PrivilegeRank", "Report")">อันดับการแลกสิทธิพิเศษ (ร้านค้า/บริการ)</a></li>
+                              <li><a href="@Url.Action("RedeemRank", "Report")">อันดับการแลกสิทธิพิเศษ (สมาชิก)</a></li>
+                              <li><a href="@Url.Action("Subscriber", "Report")">ผู้สมัครรับข่าวสาร</a></li>
+                              <li><a href="@Url.Action("Contact", "Report")">ข้อมูลผู้ขอติดต่อกลับ</a></li>
+                           </ul>
+                        </li>
+                     }
+                     @if (isValidRoles(codes, new string[] { "Gallery", "Banner", "AboutUs", "NewsActivity", "QuestionGroup", "Question", "Configuration" }))
+                     {
+                        var active = "";
+                        if (controller == "Gallery" | controller == "Banner" | controller == "AboutUs" | controller == "NewsActivity" | controller == "QuestionGroup" | controller == "Question" | controller == "Configuration")
+                        {
+                           active = "is-active";
+                        }
+                        <li class="nav-main-item @active">
+                           <a href="#" class="nav-main-link">จัดการเว็บไซต์</a>
+                           <ul>
+                              @if (isValidRoles(codes, new string[] { "User" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Banner")">แบนเนอร์</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "NewsActivityGroup" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "NewsActivityGroup")">กลุ่มข่าวสารและกิจกรรม</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "NewsActivity" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "NewsActivity")">ข่าวสารและกิจกรรม</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "User" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "AboutUs")">เกี่ยวกับเรา</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "QuestionGroup" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "QuestionGroup")">กลุ่มคำถามที่พบบ่อย</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Question" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Question")">คำถามที่พบบ่อย</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Gallery" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Gallery")">รูปภาพ</a></li>
+                              }
+                              @if (isValidRoles(codes, new string[] { "Configuration" }))
+                              {
+                                 <li><a href="@Url.Action("Index", "Configuration")">กำหนดค่าระบบ</a></li>
+                              }
+                           </ul>
+                        </li>
+                     }
+
+                  }
+
+               </ul><!-- .nav-main__container -->
+            </nav><!-- .nav-main -->
+            @if (loginServices.isInRoles(new string[] { RoleName.Member }) && loginServices.isAuthen() && customer != null)
+            {
+               <div class="login login-top">
+                  <div class="login-top-wrapper">
+                     <div class="logged-username">
+                        <i class="fa fa-user"></i>
+                        <a href="#" class="username">คุณ @customer.NameTh @customer.SurNameTh</a>
+                     </div>
+                  </div>
+                  <div class="login-bottom-wrapper">
+                     <div class="logged-info">
+                        @if (ViewBag.CustomerClass != null)
+                        {
+                           <div class="logged-status">
+                              สถานะ :
+                              <p class="status"><span class="text-gold">@ViewBag.CustomerClass</span></p>
+                           </div>
+                        }
+
+                        <div class="logged-point">
+                           คะแนนสะสม :
+                           <p class="point total-cus-point">@NumUtil.FormatCurrency(ViewBag.TotalPoint)</p>
+                        </div>
+                     </div><!-- .logged-info -->
+                     <hr class="line" />
+                     <ul class="login-top-action">
+                        <li class="login-top-action-item"><a href="@Url.Action("Info","Customer")" class="login-top-action-link">ข้อมูลของฉัน</a></li>
+                        <li class="login-top-action-item"><a href="@Url.Action("Logout","Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
+                     </ul>
+                  </div>
+               </div><!-- .login-wrapper -->
+            }
+            else if (loginServices.isAuthen())
+            {
+               <div class="login login-top">
+                  <div class="login-top-wrapper">
+                     <div class="logged-username">
+                        <i class="fa fa-user"></i>
+                        <a href="#" class="username">@loginServices.AuthenName()</a>
+                     </div>
+                  </div>
+                  <div class="login-bottom-wrapper">
+                     <ul class="login-top-action">
+                        <li class="login-top-action-item"><a href="@Url.Action("Logout","Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
+                     </ul>
+                  </div>
+               </div><!-- .login-wrapper -->
+            }
+            else
+            {
+               <div class="login login-top">
+                  <div class="login-top-wrapper">
+                     <i class="fa fa-user"></i>
+                     <a href="@Url.Action("Login","Accounts")" class="login-top-link">เข้าสู่ระบบ</a> | <a href="@Url.Action("Register","Accounts")" class="login-top-link">สมัครสมาชิก</a>
+                  </div>
+               </div><!-- .login-wrapper -->
+            }
+            <div class="mobile-menu-toggle"><a href="#"><i class="fas fa-bars"></i></a></div>
+         </div><!-- .container -->
+      </header><!-- .site-header -->
+      <main class="main">
+
+         @if ((action == "Index" & controller == "Home") | (action == "Privilege" & controller == "Home") | (action == "Index" & controller == "Admin"))
+         {
+            @if ((action == "Index" & controller == "Home"))
+            {
+               <style>
+                  .mobile-menu-toggle a {
+                     color: rgba(167, 171, 181, 0.5);
+                  }
+
+                  .nav-main-link {
+                     color: #1c3e95;
+                  }
+
+                  @@media (min-width: 992px) {
+                     .header-bg {
+                        display: block;
+                        width: 100%;
+                        height: 65px;
+                        position: absolute;
+                        background: rgba(255, 255, 255, 0.7);
+                        z-index: -1;
+                     }
+                  }
+               </style>
+            }
+            <style>
+               /*.mobile-menu-toggle a {
+                              color: #fff;
+                           }*/
+
+               .image-slideshow-full {
+                  display: block !important;
+               }
+
+               .image-slideshow-mobile {
+                  display: none !important;
+               }
+
+               .image-slidetop-full {
+                  display: inline !important;
+                  height: 350px;
+               }
+
+               .image-slidetop-mobile {
+                  display: none !important;
+                  height: 180px;
+               }
+
+               @@media (max-width: 992px) {
+                  .slideshow-container {
+                     padding-bottom: 0px;
+                     padding-top: 20px;
+                  }
+
+                  .image-slidetop-full {
+                     height: 250px;
+                  }
+               }
+
+               @@media (max-width: 640px) and (min-width: 320px) {
+                  .image-slideshow-full {
+                     display: none !important;
+                  }
+
+                  .image-slideshow-mobile {
+                     display: block !important;
+                  }
+
+                  .image-slidetop-full {
+                     display: none !important;
+                     height: 350px;
+                  }
+
+                  .image-slidetop-mobile {
+                     display: inline !important;
+                     height: 180px;
+                  }
+
+                  .slideshow-container {
+                     padding-bottom: 0px;
+                     padding-top: 20px;
+                  }
+               }
+            </style>
+            <div class="slideshow slideshow-main">
+               @if ((action == "Index" & controller == "Home"))
+               {
+                  var banners = context.Banners.Where(w => w.Status == StatusType.Active & (!w.StartDate.HasValue || w.StartDate.Value.Date <= DateUtil.Now().Date) & (!w.EndDate.HasValue || w.EndDate.Value.Date >= DateUtil.Now().Date)).OrderBy(o => o.Index);
+                  if (banners.Count() > 0)
+                  {
+                     foreach (var item in banners)
+                     {
+                        <div class="slideshow-item">
+                           <div class="image-slideshow-container">
+
+                              <img class="image-slideshow-full" src="@Url.Content(item.Url)">
+                              <img class="image-slideshow-mobile" src="@Url.Content(item.MobileUrl)">
+                           </div><!-- .slideshow-container -->
+
+                        </div> <!-- .slideshow-item -->
+                     }
+
+                  }
+                  else
+                  {
+                     <div class="slideshow-item">
+                        <div class="image-slideshow-container">
+                           <img class="image-slideshow-full" src="~/tip/img/home-banner.jpg">
+                           <img class="image-slideshow-mobile" src="~/tip/img/home-banner-mobile.jpg">
+                        </div><!-- .slideshow-container -->
+
+                     </div> <!-- .slideshow-item -->
+                  }
+               }
+               @if ((action == "Privilege" & controller == "Home"))
+               {
+                  <div class="slideshow-item" style="background-color: #efefef;">
+                     <div class="container slideshow-container">
+                        <div class="slideshow-left-container">
+                           <div class="slideshow-text-container">
+                              <h2 style="color: #1c3e95;">PRIVILEGE</h2>
+                              <h4 style="color: #142050;">สิทธิพิเศษมากมายที่เลือกได้<br />ในแบบที่คุณชอบ ตามไลฟ์สไตล์ของคุณ</h4>
+                           </div><!-- .slideshow-text-container -->
+                        </div><!-- .slideshow-left-container -->
+                        <div class="slideshow-right-container">
+                           <div class="slideshow-image-container">
+                              <img src="~/tip/img/gift-2.png" class="image-slidetop-full">
+                              <img src="~/tip/img/gift-2.png" class="image-slidetop-mobile">
+                           </div><!-- .slideshow-image-container -->
+                        </div><!-- .slideshow-right-container -->
+                     </div><!-- .slideshow-container -->
+                  </div><!-- .slideshow-item -->
+               }
+
+               @if ((action == "Index" & controller == "Admin"))
+               {
+                  <div class="slideshow-item" style="background-color: #eee5df;">
+                     <div class="container slideshow-container">
+                        <div class="slideshow-left-container">
+                           <div class="slideshow-text-container">
+                              <h2 style="color: #1c3e95;">TIP Society</h2>
+                              <h4 style="color: #142050;">ระบบบริหารจัดการ</h4>
+                           </div><!-- .slideshow-text-container -->
+                        </div><!-- .slideshow-left-container -->
+                        <div class="slideshow-right-container">
+                           <div class="slideshow-image-container">
+                              <img src="~/tip/img/gift-1.png" class="image-slidetop-full">
+                              <img src="~/tip/img/gift-1.png" class="image-slidetop-mobile">
+                           </div><!-- .slideshow-image-container -->
+                        </div><!-- .slideshow-right-container -->
+                     </div><!-- .slideshow-container -->
+                  </div><!-- .slideshow-item -->
+               }
+            </div>
+         }
+
+         @RenderBody()
+      </main>
+      <footer class="footer footer-main">
+         <div class="container">
+            <div class="footer-row">
+               <div class="footer-block">
+                  <div class="footer-logo">
+                     <img src="~/tip/img/logo.png">
+                  </div><!-- .footer-logo -->
+                  <address class="footer-address">สำนักงานใหญ่ : 1115 ถ.พระราม 3 แขวงช่องนนทรี เขตยานนาวา กรุงเทพฯ 10120</address>
+               </div><!-- .footer-block -->
+               <div class="footer-block">
+                  <nav class="footer-nav">
+                     <h3 class="footer-nav-title">TIP Society</h3>
+                     <ul class="footer-nav-menu">
+                        <li class="footer-nav-item"><a href="@Url.Action("About","Home")" class="footer-nav-link">รู้จัก TIP Society</a></li>
+                        <li class="footer-nav-item"><a href="@Url.Action("Register","Accounts")" class="footer-nav-link">สมัครสมาชิก TIP Society</a></li>
+                        <li class="footer-nav-item"><a href="@Url.Action("NewsActivity","Home")" class="footer-nav-link">เล่าเรื่องด้วยภาพ</a></li>
+                        <li class="footer-nav-item"><a href="#" class="footer-nav-link">แชร์ความสุขสนุกไม่รู้ลืม</a></li>
+                     </ul>
+                  </nav>
+               </div><!-- .footer-block -->
+               <div class="footer-block">
+                  <nav class="footer-nav">
+                     <h3 class="footer-nav-title">โซเชียลแห่งความสุข</h3>
+                     <ul class="footer-nav-menu">
+                        <li class="footer-nav-item"><a href="@Url.Action("Privilege","Home")" class="footer-nav-link">สิทธิพิเศษที่เลือกได้</a></li>
+                        <li class="footer-nav-item"><a href="@Url.Action("NewsActivity","Home")" class="footer-nav-link">ข่าวสารน่ารู้จาก TIP Society</a></li>
+                        <li class="footer-nav-item"><a href="#" class="footer-nav-link">TIP Shopping Center</a></li>
+                        <li class="footer-nav-item"><a href="@Url.Action("PrivacyPolicy","Home")" target="_blank" class="footer-nav-link">นโยบายการคุ้มครองข้อมูลส่วนบุคคล</a></li>
+                     </ul>
+                  </nav>
+               </div><!-- .footer-block -->
+               <div class="footer-block border-left">
+                  <nav class="footer-nav">
+                     <h3 class="footer-nav-title">ติดต่อเรา</h3>
+                     <ul class="footer-nav-menu">
+                        <li class="footer-nav-item"><a href="mailto:tipsociety@dhipaya.co.th" class="footer-nav-link" target="_blank">tipsociety@dhipaya.co.th</a></li>
+                        <li class="footer-nav-item"><a href="https://www.dhipaya.co.th" class="footer-nav-link" target="_blank">dhipaya.co.th</a></li>
+                     </ul>
+                  </nav>
+                  <form class="" id="form-subscribe1" name="form-subscribe" role="form">
+                     <div class="input-group">
+                        <div class="input-group-area"><input id="txtsubscribe1" type="email" value="" required email placeholder="Enter your E-mail"></div>
+                        <div class="input-group-btn"><button type="button" onclick="subscribe_onclick('txtsubscribe1','form-subscribe1')" class="button button-red">Subscribe</button></div>
+                     </div>
+                  </form>
+
+               </div><!-- .footer-block -->
+            </div><!-- .footer-row -->
+         </div><!-- .container -->
+      </footer><!-- .footer-main -->
+      @if (loginServices.isInRoles(new string[] { RoleName.Member }) | !loginServices.isAuthen())
+      {
+         <ul class="float-social">
+            @*<li class="float-social-item"><a href="#" class="float-social-link" target="_blank"><img src="~/tip/img/icon-facebook-white.png"></a></li>
+               <li class="float-social-item"><a href="#" class="float-social-link" target="_blank"><img src="~/tip/img/icon-twitter-white.png"></a></li>
+               <li class="float-social-item"><a href="#" class="float-social-link" target="_blank"><img src="~/tip/img/icon-instagram-white.png"></a></li>
+               <li class="float-social-item"><a href="#" class="float-social-link" target="_blank"><img src="~/tip/img/icon-youtube-white.png"></a></li>*@
+            <li class="float-social-item"><a href="http://line.me/ti/p/~@@tipsociety" class="float-social-link" target="_blank"><img src="~/tip/img/icon-line-white.png"></a></li>
+         </ul>
+      }
+   </div><!-- .site-wrapper -->
+
+   @RenderSection("popup", required: false)
+   <!-- .privilege-popup -->
+   <div class="privilege-popup-menu">
+      <ul class="privilege-popup-list">
+         @foreach (var item in context.MerchantCategories.Where(w => w.Status == StatusType.Active).OrderBy(c => c.Index))
+         {
+            <li class="privilege-popup-item">
+               <div class="privilege-popup-icon"><a href="@Url.Action("Privilege","Home", new { CategoryID = item.CategoryID})" class="privilege-popup-link"><img src="@Url.Content(item.Logo)"></a></div>
+               <a href="@Url.Action("Privilege","Home", new { CategoryID = item.CategoryID})" class="privilege-popup-link"><span class="privilege-popup-text">@Html.Raw(item.CategoryName.Replace(" ", "<br/>"))</span></a>
+            </li>
+         }
+         <li class="privilege-popup-item">
+            <div class="privilege-popup-icon"><a href="@Url.Action("Privilege","Home")" class="privilege-popup-link"><img src="~/tip/img/icon-8.png"></a></div>
+            <a href="@Url.Action("Privilege","Home")" class="privilege-popup-link"><span class="privilege-popup-text">ทั้งหมด</span></a>
+         </li>
+      </ul>
+   </div>
+   <nav class="stick-nav stick-nav-tablet">
+      <ul class="stick-nav-menu">
+         @foreach (var item in context.MerchantCategories.Where(w => w.Status == StatusType.Active).OrderBy(c => c.Index))
+         {
+            <li class="stick-nav-item"><a href="@Url.Action("Privilege","Home", new { CategoryID = item.CategoryID})" class="stick-nav-link"><img src="@Url.Content(item.Logo)"></a></li>
+         }
+         <li class="stick-nav-item stick-nav-more"><a href="@Url.Action("Privilege","Home")" class="stick-nav-link"><img src="~/tip/img/icon-8.png"><span>ทั้งหมด</span></a></li>
+      </ul>
+   </nav>
+   <nav class="stick-nav stick-nav-mobile">
+      <ul class="stick-nav-menu">
+         @foreach (var item in context.MerchantCategories.Where(w => w.Status == StatusType.Active).OrderBy(c => c.Index).Take(4))
+         {
+            <li class="stick-nav-item"><a href="@Url.Action("Privilege","Home", new { CategoryID = item.CategoryID})" class="stick-nav-link"><img src="@Url.Content(item.Logo)"></a></li>
+         }
+         <li class="stick-nav-item stick-nav-more"><a href="#" class="stick-nav-link"><img src="~/tip/img/icon-8.png"><span>เพิ่มเติม</span></a></li>
+      </ul>
+   </nav>
+   <div class="mobile-sidebar">
+      <div class="mobile-sidebar-header">
+         <div class="mobile-sidebar-logo"><img src="~/tip/img/logo.png"></div>
+         <a href="#" class="mobile-sidebar-close"><i class="fas fa-times"></i></a>
+      </div>
+      <div class="mobile-sidebar-login">
+
+         @if (loginServices.isInRoles(new string[] { RoleName.Member }) && loginServices.isAuthen() && customer != null)
+         {
+
+            <div class="logged-in">
+               <p class="logged-greeting">ยินดีต้อนรับ</p>
+               <p class="username">คุณ @customer.NameTh @customer.SurNameTh</p>
+               <div class="logged-info">
+                  @if (ViewBag.CustomerClass != null)
+                  {
+                     <div class="logged-status">
+                        สถานะ :
+                        <p class="status"><span class="text-gold">@ViewBag.CustomerClass</span></p>
+                     </div>
+                  }
+                  <div class="logged-point">
+                     คะแนนสะสม :
+                     <p class="point total-cus-point">@NumUtil.FormatCurrency(ViewBag.TotalPoint)</p>
+                  </div>
+               </div><!-- .logged-info -->
+            </div>
+         }
+         else if (loginServices.isAuthen() && customer != null)
+         {
+            <div class="logged-in">
+               <p class="logged-greeting">ยินดีต้อนรับ</p>
+               <p class="username">@loginServices.AuthenName()</p>
+            </div>
+
+         }
+         else
+         {
+            if (!loginServices.isAuthen())
+            {
+               <div class="is-not-logged-in"><a href="@Url.Action("Login","Accounts")" class="login-link">เข้าสู่ระบบ</a> | <a href="@Url.Action("Register","Accounts")" class="login-link">สมัครสมาชิก</a></div>
+            }
+
+         }
+      </div>
+      @if (loginServices.isInRoles(new string[] { RoleName.Member }) | !loginServices.isAuthen())
+      {
+         <nav class="mobile-sidebar-nav">
+            <ul class="mobile-sidebar-menu">
+               <li class="mobile-sidebar-item @(action == "Index" & controller == "Home" ? "is-active" : "")"><a href="@Url.Action("Index", "Home")" class="mobile-sidebar-link">TIP Society</a></li>
+               <li class="mobile-sidebar-item @(action == "Privilege" & controller == "Home" ? "is-active" : "")"><a href="@Url.Action("Privilege", "Home")" class="mobile-sidebar-link">สิทธิพิเศษ</a></li>
+               @if (loginServices.isAuthen())
+               {
+                  <li class="mobile-sidebar-item @((action == "Info" | action == "Update" | action == "Point" | action == "History") & controller == "Customer" ? "is-active" : "")"><a href="@Url.Action("Info", "Customer")" class="mobile-sidebar-link">ข้อมูลสมาชิก</a></li>
+               }
+               <li class="mobile-sidebar-item @(action == "About" & controller == "Home" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("About", "Home")">เกี่ยวกับเรา</a></li>
+               <li class="mobile-sidebar-item @((action == "NewsActivity" | action == "Home") & controller == "Home" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("NewsActivity", "Home")">ข่าวสารและกิจกรรม</a></li>
+               <li class="mobile-sidebar-item @(action == "Question" & controller == "Home" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Question", "Home")">คำถามที่พบบ่อย</a></li>
+               <li class="mobile-sidebar-item @(action == "Contact" & controller == "Home" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Contact", "Home")">ติดต่อเรา</a></li>
+               @if (loginServices.isAuthen())
+               {
+                  <li class="mobile-sidebar-item"><a href="@Url.Action("Logout", "Accounts")" class="mobile-sidebar-link">ออกจากระบบ</a></li>
+               }
+            </ul><!-- .mobile-sidebar-menu -->
+         </nav>
+      }
+      @if (loginServices.isInRoles(new string[] { RoleName.Merchant }))
+      {
+         <nav class="mobile-sidebar-nav">
+            <ul class="mobile-sidebar-menu">
+               <li class="mobile-sidebar-item @(action == "Index" & controller == "MerchantU" ? "is-active" : "")"><a href="@Url.Action("Index", "MerchantU")" class="mobile-sidebar-link">การใช้สิทธิพิเศษ</a></li>
+               <li class="mobile-sidebar-item"><a href="@Url.Action("Logout", "Accounts")" class="mobile-sidebar-link">ออกจากระบบ</a></li>
+            </ul><!-- .mobile-sidebar-menu -->
+         </nav>
+      }
+      else if (loginServices.isInRoles(new string[] { RoleName.Admin }))
+      {
+         <nav class="mobile-sidebar-nav">
+            <ul class="mobile-sidebar-menu">
+
+               <li class="mobile-sidebar-item @(controller == "Category" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Category")">กลุ่มร้านค้า/บริการ</a></li>
+               <li class="mobile-sidebar-item @(controller == "Merchant" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Merchant")">ร้านค้า/บริการ</a></li>
+               <li class="mobile-sidebar-item @(controller == "Privilege" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Privilege")">สิทธิพิเศษ</a></li>
+
+               <li class="mobile-sidebar-item @(controller == "Product" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Product")">ประกันภัย</a></li>
+               <li class="mobile-sidebar-item @(controller == "Condition" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Condition")">เงื่อนไขการสะสมคะแนน</a></li>
+
+               <li class="mobile-sidebar-item @(controller == "CustomerClass" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "CustomerClass")">ประเภทสมาชิก</a></li>
+               <li class="mobile-sidebar-item @(controller == "Customer" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Customer")">สมาชิก</a></li>
+               <li class="mobile-sidebar-item @(controller == "PointAdjust" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Customer")">ปรับปรุงคะแนน</a></li>
+
+               <li class="mobile-sidebar-item @(controller == "UserRole" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "UserRole")">สิทธิ์การเข้าถึง</a></li>
+               <li class="mobile-sidebar-item @(controller == "User" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "User")">ผู้ใช้งาน</a></li>
+
+               <li class="mobile-sidebar-item @(action == "Customer" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Customer", "Report")">รายงานสมาชิก</a></li>
+               <li class="mobile-sidebar-item @(action == "CustomerClass" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("CustomerClass", "Report")">รายงานเปลี่ยนแปลงประเภทสมาชิก</a></li>
+               <li class="mobile-sidebar-item @(action == "Invite" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Invite", "Report")">รายงาน Invite Friend</a></li>
+               <li class="mobile-sidebar-item @(action == "InviteRank" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("InviteRank", "Report")">รายงานอันดับการ Invite Friend</a></li>
+               <li class="mobile-sidebar-item @(action == "Point" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Point", "Report")">รายงานคะแนนสะสม</a></li>
+               <li class="mobile-sidebar-item @(action == "Privilege" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Privilege", "Report")">รายงานการแลกสิทธิพิเศษ</a></li>
+               <li class="mobile-sidebar-item @(action == "PrivilegeDelivery" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("PrivilegeDelivery", "Report")">รายงานจัดส่งสิทธิพิเศษ</a></li>
+               <li class="mobile-sidebar-item @(action == "PrivilegeRank" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("PrivilegeRank", "Report")">รายงานอันดับการแลกสิทธิพิเศษ (ร้านค้า/บริการ)</a></li>
+               <li class="mobile-sidebar-item @(action == "RedeemRank" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("RedeemRank", "Report")">รายงานอันดับการแลกสิทธิพิเศษ (สมาชิก)</a></li>
+               <li class="mobile-sidebar-item @(action == "Subscriber" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Subscriber", "Report")">รายงานผู้สมัครรับข่าวสาร</a></li>
+               <li class="mobile-sidebar-item @(action == "Contact" & controller == "Report" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Contact", "Report")">รายงานข้อมูลผู้ขอติดต่อกลับ</a></li>
+
+               <li class="mobile-sidebar-item @( controller == "Banner" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Banner")">แบนเนอร์</a></li>
+               <li class="mobile-sidebar-item @(controller == "NewsActivityGroup" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "NewsActivityGroup")">กลุ่มข่าวสารและกิจกรรม</a></li>
+               <li class="mobile-sidebar-item @(controller == "NewsActivity" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "NewsActivity")">ข่าวสารและกิจกรรม</a></li>
+               <li class="mobile-sidebar-item @(controller == "AboutUs" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "AboutUs")">เกี่ยวกับเรา</a></li>
+               <li class="mobile-sidebar-item @(controller == "QuestionGroup" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "QuestionGroup")">กลุ่มคำถามที่พบบ่อย</a></li>
+               <li class="mobile-sidebar-item @(controller == "Question" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Question")">คำถามที่พบบ่อย</a></li>
+               <li class="mobile-sidebar-item @(controller == "Gallery" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Gallery")">รูปภาพ</a></li>
+               <li class="mobile-sidebar-item @(controller == "Configuration" ? "is-active" : "")"><a class="mobile-sidebar-link" href="@Url.Action("Index", "Configuration")">กำหนดค่าระบบ</a></li>
+
+               <li class="mobile-sidebar-item"><a href="@Url.Action("Logout", "Accounts")" class="mobile-sidebar-link">ออกจากระบบ</a></li>
+            </ul><!-- .mobile-sidebar-menu -->
+         </nav>
+
+      }
+
+      <div class="mobile-sidebar-subscribe">
+         <form class="" id="form-subscribe2" name="form-subscribe" role="form">
+            <div class="input-group">
+               <div class="input-group-area"><input id="txtsubscribe2" type="email" value="" required email placeholder="Enter your E-mail"></div>
+               <div class="input-group-btn"><button type="button" onclick="subscribe_onclick('txtsubscribe2','form-subscribe2')" class="button button-red">Subscribe</button></div>
+            </div>
+         </form>
+      </div>
+      <div class="mobile-sidebar-footer">
+
+         <div class="mobile-sidebar-contact">
+            ติดต่อเรา <strong><a href="tel:1736" style="color:#fff">1736</a></strong> หรือ<br />
+
+            <a href="https://tipsociety.dhipaya.co.th" style="color:#fff" target="_blank">tipsociety.dhipaya.co.th</a>
+         </div>
+
+         <ul class="footer-social">
+            <li class="footer-social-item"><a href="http://line.me/ti/p/~@@tipsociety" class="footer-social-link" target="_blank"><img src="~/tip/img/icon-line-blue.png"></a></li>
+            @*<li class="footer-social-item"><a href="#" class="footer-social-link" target="_blank"><img src="~/tip/img/icon-youtube-blue.png"></a></li>
+               <li class="footer-social-item"><a href="#" class="footer-social-link" target="_blank"><img src="~/tip/img/icon-facebook-blue.png"></a></li>
+               <li class="footer-social-item"><a href="#" class="footer-social-link" target="_blank"><img src="~/tip/img/icon-twitter-blue.png"></a></li>
+               <li class="footer-social-item"><a href="#" class="footer-social-link" target="_blank"><img src="~/tip/img/icon-instagram-blue.png"></a></li>*@
+         </ul>
+      </div>
+   </div><!-- .mobile-sidebar -->
+
+
+   @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"] != null && ViewData.ModelState["Error"].Errors.Count > 0)
+   {
+      var err = ViewData.ModelState["Error"].Errors.FirstOrDefault();
+      string errMsg = "";
+      if (err != null)
+      {
+         errMsg = err.ErrorMessage;
+         <script>
+                alert('@Html.Raw(errMsg)');
+         </script>
+      }
+   }
+
+   @if (TempData["Error"] != null)
+   {
+      string errMsg = TempData["Error"].ToString();
+      <script>
+            alert('@Html.Raw(errMsg)');
+      </script>
+   }
+
+   <script type="text/javascript" src="~/tip/js/jquery.js"></script>
+   <script type="text/javascript" src="~/tip/js/jquery-migrate.js"></script>
+   <script type="text/javascript" src="~/tip/js/jquery.validate.js"></script>
+
+   <script type="text/javascript" src="~/tip/js/materialize.min.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/slick/slick.min.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/select2/js/select2.min.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/datepicker/datepicker.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/dropzone/dropzone.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/video/video.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/qrcode/qrcode.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/summernote/summernote-lite.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/masonry/masonry.pkgd.min.js"></script>
+   <script type="text/javascript" src="~/tip/vendor/masonry/imagesloaded.pkgd.min.js"></script>
+
+   <script type="text/javascript" src="~/tip/js/script.js"></script>
+   <script type="text/javascript" src="~/tip/js/custom.js"></script>
+   @*<script type="text/javascript" src="~/tip/js/all.js"></script>
+      <script type="text/javascript" src="~/tip/js/facebook.js"></script>*@
+   <div id="fb-root"></div>
+   <script>
+
+      (function () {
+         var e = document.createElement('script');
+         e.type = 'text/javascript';
+         e.src = document.location.protocol +
+            '//connect.facebook.net/en_US/all.js';
+         e.async = true;
+         document.getElementById('fb-root').appendChild(e);
+      }());
+
+      @*window.rellConfig = {
+         "appID": "@ViewData["FBAppID"]",
+         "frictionlessRequests": true,
+         "init": true,
+         "level": "debug",
+         "signedRequest": null,
+         "status": true,
+         "version": "v3.2",
+         "viewMode": "website",
+         "oauth": true
+      };*@
+      window.rellExample = { "autoRun": false }
+      window.fbAsyncInit = function () {
+         FB.init({
+            appId: '@ViewData["FBAppID"]', //local host
+            cookie: true,
+            xfbml: true,
+            version: 'v3.2',
+            oauth: true
+         });
+      };
+
+      function share_fb2(link, title, desc, img) {
+         FB.init({
+            appId: '@ViewData["FBAppID"]', //local host
+            cookie: true,
+            xfbml: true,
+            version: 'v3.2',
+            oauth: true
+         });
+         FB.ui({
+            method: 'share_open_graph',
+            action_type: 'og.shares',
+            action_properties: JSON.stringify({
+               object: {
+                  'og:url': link,
+                  'og:title': title,
+                  'og:description': desc,
+                  'og:image': img
+               }
+            })
+         },
+            function (response) {
+               if (response != null) {
+                  if (response.length == 0 || response.error_code == null) {
+                     fbreward();
+                  }
+               }
+            });
+      }
+      function share_fb(link, title, desc, img) {
+         if (link != null) {
+            share_fb2(link, title, desc, img);
+         }
+      }
+
+      function fblogin(link, title, desc, img) {
+         alert('fblogin');
+         FB.login(function (response) {
+            if (response.status === 'connected') {
+               alert('connected');
+               share_fb2(link, title, desc, img);
+            } else {
+               alert('error');
+               // The person is not logged into this app or we are unable to tell.
+            }
+         });
+      }
+
+      var inCallbackLayoutFB = false;
+      function fbreward() {
+         if (inCallbackLayoutFB == false) {
+            var data = { tID: '@((int)TransacionTypeID.ShareFacebook)' };
+            $.ajax({
+               type: 'Put',
+               url: '@Url.Action("Reward", "Customer")',
+               data: data,
+               success: function (data) {
+                  if (data != null) {
+                     if (data.responseCode == 1) {
+
+                     }
+                     else if (data.responseDesc != undefined) {
+                        //alert(data.responseDesc);
+                     }
+                  }
+                  inCallbackLayoutFB = false;
+                  return;
+               },
+               error: function (XMLHttpRequest, errorThrown) {
+                  alert(errorThrown);
+                  return;
+               }
+            });
+         }
+         return;
+      }
+   </script>
+
+   <script>
+      function get_content(html) {
+         if (html == null)
+            return '';
+         return html.replace(/<[^>]*>/g, "");
+      }
+
+    var inCallbackLayout = false;
+    function subscribe_onclick(id, formid) {
+      if (inCallbackLayout == false) {
+        var valid = $("#" + formid).valid();
+        if (valid) {
+          var data = { email: $("#" + id).val() };
+          inCallbackLayout = true;
+          $.ajax({
+            type: 'Get',
+            url: '@Url.Action("Subscribe", "Home")',
+            data: data,
+            success: function (data) {
+              if (data != null) {
+                if (data.result == 1) {
+                  alert("สมัครรับข่าวสารสำเร็จ");
+                  $("#" + id).val('');
+                }
+                else {
+                  alert(data.desc);
+                }
+              }
+              inCallbackLayout = false;
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+              alert(errorThrown);
+            }
+          });
+        }
+      }
+    }
+   </script>
+
+   <!-- Google Tag Manager (noscript) -->
+   <noscript>
+      <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WSGGHFL"
+              height="0" width="0" style="display:none;visibility:hidden"></iframe>
+   </noscript>
+   <!-- End Google Tag Manager (noscript) -->
+
+   @RenderSection("scripts", required: false)
+</body>
+</html>

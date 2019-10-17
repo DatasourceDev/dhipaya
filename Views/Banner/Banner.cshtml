@@ -1,0 +1,90 @@
+﻿@model IEnumerable<Dhipaya.Models.Banner>
+@{
+   ViewData["Title"] = "แบนเนอร์";
+   Layout = "_LayoutTIP";
+   var i = 0;
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">แบนเนอร์<small></small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","Banner")" class="button button-blue">เพิ่มแบนเนอร์</a>
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         @foreach (var item in Model)
+         {
+            <div class="profile-block-with-bg">
+
+               <div class="history-table-container">
+                  <div class="history-date">
+                     รูปที่ @(i + 1)
+                  </div>
+                  <div class="history-table-wrapper add-point">
+
+                     <div class="history-detail">
+                        <div class="history-detail-logo">
+                           <img src="@Url.Content(item.Url)" height="300" />
+
+
+                        </div>
+                        <div class="history-detail-logo">
+                           <img src="@Url.Content(item.MobileUrl)" height="300" />
+
+                        </div>
+                     </div>
+
+                  </div>
+                  <div class="history-table-wrapper">
+                     <div class="history-detail">
+                        <div class="history-detail-text">
+                           <a href="@Url.Action("MoveUp", "Banner", new { id = item.ID })"
+                              class="btn btn-link">
+                              ย้ายขึ้น
+                           </a>
+                           <a href="@Url.Action("MoveDown", "Banner", new { id = item.ID })"
+                              class="btn btn-link">
+                              ย้ายลง
+                           </a>
+
+                        </div>
+
+                     </div>
+                     <div class="history-point">
+                        <a href="@Url.Action("Update", "Banner", new { id = item.ID })"
+                           class="btn btn-link">
+                           แก้ไข
+                        </a>
+                        <a href="@Url.Action("Delete", "Banner", new { id = item.ID })"
+                           onclick="return confirm('ต้องการลบรายการนี้?')"
+                           class="btn btn-link">
+                           ลบ
+                        </a>
+
+                     </div>
+                  </div>
+
+               </div>
+            </div>
+            <br />
+            i++;
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

@@ -1,0 +1,298 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.NewsActivity
+@{
+   ViewData["Title"] = "ข่าวสารและกิจกรรม";
+   Layout = "_LayoutTIP";
+}
+@section scripts{
+   <script>
+      videojs.options.flash.swf = "video-js.swf";
+
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+         $('.summernote').summernote({
+            height: 600
+         });
+
+         if ('@ViewBag.imgfocus'.toLowerCase() == 'true') {
+            $(window).scrollTop($('#divimg').position().top);
+         }
+
+         if ('@Model.MediaType' == '@MediaType.Image')
+            mediatype_onchange($('#MediaTypeImage').get(0));
+         else if('@Model.MediaType' == '@MediaType.Video')
+           mediatype_onchange($('#MediaTypeVideo').get(0));
+      });
+
+      function mediatype_onchange(obj) {
+         if (obj.checked == true) {
+            if (obj.value == '@MediaType.Video') {
+               $('#divMainVideo').show();
+               $('#divMainImg').hide();
+               $('#divimg').hide();
+            }
+            else {
+               $('#divMainVideo').hide();
+               $('#divMainImg').show();
+               $('#divimg').show();
+            }
+         }
+      }
+
+      function upload_onclick(e) {
+         if (e != null)
+            e.preventDefault();
+
+         //jQuery('body').addClass('popup-is-active');
+         jQuery('.privilege-popup').addClass('is-active');
+
+
+         jQuery('.privilege-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('.privilege-popup').removeClass('is-active');
+            jQuery('.privilege-popup-slideshow').slick('unslick');
+
+            window.location = '@Url.Action("Update","NewsActivity", new {id=Model.ID , imgfocus = true})'
+         });
+      }
+      function remove_onclick(e,id) {
+      if (e != null)
+            e.preventDefault();
+         if (confirm('ต้องการลบรายการนี้?')) {
+            $.ajax({
+               url: "@Url.Action("ImageDelete","NewsActivity")?id=" + id,
+            })
+            .done(function( data ) {
+               if ( data != null && data== true ) {
+                  window.location = '@Url.Action("Update","NewsActivity", new {id=Model.ID, imgfocus = true })'
+               }
+            });
+         }
+    }
+
+    function submit_onclick() {
+      var valid = $("#form").valid();
+      $('#error_description').hide();
+      var text = get_content($('#Description').val());
+        if (text == null || text== '') {
+          $('#error_description').show();
+          valid = false;
+        }
+
+      if (valid)
+        document.forms['form'].submit();
+    }
+   </script>
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.ID > 0)
+            {
+               <h2>แก้ไข<small>ข่าวสารและกิจกรรม</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>ข่าวสารและกิจกรรม</small></h2>
+            }
+            <div class="icon"><i class="fa fa-store-alt"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="NewsActivity" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               @Html.HiddenFor(m => m.ImgUrl)
+               @Html.HiddenFor(m => m.VideoUrl)
+               @Html.HiddenFor(m => m.IsFavorite)
+               @Html.HiddenFor(m => m.Index)
+               <div class="profile-row">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>หัวข้อ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="Title" class="input-text " required placeholder="หัวข้อ">
+                                 @Html.ValidationMessageFor(m => m.Title, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เนื้อหา<span class="text-red">*</span></td>
+                              <td>
+                                 <textarea asp-for="Description" class="summernote" placeholder="เนิ้อหา" rows="20"></textarea>
+                                 <p class="warning" id="error_description" style="display:none;">กรุณาระบุเนื้อหา</p>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>กลุ่มข่าวสารและกิจกรรม</td>
+                              <td class="input-block">
+                                 <select asp-for="GroupID" asp-items="@(new SelectList(ViewBag.ListGroup, "ID", "Name"))">
+                                    <option value="">-</option>
+                                 </select>
+                                 @Html.ValidationMessageFor(m => m.GroupID, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แสดงตั้งแต่</td>
+                              <td>
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="sDate" placeholder="วว/ดด/ปปปป" />
+                                 @Html.ValidationMessageFor(m => m.sDate, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แสดงถึงวันที่</td>
+                              <td>
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="eDate" placeholder="วว/ดด/ปปปป" />
+                                 @Html.ValidationMessageFor(m => m.eDate, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หน้าปก</td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="MediaTypeImage" asp-for="MediaType" value="@MediaType.Image" onchange="mediatype_onchange(this)">
+                                    <span>รูปภาพ</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="MediaTypeVideo" asp-for="MediaType" value="@MediaType.Video" onchange="mediatype_onchange(this)">
+                                    <span>วีดีโอ</span>
+                                 </label>
+                              </td>
+                           </tr>
+                           <tr id="divMainImg">
+                              <td>รูปหน้าปก</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.ImgUrl))
+                                 {
+                                    <img src="@Url.Content(Model.ImgUrl)" height="300" />
+                                    <br />
+                                 }
+                                 <input type="file" name="file" accept="image/*" />
+                                 600x325 px
+                              </td>
+                           </tr>
+                           <tr id="divMainVideo">
+                              <td>วีดีโอหน้าปก</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                                 {
+                                    <video class="video-js vjs-default-skin" controls preload="auto" height="280" width="100%" poster="" data-setup="{}">
+                                       <source src="@Url.Content(Model.VideoUrl)" type='video/mp4' />
+                                    </video>
+                                 }
+
+                                 <input type="file" name="video" accept="video/*" />
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     @if (Model.ID > 0)
+                     {
+                        <a href="@Url.Action("NewsActivityInfo","Home", new {id = Model.ID })" class="button button-white" target="_blank">Preview</a>
+                     }
+                     <button type="button" class="button button-blue" onclick="submit_onclick()">บันทึกข้อมูล</button>
+
+                  </div>
+               </div><!-- .profile-row -->
+            </div>
+         </form>
+
+         @if (Model.ID > 0)
+         {
+            <div id="divimg">
+               <div class="profile-title-block">
+                  <br />
+                  <div class="heading-wrapper">
+                     <h2 class="title"><small>รูป</small>ข่าวสาร<small>และ</small>กิจกรรม</h2>
+                     <div class="title-right">
+                        <button type="button" onclick="upload_onclick()" class="button button-blue">เพิ่มรูป</button>
+                     </div>
+                  </div>
+               </div><!-- .profile-title-block -->
+               <div class="profile-block-with-bg">
+                  <div class="profile-row">
+                     <div class="profile-col-full">
+                        @if (Model.NewsActivityImages != null && Model.NewsActivityImages.Count() > 0)
+                        {
+                           foreach (var img in Model.NewsActivityImages)
+                           {
+                              <div class="privilege-image-preview">
+                                 <img src="@Url.Content(img.Url)" />
+                                 <div class="action">
+                                    <a onclick="remove_onclick(event,'@img.ID')"
+                                       class="btn btn-link">
+                                       ลบ
+                                    </a>
+                                 </div>
+                              </div>
+                           }
+                        }
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+         }
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+<div class="privilege-popup" id="privilege-popup">
+   <div class="privilege-popup-close"><i class="fas fa-times"></i></div>
+   <div class="privilege-popup-wrapper">
+      <div class="privilege-popup-body">
+         <div class="privilege-popup-title-wrapper">
+            <div class="privilege-popup-icon"><img id="pop-icon" src="~/tip/img/icon-instagram-white.png" style="transform: scale(1);"></div>
+            <h3 class="privilege-popup-title"><small id="pop-merchant-name">รูปภาพ</small></h3>
+         </div>
+         <div class="privilege-popup-content">
+            <p id="pop-condition"></p>
+         </div>
+         <div class="privilege-popup-content">
+            <form asp-controller="NewsActivity" asp-action="Image" class="dropzone" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.ID)
+               <div class="fallback">
+                  <input name="imgfile" id="imgfile" type="file" multiple accept="image/*" />
+               </div>
+            </form>
+
+         </div>
+         <!-- .privilege-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .privilege-popup-wrapper -->
+</div>

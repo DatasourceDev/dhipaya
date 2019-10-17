@@ -1,0 +1,213 @@
+﻿@{
+   var url = "https://" + ViewContext.HttpContext.Request.Host.Value + "/Home/PrivilegeInfo?id=";
+   var urlhost = "https://" + ViewContext.HttpContext.Request.Host.Value;
+
+}
+<script>
+  var control = document.getElementById("pop-clock");
+  var controltext = document.getElementById("pop-clock-text");
+  var resetValue = 30 * 60;
+  var setControlVal = control.setAttribute("text", resetValue);
+  var seconds = control.text;
+  var interval;
+  var privilegeId;
+  var privilegetitle;
+  var privilegedesc;
+  var privilegeimg;
+
+  function startTimer() {
+    if (seconds === 0 || seconds === "Done") {
+      control.value = "Please read the red text information below and follow instructions!";
+      return;
+
+    } else {
+      control.value = seconds--;
+      var min = parseInt(control.value / 60, 10);
+      var sec = parseInt(control.value % 60, 10);
+      if (sec.toString().length == 1)
+        sec = "0" + sec.toString();
+      controltext.innerHTML = min + ":" + sec;
+    }
+    interval = setTimeout(startTimer, 1000);
+  }
+
+  function stopTimer() {
+    clearTimeout(interval);
+  }
+
+  function resetTimer() {
+    stopTimer();
+    control.value = resetValue;
+    seconds = resetValue;
+  }
+
+   function privilege_onclick(e, id) {
+      $('#pop-privilege-detail').show();
+      $('#pop-redeem-detail').hide();
+      $('#pop-redeem-detail2').hide();
+      $('#pop-redeemed-detail').hide();
+      $('#pop-error-detail').hide();
+      $('#pop-error-address').hide();
+      $('#popaddress').val('');
+      privilegeId = id;
+      $.ajax({
+         type: 'Get',
+         url: '@Url.Action("GetPrivilegeDetail", "Home")?id=' + id,
+         success: function (data) {
+            if (data != null && data.result == 1) {
+               if (data.msg != null && data.msg != '') {
+                  $('#pop-privilege-detail').hide();
+                  $('#pop-redeem-detail').hide();
+                  $('#pop-redeem-detail2').hide();
+                  $('#pop-error-detail').show();
+               }
+               $('#pop-error-msg').text(data.msg);
+
+               $('#pID').val(data.privilegeID);
+               pID = data.privilegeID;
+               pRedeemType = data.redeemtype;
+               privilegetitle = data.merchantName;
+               privilegedesc = get_content(data.condition);
+               if (data.image != null && data.image != '') {
+                  privilegeimg = '@urlhost' + data.image;
+               }
+               $('#pop-merchant-name').html(data.merchantName);
+               $('#pop-cat').html(data.categoryName);
+               $('#pop-condition').html(data.condition);
+               $('#pop-outlets').html(data.outlets);
+               $('#pop-privilege-name').html(data.privilegeName);
+               $('#pop-icon').get(0).src = data.iconUrl;
+               $('#pop-period').html(data.periodFrom + data.periodTo);
+               
+               if (data.youtube != null && data.youtube.length > 0) {
+                  $('#pop-youtube').get(0).href = data.youtube;
+                  $('#pop-privilege-youtube').show();
+               }
+               else {
+                  $('#pop-privilege-youtube').hide();
+               }
+               if (data.redeemtype == '@((int)RedeemType.Delivery)') {
+                  $('#pop-address').show();
+               }
+               else {
+                  $('#pop-address').hide();
+               }
+               if (data.creditPoint  == null || data.creditPoint == '')
+                  data.creditPoint = "-";
+               $('#pop-point').html(data.creditPoint);
+
+               if (data.imps != null && data.imps.length > 0) {
+                  $('#pop-slideshow').html('');
+                  for (var i = 0; i < data.imps.length; i++) {
+                     var url = data.imps[i];
+                     var div = '<div class="privilege-popup-slideshow-item"><img src="' + url + '"></div>';
+                     $('#pop-slideshow').append(div);
+                  }
+                  privilege_item_onclick(e, data.imps.length);
+               }
+               else {
+                  $('#pop-slideshow').html('');
+                  var div = '<div class="privilege-popup-slideshow-item"><img src="' + imgpopupdefault + '"></div>';
+                  $('#pop-slideshow').append(div);
+                  privilege_item_onclick(e, 1);
+               }
+            }
+         },
+         error: function (XMLHttpRequest, errorThrown) {
+            alert(errorThrown);
+         }
+      });
+   }
+
+  function privilege_item_onclick(e, length) {
+    if (e != null)
+      e.preventDefault();
+
+    var dots = true;
+    if (length <= 1)
+      dots = false;
+    jQuery('body').addClass('popup-is-active');
+    jQuery('.privilege-popup').addClass('is-active');
+    jQuery('.privilege-popup-slideshow').slick({
+      arrows: false,
+      dots: dots,
+      //adaptiveHeight: true,
+      lazyLoad: 'ondemand',
+    });
+
+    jQuery('.privilege-popup-close').click(function (e) {
+      jQuery('body').removeClass('popup-is-active');
+      jQuery('.privilege-popup').removeClass('is-active');
+      jQuery('.privilege-popup-slideshow').slick('unslick');
+    });
+  }
+
+  function popupshare() {
+    share_fb('@url' + privilegeId, privilegetitle, privilegedesc, privilegeimg);
+  }
+
+   function redeem_onclick() {
+      if (pRedeemType == '@((int)RedeemType.Delivery)') {
+         if ($('#popaddress').val() == null || $('#popaddress').val() == '') {
+            $('#pop-error-address').show();
+            return;
+         }
+      }
+      var data = new FormData($("#popup-form")[0]);
+      inCallback = true;
+      $.ajax({
+         type: 'POST',
+         contentType: false,
+         processData: false,
+         cache: false,
+         url: '@Url.Action("Redeem", "Customer")',
+         data: data,
+         success: function (data) {
+            if (data != null && data.result == 1) {
+               $('#pop-code').html(data.redeemcode);
+               $('#pop-date').html(data.date);
+               $('.total-cus-point').text(data.totalpoint);
+               $('#pop-redeem-detail').show();
+               $('#pop-privilege-detail').hide();
+               $('#pop-redeemed-detail').hide();
+               $('#pop-error-detail').hide();
+
+               if (pRedeemType == '@((int)RedeemType.Delivery)') {
+                  $('#pop-redeem-detail').hide();
+                  $('#pop-redeem-detail2').show();
+                  $('#text-address').text($('#popaddress').val() );
+               }
+               resetTimer();
+               startTimer();
+            }
+            else if (data != null && (data.result == 2 | data.result == 3 | data.result == 4 | data.result == 5)) {
+               $('#pop-redeemed-detail').show();
+               $('#pop-privilege-detail').hide();
+               $('#pop-redeem-detail').hide();
+               $('#pop-redeem-detail2').hide();
+               $('#pop-error-detail').hide();
+
+               if (data.result == 2)
+                  $('#pop-err-text').text("คุณได้ใช้สิทธิ์ไปแล้ว");
+               if (data.result == 3)
+                  $('#pop-err-text').text("แต้มคงเหลือไม่เพียงพอ");
+               if (data.result == 4)
+                  $('#pop-err-text').text("ไม่สามารถใช้สิทธิ์ได้");
+               if (data.result == 5)
+                  $('#pop-err-text').text("สิทธิพิเศษไม่เพียงพอให้บริการ");
+            }
+            inCallback = false;
+
+         },
+         error: function (XMLHttpRequest, errorThrown) {
+            alert(errorThrown);
+         }
+      });
+   }
+   function privilege_popup_close() {
+      jQuery('body').removeClass('popup-is-active');
+      jQuery('.privilege-popup').removeClass('is-active');
+      jQuery('.privilege-popup-slideshow').slick('unslick');
+   }
+</script>
+

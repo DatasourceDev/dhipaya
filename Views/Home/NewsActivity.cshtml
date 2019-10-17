@@ -1,0 +1,146 @@
+﻿@model Dhipaya.DTO.NewsActivityDTO
+@using System.Text.RegularExpressions;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "ข่าวสารและกิจกรรม";
+   Layout = "_LayoutTIP";
+}
+<div class="news-banner">
+   <div class="container">
+      <div class="title">
+         <h3>ข่าวสารและ</h3>
+         <h3>กิจกรรม</h3>
+         <h4>ที่คุณสามารถติดตามและเข้า</h4>
+         <h4>ร่วมได้ ตามสไตล์ของคุณ</h4>
+      </div>
+   </div>
+</div>
+<div class="news">
+   <div class="news-latest">
+      <div class="container">
+         <h3>อัพเดต <small>ข่าวสาร</small></h3>
+         <ul class="news-condition-list">
+            @foreach (NewsActivity item in ViewBag.Favorities)
+            {
+               <li class="news-condition-item">
+                  <div class="news-condition-icon">
+                     @if (item.MediaType == MediaType.Video && !string.IsNullOrEmpty(item.VideoUrl))
+                     {
+                        <video class="video-js vjs-default-skin" controls preload="auto" height="280" width="100%" poster="" data-setup="{}">
+                           <source src="@Url.Content(item.VideoUrl)" type='video/mp4' />
+                        </video>
+                     }
+                     else
+                     {
+                        <img src="@Url.Content(item.ImgUrl)" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                     }
+                  </div>
+                  <div class="news-condition-title" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                     <h4>
+                        @if (!string.IsNullOrEmpty(item.Title))
+                        {
+                           var title = item.Title;
+                           if (title.Length > 23)
+                           {
+                              @Html.Raw((title).Substring(0, 23) + "...")
+                           }
+                           else
+                           {
+                              @Html.Raw(title)
+                           }
+                        }
+                     </h4>
+                  </div>
+                  <p class="news-condition-text">
+                     @if (!string.IsNullOrEmpty(item.Description))
+                     {
+                        string desc = item.Description;
+                        Regex regex = new Regex("\\<[^\\>]*\\>");
+                        desc = regex.Replace(desc, String.Empty);
+                        if (desc.Length > 150)
+                        {
+                           @Html.Raw((desc).Substring(0, 150) + "...")
+                        }
+                        else
+                        {
+                           @Html.Raw(desc)
+                        }
+                     }
+                  </p>
+
+                  <div class="read-more">
+                     <a href="@Url.Action("NewsActivityInfo","Home", new { id=item.ID})" target="_blank">Read more <i class="fas fa-chevron-circle-right"></i></a>
+                  </div>
+               </li>
+            }
+         </ul>
+      </div><!-- .container -->
+   </div><!-- #faq-privilege -->
+   <div class="news-gallery">
+      <div class="container">
+         <div class="privilege-header">
+            <h3 class="privilege-header-title">
+               <span class="text-red">All</span> <small>Activities</small>
+            </h3>
+            <div class="faq-filter">
+               <form class="faq-filter-form" asp-action="NewsActivity" asp-controller="Home" method="get">
+                  <div class="input-block input-member-block">
+                  </div>
+                  <div class="input-block input-text-block">
+                  </div>
+                  <div class="input-block input-group-block">
+                     <select asp-for="GroupID" asp-items="@(new SelectList(ViewBag.ListGroup, "ID", "Name"))">
+                        <option value="" selected>หมวดหมู่ข่าวสารและกิจกรรม</option>
+                     </select>
+                  </div>
+                  <div class="submit-block">
+                     <button type="submit" class="submit-button"><i class="fa fa-search"></i></button>
+                  </div>
+               </form>
+            </div>
+         </div>
+
+         <div class="grid">
+            @foreach (var item in Model.NewsActivities)
+            {
+               <div class="grid-item">
+                  @if (item.MediaType == MediaType.Video && !string.IsNullOrEmpty(item.VideoUrl))
+                  {
+                     <video class="video-js vjs-default-skin" controls preload="auto" height="280" width="100%" poster="" data-setup="{}">
+                        <source src="@Url.Content(item.VideoUrl)" type='video/mp4' />
+                     </video>
+                  }
+                  else
+                  {
+                     <img src="@Url.Content(item.ImgUrl)" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                  }
+
+                  <div class="date" style="cursor:pointer" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">@DateUtil.ToDisplayFullDateTime(item.Create_On)</div>
+                  <div class="title" style="cursor:pointer" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">@item.Title</div>
+               </div>
+               @*<div class="grid-item--width2 ">
+                     <img src="@Url.Content(item.ImgUrl)" onclick="window.location='@Url.Action("NewsActivityInfo","Home", new { id=item.ID})';">
+                     <div class="date">@DateUtil.ToDisplayFullDate(item.Create_On)</div>
+                     <div class="title">@item.Title</div>
+                  </div>*@
+            }
+         </div>
+      </div><!-- .container -->
+   </div>
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('news-main');
+         var $grid = $('.grid').imagesLoaded(function () {
+            // init Masonry after all images have loaded
+            $grid.masonry({
+               // options...
+            });
+         });
+      });
+
+
+
+   </script>
+}

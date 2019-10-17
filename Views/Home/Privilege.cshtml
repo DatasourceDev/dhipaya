@@ -1,0 +1,202 @@
+﻿@model Dhipaya.DTO.PrivilegeDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@inject Dhipaya.Services.LoginServices loginServices
+@using Microsoft.EntityFrameworkCore;
+@{
+   ViewData["Title"] = "แลกสิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+   var imgpopupdefault = Url.Content("~/tip/img/privilege-default.jpg");
+   string gold = "";
+   string silver = "";
+   string logedin = "false";
+   if (loginServices.isInRoles(new string[] { RoleName.Member }))
+   {
+      var user = this.context.Users.Where(w => w.UserName == loginServices.AuthenName()).FirstOrDefault();
+      if (user != null)
+      {
+         var customer = this.context.Customers.Include(i => i.CustomerClass).Where(w => w.UserID == user.ID).FirstOrDefault();
+         if (customer != null)
+         {
+            logedin = "true";
+            if (customer.CustomerClass == null)
+            {
+               customer.CustomerClass = this.context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+            }
+            if (customer.CustomerClass != null)
+            {
+               if (customer.CustomerClass.Name == "TIP Gold")
+               {
+                  gold = "true";
+               }
+               if (customer.CustomerClass.Name == "TIP Silver")
+               {
+                  silver = "true";
+               }
+            }
+         }
+      }
+   }
+
+}
+<script>
+   var privilegies = [];
+   var lastprivilegeID = 0;
+   var lastindex = 0;
+   var pID = 0;
+   var pRedeemType = '@((int)RedeemType.Redeem)';
+   var allimgs = [];
+   var logedin = "@logedin";
+   var gold = "@gold";
+   var silver = "@silver";
+   var imgpopupdefault = "@imgpopupdefault";
+</script>
+
+<div class="privilege privilege-main" id="divpri">
+   <div class="container">
+      <nav class="privilege-main-navigation">
+         <ul class="privilege-main-menu">
+            <li class="privilege-main-menu-item @(!Model.CategoryID.HasValue ? " is-active" : "" ) ">
+               <div class="privilege-main-menu-icon"><a href="@Url.Action("Privilege","Home")" class="privilege-main-menu-link"><img src="~/tip/img/icon-8.png"></a></div>
+               <a href="@Url.Action("Privilege","Home")" class="privilege-main-menu-link"><span class="privilege-main-menu-text">ทั้งหมด</span></a>
+            </li>
+            @foreach (var item in context.MerchantCategories.Where(w => w.Status == StatusType.Active).OrderBy(o => o.Index))
+            {
+               <li class="privilege-main-menu-item @(Model.CategoryID == item.CategoryID ? " is-active" : "" ) ">
+                  <div class="privilege-main-menu-icon"><a href="@Url.Action("Privilege","Home", new { CategoryID=item.CategoryID})" class="privilege-main-menu-link"><img src="@Url.Content(item.Logo)"></a></div>
+                  <a href="@Url.Action("Privilege","Home", new { CategoryID=item.CategoryID})" class="privilege-main-menu-link"><span class="privilege-main-menu-text">@Html.Raw(item.CategoryName.Replace(" ", "<br/>"))</span></a>
+               </li>
+            }
+         </ul>
+      </nav>
+      <div class="privilege-header">
+         <h3 class="privilege-header-title"><span class="text-red">All</span> <small>Privilege</small></h3>
+         <div class="privilege-filter">
+            <form class="privilege-filter-form" asp-action="Privilege" asp-controller="Home" method="get">
+               <input asp-for="CategoryID" type="hidden" />
+               <div class="input-block input-member-block">
+                  <select class="disable-search" asp-for="CustomerClassID">
+                     <option value="">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+               </div>
+               <div class="input-block input-name-block">
+                  <input type="text" class="input-text" placeholder="ค้นหาจากสถานที่" asp-for="Outlets">
+               </div>
+               <div class="input-block input-province-block">
+                  <select asp-for="ProvinceID">
+                     <option value="" selected>จังหวัด</option>
+                     @foreach (var item in Model.Provinces)
+                     {
+                        <option value="@item.ProvinceID">@item.ProvinceName</option>
+                     }
+                  </select>
+               </div>
+               <div class="submit-block">
+                  <button type="submit" class="submit-button"><i class="fa fa-search"></i></button>
+               </div>
+            </form>
+         </div>
+      </div><!-- .privilege-header -->
+
+      <ul class="privilege-list" id="privilege-list">
+         @foreach (var itemdtl in Model.Privileges)
+         {
+            Html.RenderPartial("_Privilege", itemdtl);
+         }
+      </ul><!-- .privilege-list -->
+      @if (Model.AllPrivilegeCnt > 12)
+      {
+         <div class="privilege-list-more" id="loadmore">
+            <a onclick="load_more()">Load more <i class="fas fa-chevron-circle-down"></i></a>
+         </div>
+         <div class="privilege-list-more" id="loading" style="display:none;">
+            <img src="~/tip/img/loading.gif" height="60" />
+         </div>
+      }
+
+   </div><!-- .container -->
+</div><!-- .privilege-main -->
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         if ('@Model.CategoryID.HasValue'.toLowerCase() == 'true') {
+            $(window).scrollTop($('#divpri').position().top);
+         }
+         if ('@(Model.poppromo.HasValue ? Model.poppromo.Value: 0)' == 1) {
+            promo_popup();
+         }
+      });
+      function promo_popup(e) {
+         if (e != null)
+            e.preventDefault();
+
+         var dots = true;
+         if (length <= 1)
+            dots = false;
+         jQuery('body').addClass('popup-is-active');
+         jQuery('.image-popup').addClass('is-active');
+         jQuery('.image-popup-slideshow').slick({
+            arrows: false,
+            dots: dots,
+            //adaptiveHeight: true,
+            lazyLoad: 'ondemand',
+         });
+
+         jQuery('.image-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('.image-popup').removeClass('is-active');
+            jQuery('.image-popup-slideshow').slick('unslick');
+         });
+      }
+     var inCallback = false;
+     var allloaded = false;
+      function load_more() {
+         if (!inCallback) {
+            inCallback = true;
+            $("div#loading").show();
+            $("div#loadmore").hide();
+            var data = { LastIndex: lastindex, CustomerClassID: '@Model.CustomerClassID',CategoryID: '@Model.CategoryID',Outlets: '@Model.Outlets',ProvinceID: '@Model.ProvinceID'};
+            $.ajax({
+               type: 'GET',
+               url: '@Url.Action("LoadPrivilege", "Home")',
+               data: data,
+               success: function (data) {
+                  if (data != null) {
+                     $('#privilege-list').append(data);
+                   }
+                  inCallback = false;
+                  var pcnt = $('.privilege-item').length;
+                  if (pcnt < parseInt('@Model.AllPrivilegeCnt'))
+                     $("div#loadmore").show();
+                   $("div#loading").hide();
+               },
+               error: function (XMLHttpRequest, errorThrown) {
+                   alert(errorThrown);
+               }
+           });
+         }
+      }
+   </script>
+   @{
+      Html.RenderPartial("_PrivilegePopupJs");
+   }
+
+}
+@section popup{
+   @{
+      Html.RenderPartial("_PrivilegePopup");
+   }
+
+   <div class="image-popup" id="promo-popup">
+      <div class="image-popup-close"><i class="fas fa-times"></i></div>
+      <div class="image-popup-wrapper">
+         @*<img src="~/images/promotion_now.jpg" width="100%" />*@
+
+      </div><!-- .privilege-popup-wrapper -->
+   </div>
+}
+

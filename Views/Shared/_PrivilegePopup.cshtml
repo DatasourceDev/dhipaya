@@ -1,0 +1,103 @@
+﻿@inject Dhipaya.Services.LoginServices loginServices
+@{
+   var url = ViewContext.HttpContext.Request.Host.Value + "/Home/PrivilegeInfo?id=";
+}
+<form id="popup-form" method="post">
+   <input type="hidden" id="pID" name="pID">
+
+   <div class="privilege-popup" id="privilege-popup">
+      <div class="privilege-popup-close"><i class="fas fa-times"></i></div>
+      <div class="privilege-popup-wrapper">
+         <div class="privilege-popup-header">
+            <div class="privilege-popup-slideshow-wrapper">
+               <div class="privilege-popup-slideshow" id="pop-slideshow">
+                  <div class="privilege-popup-slideshow-item">
+                     <img src="~/tip/img/boxing.png">
+                  </div>
+               </div><!-- .privilege-popup-slideshow -->
+            </div>
+            <h3 class="privilege-popup-header-title"><small id="pop-privilege-name"></small></h3>
+            <div class="privilege-popup-more" id="pop-privilege-youtube"><a href="#" id="pop-youtube" target="_blank"><img src="~/tip/img/icon-youtube-blue.png"> คลิกเพื่อดูรายละเอียดเพิ่มเติม</a></div>
+         </div><!-- .privilege-popup-header -->
+         <div class="privilege-popup-body">
+            <div class="privilege-popup-title-wrapper">
+               <div class="privilege-popup-icon"><img id="pop-icon" src="~/tip/img/icon-5.png"></div>
+               <h3 class="privilege-popup-title"><small id="pop-merchant-name"></small></h3>
+               <p class="privilege-popup-category" id="pop-cat"></p>
+            </div>
+            <div class="privilege-popup-content">
+               <p id="pop-condition"></p>
+            </div>
+            <div class="privilege-popup-content">
+               <span><strong>สาขาที่ร่วมรายการ</strong></span>
+               <p id="pop-outlets"></p>
+            </div>
+            <div id="pop-privilege-detail">
+               <div class="privilege-popup-point">
+                  คะแนนที่ใช้
+                  <span class="text-red point"><small id="pop-point"></small></span>
+               </div>
+               <div class="privilege-popup-period">
+                  ระยะเวลาใช้สิทธิ์ : <span class="text-red" id="pop-period"></span>
+               </div>
+               @if (loginServices.isInRoles(new string[] { RoleName.Member }))
+               {
+                  <div class="privilege-popup-period" id="pop-address">
+                     ทีอยู่จัดส่ง<span class="text-red">*</span>
+                     <textarea style="width:100%" rows="3" id="popaddress" name="popaddress"></textarea>
+                     <label id="pop-error-address" class="text-red" style="display:none;">กรุณาระบุที่อยู่จัดส่ง</label>
+                  </div>
+                  <div class="privilege-popup-action">
+                     <a onclick="redeem_onclick()" class="privilege-popup-redeem-link full-width-link">รับสิทธิ์</a>
+                  </div>
+               }
+               else
+               {
+                  <div class="privilege-popup-action">
+                     <a href="@Url.Action("Login","Accounts")" class="privilege-popup-redeem-link full-width-link">รับสิทธิ์</a>
+                  </div>
+               }
+            </div>
+            <div id="pop-redeem-detail">
+               <div class="privilege-popup-point">
+                  รหัสคือ
+                  <span class="text-red point" id="pop-code"><small id="pop-code"></small></span>
+               </div>
+               <div class="privilege-popup-period">
+                  <input type="hidden" id="pop-clock" value="180" />
+                  วันที่รับสิทธิ์ : <span id="pop-date"></span>
+                  <br />
+                  กรุณานำรหัสให้กับพนักงานภายใน : <span class="text-red" id="pop-clock-text">30:00</span><span class="text-red"> นาที</span>
+               </div>
+               <div class="privilege-popup-action" id="pop-redeem-button">
+                  <a onclick="privilege_popup_close()" class="privilege-popup-redeem-link full-width-link">สำเร็จ</a>
+               </div>
+            </div>
+            <div id="pop-redeem-detail2">
+               ที่อยู่จัดส่ง : <div id="text-address"></div>
+               <div class="privilege-popup-action" id="pop-redeem-button">
+                  <a onclick="privilege_popup_close()" class="privilege-popup-redeem-link full-width-link">สำเร็จ</a>
+               </div>
+            </div>
+            <div id="pop-error-detail">
+               <div class="privilege-popup-point">
+                  ขออภัย!!
+                  <span class="text-red point"><small id="pop-error-msg"></small></span>
+               </div>
+            </div>
+            <div id="pop-redeemed-detail">
+               <div class="privilege-popup-point">
+                  ขออภัย!!
+                  <span class="text-red point" id="pop-err-text"><small>คุณได้ใช้สิทธิ์ไปแล้ว</small></span>
+               </div>
+            </div><!-- .privilege-popup-action -->
+            <div class="privilege-popup-action">
+               <a id="pop-share" href="#" class="privilege-popup-facebook-link full-width-link fb-share-button" onclick="popupshare(); return false;">
+                  <i class="fab fa-facebook-f"></i> Share
+               </a>
+            </div>
+         </div><!-- .prvilege-popup-body -->
+      </div><!-- .privilege-popup-wrapper -->
+   </div>
+
+</form>

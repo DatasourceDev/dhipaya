@@ -1,0 +1,29 @@
+﻿@model Dhipaya.DTO.MailRedeemSendAddrestoAdminDTO
+@using Dhipaya.DTO;
+@using Dhipaya.Services;
+
+@{
+   ViewData["Title"] = "MailRedeemSendAddrestoAdmin";
+   //Layout = null;
+}
+
+<style type="text/css">
+   .button:hover {
+      color: #d9192b !important;
+   }
+</style>
+
+<div class="site-wrapper" style="max-width:430px;color: #000;font-size: 12pt;text-align:left;">
+   <main class="main">
+      <p>
+         สมาชิกเลขที่ : @(Model.customer.RefCode) <br/>
+         ชื่อ : @(Model.customer.NameTh + " "  + Model.customer.SurNameTh) <br/>
+         วันที่ใช้สิทธิ์ : @DateUtil.ToDisplayDateTime(Model.redeem.RedeemDate) <br/>
+         ร้านค้า : @(Model.merchant != null ? Model.merchant.MerchantName : "") <br />
+         สิทธิพิเศษ : @(Model.privilege != null ? Model.privilege.PrivilegeName : "") <br />
+         สถานที่จัดส่ง : @Model.redeem.Address 
+      </p>
+   </main>
+</div>
+<br />
+<br />

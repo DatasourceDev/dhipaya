@@ -1,0 +1,85 @@
+﻿@model Dhipaya.DTO.HomeDTO
+@inject Dhipaya.Services.LoginServices loginServices
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "สิทธิพิเศษที่คุณเลือกได้ โซเชียลแห่งความสุข สนุกได้ทุกไลฟ์สไตล์ TIP Society จากทิพยประกันภัย";
+   Layout = "_LayoutTIP";
+}
+<!-- .slideshow-main -->
+@section head{
+   <meta name="description" content="TIP Society ร้านอาหารยอดนิยม ที่พักแสนสบายบรรยากาศดี Car Care ระดับคุณภาพ สถานเสริมความงามและสุขภาพชื่อดัง รวมทั้งกิจกรรมความสนุกอีกเพียบจากทิพยประกันภัย สมัครฟรี ไม่เสียค่าใช้จ่าย รับส่วนลดร้านค้า สะสมคะแนนแลกของรางวัล และสิทธิพิเศษ รับข่าวสาร สังคมที่ทิพยประกันภัยมอบให้คุณ" />
+   <meta name="keywords" content="TIP Society,TipSociety, สิทธิพิเศษ,ทิพยประกันภัย,ประกันภัย, ร้านอาหาร, ที่พัก, Car Care, สถานเสริมความงาม" />
+
+}
+<div class="container carousel-container">
+   <a href="#" class="carousel-prev"><i class="fas fa-angle-left"></i></a>
+   <div class="carousel carousel-privilege">
+      @foreach (var item in context.MerchantCategories.Where(w => w.Status == StatusType.Active).OrderBy(o => o.Index))
+      {
+         var title = item.CategoryName;
+         if (!string.IsNullOrEmpty(item.RedWord))
+         {
+            title = item.RedWord.Replace("[", "<span class='text-red'>").Replace("]", "</span>");
+
+         }
+         <div class="carousel-item">
+            <div class="carousel-image">
+               <a href="@Url.Action("Privilege","Home", new { CategoryID = item.CategoryID})" class="carousel-image-link"><img src="@Url.Content(item.Url)"></a>
+            </div><!-- .carousel-image -->
+            <div class="carousel-body">
+               <h3 class="carousel-title"><small>@Html.Raw(title)</small></h3><!-- .carousel-title -->
+               <div class="carousel-content">
+                  <p><small>@item.Description</small></p>
+               </div><!-- .carousel-content -->
+            </div><!-- .carousel-body -->
+         </div><!-- .carousel-item -->
+      }
+   </div><!-- .carousel-privilege -->
+   <a href="#" class="carousel-next"><i class="fas fa-angle-right"></i></a>
+</div>
+<div class="privilege jumbotron text-center">
+   <div class="container">
+      <h2 class="jumbotron-title">สิทธิ<span class="text-red">พิเศษ</span>ที่เหนือกว่า</h2>
+      <ul class="item-list">
+         <li class="item">
+            <div class="icon"><img src="~/tip/img/icon-message.png"></div>
+            <h4 class="text"><small>ที่ปรึกษาด้านการประกันภัย</small></h4>
+         </li>
+         <li class="item">
+            <div class="icon"><img src="~/tip/img/icon-edit.png"></div>
+            <h4 class="text"><small>TIP Shopping Center</small></h4>
+         </li>
+         <li class="item">
+            <div class="icon"><img src="~/tip/img/icon-gift.png"></div>
+            <h4 class="text"><small>ของขวัญวันเกิด</small></h4>
+         </li>
+      </ul><!-- .jumbotron-list -->
+      @*<input type="text" /><button style="background-color: #eb232e; padding: 5px 10px;">Subscribe</button>*@
+   </div><!-- .container -->
+</div><!-- .section-privilege -->
+<div class="promote">
+   <div class="promote-left-container">
+      <div class="promote-image-container">
+         <img src="~/tip/img/banner-promote-1.jpg">
+      </div><!-- .promote-image-container -->
+   </div><!-- .promote-left-container -->
+   <div class="promote-right-container">
+      <div class="promote-content-container">
+         <h2 class="title"><span class="text-red">TIP Insure</span> สุดคุ้ม</h2>
+         <h4 class="text-black">ให้บริการ Online ได้ทุกมิติ ครบจบใน App เดียว</h4>
+         <ul>
+            <li>Application ซื้อประกันภัย เคลมประกันภัย </li>
+            <li>รับสิทธิพิเศษ ตรวจสอบคะแนนสะสม TIP Point</li>
+            <li>ร่วมกิจกรรมกับ TIP Society พร้อมบริการออนไลน์อื่นๆอีกเพียบ</li>
+         </ul>
+         <h4 class="text-black">
+            <a class="" href="https://itunes.apple.com/th/app/tip-insure/id1182286345?mt=8" target="_blank">
+               <img src="~/tip/img/apple_app_store.png?h=148&amp;la=en&amp;w=500&amp;hash=C4884CFF32A356E5B49B13165DB1A6FF04FEE5C2" alt="" height="50">
+            </a>
+            <a class="" href="https://play.google.com/store/apps/details?id=com.nextzy.tipapp" target="_blank">
+               <img src="~/tip/img/googlePlay.png?h=140&amp;la=en&amp;w=400&amp;hash=C52C10B931BF7F1FDC6D9A9A4ED1ACF1B786A44B" alt="" height="50">
+            </a>
+         </h4>
+      </div><!-- .promote-content-container -->
+   </div><!-- .promote-right-container -->
+</div><!-- .promote -->

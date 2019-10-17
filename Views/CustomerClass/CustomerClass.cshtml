@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Dhipaya.Models.CustomerClass>
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "ประเภทสมาชิก";
+   Layout = "_LayoutTIP";
+   var i = 1;
+}
+@functions
+{
+   bool canDelete(int Id)
+   {
+      bool retVal = true;
+      if (context.PrivilegeCustomerClasses.Where(c => c.CustomerClassID == Id).Count() > 0)
+      {
+         return false;
+      }
+      if (context.Customers.Where(c => c.CustomerClassID == Id).Count() > 0)
+      {
+         return false;
+      }
+      return retVal;
+   }
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">ประเภท<small>สมาชิก</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","CustomerClass")" class="button button-blue">เพิ่มประเภทสมาชิก</a>
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @foreach (var item in Model)
+               {
+                  <div class="history-table-container">
+                     <div class="history-date"></div>
+                     <div class="history-table-wrapper @(item.Status == StatusType.Active ? "add-point" :"minus-point")">
+                        <div class="history-detail">
+                           <div class="history-detail-logo">
+
+                           </div>
+                           <div class="history-detail-text">
+                              @item.Name
+                           </div>
+                        </div>
+
+                        <div class="history-total-point">
+                           @item.Status.toStatusName()
+                        </div>
+                        <div class="history-point">
+                           @if (!item.UnEditable)
+                           {
+                              <a href="@Url.Action("Update", "CustomerClass", new { id = item.ID })"
+                                 class="btn btn-link">
+                                 แก้ไข
+                              </a>
+                              @if (canDelete(item.ID))
+                              {
+                                 <a href="@Url.Action("Delete", "CustomerClass", new { id = item.ID })"
+                                    onclick="return confirm('ต้องการลบรายการนี้?')"
+                                    class="btn btn-link">
+                                    ลบ
+                                 </a>
+                              }
+                           }
+
+                        </div>
+                     </div>
+
+                  </div> <!-- .history-table-container -->
+                  i++;
+               }
+            </div>
+         </div>
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

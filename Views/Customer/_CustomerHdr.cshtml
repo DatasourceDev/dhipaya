@@ -1,0 +1,55 @@
+﻿@using Dhipaya.Extensions;
+@inject Dhipaya.DAL.ChFrontContext context
+@model Dhipaya.DTO.CustomerDTO;
+@{
+   ViewData["Title"] = "ข้อมูลสมาชิก";
+   @if (ViewBag.TotalPoint == null)
+   {
+      var redeems = context.Redeems.Where(w => w.CustomerID == Model.ID);
+      var points = context.CustomerPoints.Where(w => w.CustomerID == Model.ID);
+
+      ViewBag.TotalPoint = points.Sum(s => s.Point) - redeems.Sum(s => s.Point);
+
+   }
+}
+
+<div class="profile-box">
+   <div class="profile-block user-main">
+      <div class="profile-name">
+         <h2>คุณ @Model.firstName @Model.lastName</h2>
+         <h4>@Model.firstNameEn @Model.lastNameEn</h4>
+      </div>
+      <div class="profile-status-point">
+         <div class="profile-status">
+            สถานะ :
+            <strong><span class="text-gold">@Model.customerClassName</span></strong>
+         </div>
+         <div class="profile-point">
+            คะแนนสะสม :
+            <strong>@NumUtil.FormatCurrency(ViewBag.TotalPoint)</strong>
+         </div>
+      </div>
+   </div>
+   <div class="profile-block user-detail">
+      <h3>ข้อมูลสมาชิก</h3>
+      <div class="table-row">
+         <div class="table-col">หมายเลขสมาชิก</div>
+         <div class="table-col">
+            <span class="colon">:</span>@Model.refCode
+         </div>
+      </div>
+      <div class="table-row">
+         <div class="table-col">หมายเลขโทรศัพท์มือถือ*</div>
+         <div class="table-col">
+            <span class="colon">:</span>@Model.moblieNo
+         </div>
+      </div>
+      <p class="remark">*บริษัทจะส่งหมายเลขสมาชิกผ่านทางหมายเลขโทรศัพท์มือถือที่ระบุไว้</p>
+      <div class="table-row">
+         <div class="table-col">@(Model.facebookFlag == "Y" ? "Facebook" : "อีเมล") (รหัสผู้ใช้งาน)</div>
+         <div class="table-col">
+            <span class="colon">:</span>@Model.username
+         </div>
+      </div>
+   </div>
+</div><!-- .profile-box -->

@@ -1,0 +1,65 @@
+﻿@using Dhipaya.Extensions;
+@model Dhipaya.DTO.ResetPwdDTO;
+@{
+   ViewData["Title"] = "เปลี่ยนรหัสผ่าน";
+   Layout = "_LayoutTIP";
+}
+<main class="main forget-main">
+     <div class="container">
+<div class="login-block">
+      <div class="login-body">
+         <h3 class="login-title">เปลี่ยนรหัสผ่าน</h3>
+         <form class="login-form" id="form" asp-controller="User" asp-action="ResetPwdO" role="form" method="post">
+            @Html.HiddenFor(m => m.ID)
+            @Html.HiddenFor(m => m.UserID)
+            @Html.HiddenFor(m => m.username)
+            <div class="login-input-block full-block has-tooltips">
+               <input type="password" placeholder="รหัสผ่านเดิม" asp-for="oldpassword" required autocomplete="off" maxlength="12" >
+               @Html.ValidationMessageFor(m => m.oldpassword, "", new { @class = "warning" })
+               <a class="viewpwd" onclick="pwdtoggle('oldpassword');"><i class="fas fa-eye"></i></a>
+
+            </div>
+
+            <div class="login-input-block full-block has-tooltips">
+               <input type="password" placeholder="รหัสผ่านใหม่" asp-for="password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
+               @Html.ValidationMessageFor(m => m.password, "", new { @class = "warning" })
+               <a class="viewpwd" onclick="pwdtoggle('password');"><i class="fas fa-eye"></i></a>
+
+               <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+               <a class="tooltipped" data-position="left" data-tooltip="รหัสผ่านต้องประกอบด้วยตัวเลข&lt;br /&gt;ตัวอักษร อักขระพิเศษและ&lt;br /&gt;ความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว"><i class="fas fa-question"></i></a>
+            </div>
+            <div class="login-input-block full-block has-tooltips">
+               <input type="password" asp-for="confirmPassword" placeholder="ยืนยันรหัสผ่านใหม่" required autocomplete="off" maxlength="12" minlength="8" equalTo="#password">
+               <a class="viewpwd" onclick="pwdtoggle('confirmPassword');"><i class="fas fa-eye"></i></a>
+
+               <a class="tooltipped" data-position="left" data-tooltip="รหัสผ่านต้องประกอบด้วยตัวเลข&lt;br /&gt;ตัวอักษร อักขระพิเศษและ&lt;br /&gt;ความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว"><i class="fas fa-question"></i></a>
+               @Html.ValidationMessageFor(m => m.confirmPassword, "", new { @class = "warning" })
+            </div>
+            <button type="button" class="submit-button button button-red" onclick="save_onclick()">บันทึก</button>
+         </form>
+      </div><!-- .login-body -->
+   </div>  <!-- .login-block -->
+</div>
+ 
+</main>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+      });
+
+      function save_onclick() {
+         var valid = $("#form").valid();
+         $('#error_password').hide();
+
+         if (!validatepwd($('#password').val())) {
+            $('#error_password').show();
+            valid = false;
+         }
+
+         if (valid)
+            document.forms['form'].submit();
+      }
+
+   </script>
+}

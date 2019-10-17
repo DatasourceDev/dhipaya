@@ -1,0 +1,7 @@
+﻿<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+   <s:Body>
+      <GetPolicyActiveResponse xmlns="http://tempuri.org/">
+         <GetPolicyActiveResult>{"ResultCode":"Y","ResultDescription":"","Data":[{"PolicyNo":"11001-006-180004875","EffectiveDate":"3/23/2018 12:00:00 AM","ExpiryDate":"3/23/2019 12:00:00 AM","ProjectCode":"KONPANTIP","ProjectName":"?.?.?. ????????????","PolicyPremium":"645.210000"},{"PolicyNo":"11002-006-180006774","EffectiveDate":"3/23/2018 12:00:00 AM","ExpiryDate":"3/23/2019 12:00:00 AM","ProjectCode":"Lady Motor","ProjectName":"??????????????? TIP Lady","PolicyPremium":"17001.230000"},{"PolicyNo":"12001-108-163492243","EffectiveDate":"4/30/2016 12:00:00 AM","ExpiryDate":"4/30/2019 12:00:00 AM","ProjectCode":"","ProjectName":"????????????????????","PolicyPremium":"2574.420000"},{"PolicyNo":"14025-168-180006163","EffectiveDate":"3/23/2018 12:00:00 AM","ExpiryDate":"3/23/2019 12:00:00 AM","ProjectCode":"IHP1201Y","ProjectName":"HIP ?????_Motor Add On_Lady Motor","PolicyPremium":"1100.000000"}]}</GetPolicyActiveResult>
+      </GetPolicyActiveResponse>
+   </s:Body>
+</s:Envelope>

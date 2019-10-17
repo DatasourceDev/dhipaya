@@ -1,0 +1,207 @@
+﻿@inject Dhipaya.Services.LoginServices loginServices
+@{
+    string liClassName = "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <link href="~/assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+    <link href="~/assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+    <link href="~/assets/plugins/switchery/css/switchery.min.css" rel="stylesheet" type="text/css" media="screen" />
+    <link href="~/assets/plugins/bootstrap3-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/bootstrap-tag/bootstrap-tagsinput.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/dropzone/css/dropzone.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/bootstrap-datepicker/css/datepicker3.css" rel="stylesheet" type="text/css" media="screen">
+    <link href="~/assets/plugins/summernote/css/summernote.css" rel="stylesheet" type="text/css" media="screen">
+
+    <link href="~/assets/plugins/bootstrap-daterangepicker/daterangepicker-bs3.css" rel="stylesheet" type="text/css" media="screen">
+    <link href="~/assets/plugins/bootstrap-timepicker/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" media="screen">
+    <link href="~/pages/css/pages-icons.css" rel="stylesheet" type="text/css">
+    <link class="main-stylesheet" href="~/pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+
+    <script src="~/assets/plugins/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+    @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />*@
+    @*<link rel="stylesheet" href="~/css/site.css" />*@
+    @*<environment exclude="Development">
+            <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+                  asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+                  asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+            <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        </environment>*@
+</head>
+<body class="fixed-header menu-pin menu-behind">
+    <!-- BEGIN SIDEBPANEL-->
+    <nav class="page-sidebar" data-pages="sidebar">
+        <!-- BEGIN SIDEBAR MENU TOP TRAY CONTENT-->
+        <div class="sidebar-overlay-slide from-top" id="appMenu">
+            <div class="row">
+                <div class="col-xs-6 no-padding">
+                    <a href="#" class="p-l-40">
+                        <img src="~/assets/img/demo/social_app.svg" alt="socail">
+                    </a>
+                </div>
+                <div class="col-xs-6 no-padding">
+                    <a href="#" class="p-l-10">
+                        <img src="~/assets/img/demo/email_app.svg" alt="socail">
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 m-t-20 no-padding">
+                    <a href="#" class="p-l-40">
+                        <img src="~/assets/img/demo/calendar_app.svg" alt="socail">
+                    </a>
+                </div>
+                <div class="col-xs-6 m-t-20 no-padding">
+                    <a href="#" class="p-l-10">
+                        <img src="~/assets/img/demo/add_more.svg" alt="socail">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+        <!-- START SIDEBAR MENU -->
+        <div class="sidebar-menu">
+            <!-- BEGIN SIDEBAR MENU ITEMS-->
+            <ul class="menu-items">
+                @if (loginServices.isInRoles(new string[] { RoleName.Admin }))
+                {
+                    <li class="m-t-30">
+                        <a href="@Url.Action("Index","Customer")">
+                            <span class="title">สมาชิก</span>
+                        </a>
+                        <span class="icon-thumbnail"><i class="fa fa-users"></i></span>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Merchant","Privilege")">
+                            <span class="title">ร้านค้า/บริการ</span>
+                        </a>
+                        <span class="icon-thumbnail"><i class="fa fa-home"></i></span>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Privilege","Privilege")">
+                            <span class="title">สิทธิพิเศษ</span>
+                        </a>
+                        <span class="icon-thumbnail"><i class="fa fa-gift"></i></span>
+                    </li>
+                }
+                @if (loginServices.isInRoles(new string[] { RoleName.Member }))
+                {
+                   
+                    <li class="m-t-30">
+                        <a href="@Url.Action("Privilege", "Home")">
+                            <span class="title">แลกสิทธิพิเศษ</span>
+                        </a>
+                        <span class="icon-thumbnail"><i class="fa fa-gift"></i></span>
+                    </li>
+                }
+             
+
+                <li class="">
+                    <a href="@Url.Action("Logout","Accounts")">
+                        <span class="title">ออกจากระบบ</span>
+                    </a>
+                    <span class="icon-thumbnail"><i class="fa fa-power-off"></i></span>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <!-- END SIDEBAR MENU -->
+    </nav>
+    <!-- END SIDEBAR -->
+    <!-- END SIDEBPANEL-->
+    <!-- START PAGE-CONTAINER -->
+    <div class="page-container ">
+        <!-- START PAGE CONTENT WRAPPER -->
+        @RenderBody()
+        <!-- END PAGE CONTENT WRAPPER -->
+    </div>
+    <!-- END PAGE CONTAINER -->
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"] != null && ViewData.ModelState["Error"].Errors.Count > 0)
+    {
+        var err = ViewData.ModelState["Error"].Errors.FirstOrDefault();
+        string errMsg = "";
+        if (err != null)
+        {
+            errMsg = err.ErrorMessage;
+            <script>
+                alert('@Html.Raw(errMsg)');
+            </script>
+        }
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        string errMsg = TempData["Error"].ToString();
+        <script>
+            alert('@Html.Raw(errMsg)');
+        </script>
+    }
+
+    <!-- BEGIN VENDOR JS -->
+    <script src="~/assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/tether/js/tether.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+    <script src="~/assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/select2/js/select2.full.min.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/classie/classie.js"></script>
+    <script src="~/assets/plugins/switchery/js/switchery.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/bootstrap3-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/jquery-autonumeric/autoNumeric.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/dropzone/dropzone.min.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/bootstrap-tag/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/jquery-inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/assets/plugins/bootstrap-form-wizard/js/jquery.bootstrap.wizard.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/summernote/js/summernote.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/moment/moment.min.js"></script>
+    <script src="~/assets/plugins/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="~/assets/plugins/bootstrap-timepicker/bootstrap-timepicker.min.js"></script>
+    <script src="~/assets/plugins/bootstrap-typehead/typeahead.bundle.min.js"></script>
+    <script src="~/assets/plugins/bootstrap-typehead/typeahead.jquery.min.js"></script>
+    <script src="~/assets/plugins/handlebars/handlebars-v4.0.5.js"></script>
+
+    <script src="~/assets/plugins/jquery-datatable/media/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-datatable/extensions/TableTools/js/dataTables.tableTools.min.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-datatable/media/js/dataTables.bootstrap.js" type="text/javascript"></script>
+    <script src="~/assets/plugins/jquery-datatable/extensions/Bootstrap/jquery-datatable-bootstrap.js" type="text/javascript"></script>
+    <script type="text/javascript" src="~/assets/plugins/datatables-responsive/js/datatables.responsive.js"></script>
+    <script type="text/javascript" src="~/assets/plugins/datatables-responsive/js/lodash.min.js"></script>
+    <script src="~/pages/js/pages.js"></script>
+
+    <script src="~/assets/js/form_elements.js" type="text/javascript"></script>
+    @*<script src="~/assets/js/tables.js" type="text/javascript"></script>*@
+    @RenderSection("scripts", required: false)
+    <script src="~/assets/js/scripts.js" type="text/javascript"></script>
+
+
+    <!-- END PAGE LEVEL JS -->
+    <script>
+            $("input[required]").attr('oninvalid', 'setCustomValidity(\'โปรดระบุข้อมูล\')');
+            $("input[required]").attr('oninput', 'setCustomValidity(\'\')');
+    </script>
+
+    <script>
+            $(function () {
+                $(".phone").mask("999-999-9999");
+                $(".idcard").mask("9-9999-99999-99-9");
+            });
+    </script>
+</body>
+
+</html>

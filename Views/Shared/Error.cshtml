@@ -1,0 +1,39 @@
+﻿@model Dhipaya.DTO.ErrorViewModel
+@using Dhipaya.Extensions;
+@{
+   ViewData["Title"] = "Error";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <!-- .profile-navigation -->
+   <div class="profile-information">
+      <div class="container">
+  <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">@Model.Message</h2>
+               <div class="title-right">
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+
+         @if (Model.ShowRequestId)
+         {
+            <p>
+               <strong>Request ID:</strong> <code>@Model.RequestId</code>
+            </p>
+         }
+
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div><!-- .profile-container -->
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+
+}

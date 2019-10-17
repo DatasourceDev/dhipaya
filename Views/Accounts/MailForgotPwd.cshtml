@@ -1,0 +1,40 @@
+﻿@model Dhipaya.DTO.Accounts.Forgot
+@using Dhipaya.DTO;
+@using Dhipaya.DTO
+@{
+   ViewData["Title"] = "MailActivateAcc";
+   var location = new Uri($"{Context.Request.Scheme}://{Context.Request.Host}");
+   var url = location.AbsoluteUri;
+}
+
+<style>
+   
+.footer-main {
+      background-color: #1c3e95;
+      color: #fff;
+      padding: 2em 0;
+   }
+
+</style>
+<div class="site-wrapper">
+   <main class="main">
+<p>
+เรียน คุณ @Model.Customer.NameTh @Model.Customer.SurNameTh<br/><br/>
+TIP Society ได้รับคำร้องขอการกำหนดรหัสผ่านใหม่จากท่าน ท่านสามารถรับรหัสผ่านเพื่อตั้งรหัสผ่านใหม่ โดยคลิกที่ link ด้านล่างนี้<br/><br/>
+<a href="@url@Model.Url">คลิกที่นี่</a><br/><br/>
+</p>
+    
+   </main>
+   <footer class="footer footer-main">
+      <div class="container">
+         <div class="footer-row">
+            <div class="footer-block">
+               <div class="footer-logo">
+                  <img src="https://tipsociety.dhipaya.co.th/tip/img/logo.png">
+               </div><!-- .footer-logo -->
+            </div><!-- .footer-block -->
+         </div><!-- .footer-row -->
+      </div><!-- .container -->
+   </footer><!-- .footer-main -->
+
+</div>

@@ -1,0 +1,170 @@
+﻿@model Dhipaya.DTO.CustomerDTO
+@{
+   ViewData["Title"] = "สมัครสมาชิก";
+   Layout = "_LayoutTIP";
+}
+
+<!-- START Login Form -->
+<main class="main login-main">
+   <div class="login-block">
+      <div class="login-hero">
+         <h2>ยินดีต้อนรับ</h2>
+         <p>ลงทะเบียนเพื่อร่วมเป็นส่วนหนึ่งกับเรา<br />พร้อมรับสิทธิพิเศษมากมาย</p>
+         <ul>
+            <li>ส่วนลดร้านค้าและบริการต่างๆ</li>
+            <li>สิทธิการรับข่าวสาร และข้อมูลก่อนใคร</li>
+            <li>ลงทะเบียนฟรี ไม่มีค่าใช้จ่าย</li>
+         </ul>
+      </div><!-- .login-hero -->
+      <div class="login-body">
+         <h3 class="login-title">Register</h3>
+         <form class="login-form" id="form-register" name="form-register" role="form" asp-action="Register">
+            <input type="hidden" asp-for="valid" value="@Model.valid">
+            <input type="hidden" asp-for="pEncyprt" value="@Model.pEncyprt">
+            <div id="div-detail1" @(Model.valid ? "style=display:none;" : "")>
+               <div class="login-input-block half-block first-block">
+                  <input type="text" placeholder="ชื่อ" asp-for="firstName" required>
+                  @Html.ValidationMessageFor(m => m.firstName, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block half-block last-block">
+                  <input type="text" placeholder="นามสกุล" asp-for="lastName" required>
+                  @Html.ValidationMessageFor(m => m.lastName, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block full-block">
+                  <input type="text" placeholder="หมายเลขโทรศัพท์มือถือ" asp-for="moblieNo" required class="digits" maxlength="10" minlength="10">
+                  <p class="remark">* บริษัทจะส่งหมายเลขสมาชิกผ่านทางหมายเลขโทรศัพท์มือถือที่ระบุ</p>
+                  @Html.ValidationMessageFor(m => m.moblieNo, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block full-block">
+                  <input type="email" placeholder="อีเมล (รหัสผู้ใช้งาน)" asp-for="email" required email autocomplete="off">
+                  @Html.ValidationMessageFor(m => m.email, "", new { @class = "warning" })
+
+               </div>
+               <div class="login-input-block full-block has-tooltips">
+                  <input type="password" placeholder="รหัสผ่าน" asp-for="password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
+                  <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+                  @Html.ValidationMessageFor(m => m.password, "", new { @class = "warning" })
+                  <a class="viewpwd" onclick="pwdtoggle('password');"><i class="fas fa-eye"></i></a>
+                  <a class="tooltipped" data-position="left" data-tooltip="รหัสผ่านต้องประกอบด้วยตัวเลข&lt;br /&gt;ตัวอักษร อักขระพิเศษและ&lt;br /&gt;ความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว"><i class="fas fa-question"></i></a>
+               </div>
+               <div class="login-input-block full-block has-tooltips">
+                  <input type="password" placeholder="ยืนยันรหัสผ่าน" asp-for="confirmPassword" required autocomplete="off" maxlength="12" equalTo="#password">
+                  <a class="viewpwd" onclick="pwdtoggle('confirmPassword');"><i class="fas fa-eye"></i></a>
+                  <a class="tooltipped" data-position="left" data-tooltip="รหัสผ่านต้องประกอบด้วยตัวเลข&lt;br /&gt;ตัวอักษร อักขระพิเศษและ&lt;br /&gt;ความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว"><i class="fas fa-question"></i></a>
+                  @Html.ValidationMessageFor(m => m.confirmPassword, "", new { @class = "warning" })
+
+               </div>
+               <div class="login-input-block full-block">
+                  <input type="text" placeholder="Friend Code" asp-for="friendCode">
+                  @Html.ValidationMessageFor(m => m.friendCode, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block">
+                  <label>
+                     <input type="checkbox" class="filled-in" asp-for="userConfirm" onchange="if (this.checked == true) { $('#error_userConfirm').hide(); } else {$('#error_userConfirm').show(); }">
+                     <span>ยอมรับ<a href="@Url.Action("TermsAndConditions", "Accounts")" class="condition-link" target="_blank">ข้อตกลงและเงื่อนไข</a></span>
+                  </label>
+                  <p class="warning" id="error_userConfirm" style="display:none;">โปรดยินยอมข้อตกลงและเงื่อนไขก่อนทำรายการขั้นต่อไป</p>
+               </div>
+               <button type="button" class="submit-button button button-red" onclick="regsiter_onclick()">สมัครสมาชิก</button>
+            </div>
+            <div id="div-detail2" @(!Model.valid ? "style=display:none;" : "")>
+               <p>คุณเป็นลูกค้าทิพยประกันภัยหรือไม่</p>
+               <div class="login-input-block">
+                  <label class="full-block">
+                     <input type="radio" class="with-gap" asp-for="isDhiMember" value="true" id="yes" onchange="$('#divMember').show(); $('#citizenId').attr('required', '');">
+                     <span>ใช่</span>
+                  </label>
+                  <label class="full-block">
+                     <input type="radio" class="with-gap" asp-for="isDhiMember" value="false" id="no" onchange="$('#divMember').hide();$('#citizenId').removeAttr('required');">
+                     <span>ไม่ใช่</span>
+                  </label>
+               </div>
+               <div id="divMember" style="@(Model.isDhiMember ? " " : " display:none;")">
+                  <br /><br />
+                  <p>สำหรับท่านที่เป็นลูกค้า กรุณากรอกเลขบัตรประชาชน เพื่อรับสิทธิพิเศษในระดับ TIP Gold</p>
+                  <div class="login-input-block">
+                     <input type="text" placeholder="หมายเลขบัตรประชาชน" asp-for="citizenId" class="digits" maxlength="13" minlength="13">
+                     @Html.ValidationMessageFor(m => m.citizenId, "", new { @class = "warning" })
+                  </div>
+               </div>
+               <button type="submit" class="submit-button button button-red">เข้าสู่ระบบ</button>
+            </div>
+
+         </form>
+      </div><!-- .login-body -->
+   </div><!-- .login-block -->
+</main>
+
+<div class="normal-popup" id="normal-popup">
+   <div class="normal-popup-close"><i class="fas fa-times"></i></div>
+   <div class="normal-popup-wrapper">
+      <div class="normal-popup-body">
+         <div class="normal-popup-content">
+            <p id="pop-condition"></p>
+         </div>
+         <div class="normal-popup-content">
+            <h3>เลขบัตรประชาชนนี้ได้มีการลงทะเบียนแล้ว</h3>
+            <br />
+            @if (Model.dupEmail != null)
+            {
+               foreach (var email in Model.dupEmail)
+               {
+                  @("อีเมล " + email + " ที่เคยใช้ลงทะเบียน")
+                  <br />
+               }
+            }
+            @if (Model.dupFBID != null)
+            {
+               foreach (var fb in Model.dupFBID)
+               {
+                  @("Facebook " + fb + " ที่เคยใช้ลงทะเบียน") 
+                  <br />
+               }
+            }
+            <a href="@Url.Action("Forgot", "Accounts")"><b>ลืมรหัสผ่าน</b></a> หรือ <a href="@Url.Action("SendDeleteAccount", "Accounts", new {idcard =Model.dupIdcard})"><b>ลบบัญชีเดิม</b></a>
+         </div>
+         <!-- .normal-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .normal-popup-wrapper -->
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+
+         if ('@Model.ShowIdcardDupPopup'.toLowerCase() == 'true') {
+            popup_onclick(event);
+         }
+      });
+      function regsiter_onclick() {
+         var valid = $("#form-register").valid();
+         $('#error_userConfirm').hide();
+         $('#error_password').hide();
+
+         if ($('#userConfirm').get(0).checked == false) {
+            $('#error_userConfirm').show();
+            valid = false;
+         }
+         if (!validatepwd($('#password').val())) {
+            $('#error_password').show();
+            valid = false;
+         }
+
+         if (valid)
+            document.forms['form-register'].submit();
+      }
+      function popup_onclick(e) {
+         if (e != null)
+            e.preventDefault();
+         jQuery('#normal-popup').addClass('is-active');
+         jQuery('.normal-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#normal-popup').removeClass('is-active');
+
+         });
+      }
+
+
+   </script>
+}

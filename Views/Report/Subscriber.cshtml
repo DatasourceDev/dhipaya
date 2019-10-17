@@ -1,0 +1,116 @@
+﻿@model Dhipaya.DTO.ReportDTO
+@{
+   ViewData["Title"] = "ผู้สมัครรับข่าวสาร";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>ผู้สมัครรับ</small>ข่าวสาร</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("ExcelSubscriber","Report", new {  search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="Subscriber" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col60" asp-for="search_text" placeholder="ค้นหาจากชื่อ อีเมล">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่จาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่ถึง" />
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>อีเมล</th>
+                     <th>วันเวลาที่สมัคร</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Subscribers)
+                  {
+
+                     <tr>
+                        <td>@item.Email</td>
+                        <td>@DateUtil.ToDisplayDateTime(item.Create_On)</td>
+                     </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pno = ViewBag.PageNo;
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("Subscriber", "Report", new { id = 1, pno= pnumber - 10,search_text= Model.search_text,search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("Subscriber", "Report", new { id = 1, pno=i,search_text= Model.search_text,search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("Subscriber", "Report", new { id = 1, pno=pnumber +10,search_text= Model.search_text,search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("Subscriber", "Report", new { id = 1, pno=i,search_text= Model.search_text,search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

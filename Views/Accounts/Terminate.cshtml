@@ -1,0 +1,21 @@
+﻿@{
+   ViewData["Title"] = "ลบบัญชีสำเร็จ";
+   Layout = "_LayoutTIP";
+}
+<main class="main register-end">
+   <div class="register-block">
+      <h1>ลบบัญชีสำเร็จ</h1>
+      <h3></h3>
+      <div class="register-action text-center" style="display:block">
+         <a href="@Url.Action("Register","Accounts")" class="button button-red">สมัครสมาชิก</a>
+      </div>
+   </div><!-- .register-block -->
+</main>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+      });
+   </script>
+}

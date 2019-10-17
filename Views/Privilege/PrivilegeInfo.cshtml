@@ -1,0 +1,1116 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@inject Dhipaya.DAL.ChFrontContext context
+@model Dhipaya.Models.Privilege
+@{
+   ViewData["Title"] = "สิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+   var url = "https://" + Context.Request.Host;
+   var cCount = 0;
+   var itemCount = 0;
+
+}
+<script>
+   var merchants = []
+@foreach (Merchant item in ViewBag.ListMerchant)
+{
+   @Html.Raw("merchants[" + item.MerchantID + "] = {id:" + item.CategoryID + ", name:'" + (item.MerchantCategories != null ? item.MerchantCategories.CategoryName  : "") + "' };")
+}
+
+
+</script>
+
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.PrivilegeID > 0)
+            {
+               <h2>แก้ไข<small>สิทธิพิเศษ</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>สิทธิพิเศษ</small></h2>
+            }
+            <div class="icon"><i class="fa fa-gift"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="Privilege" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+            <table class="tab-table">
+               <tbody>
+                  <tr>
+                     <td><button type="button" id="btn-privilege" class="button button-white" onclick="tab_manage();">สิทธิพิเศษ</button></td>
+                     @if (Model.Inited)
+                     {
+                        <td><button type="button" id="btn-condition" class="button button-white" onclick="tab_manage('condition');">การใช้สิทธิ์</button></td>
+                        <td><button type="button" id="btn-img" class="button button-white" onclick="tab_manage('image');">รูปภาพ</button></td>
+                        <td><button type="button" id="btn-code" class="button button-white" onclick="tab_manage('code');">รหัสสิทธิพิเศษ</button></td>
+                     }
+                     else
+                     {
+                        if (Model.tab == PrivilegeTab.condition)
+                        {
+                           <td><button type="button" id="btn-condition" class="button button-white" onclick="tab_manage('condition');">การใช้สิทธิ์</button></td>
+                        }
+                        else if (Model.tab == PrivilegeTab.image)
+                        {
+                           <td><button type="button" id="btn-condition" class="button button-white" onclick="tab_manage('condition');">การใช้สิทธิ์</button></td>
+                           <td><button type="button" id="btn-img" class="button button-white" onclick="tab_manage('image');">รูปภาพ</button></td>
+                        }
+                        else if (Model.tab == PrivilegeTab.code)
+                        {
+                           <td><button type="button" id="btn-condition" class="button button-white" onclick="tab_manage('condition');">การใช้สิทธิ์</button></td>
+                           <td><button type="button" id="btn-img" class="button button-white" onclick="tab_manage('image');">รูปภาพ</button></td>
+                           <td><button type="button" id="btn-code" class="button button-white" onclick="tab_manage('code');">รหัสสิทธิพิเศษ</button></td>
+                        }
+
+                     }
+
+
+                  </tr>
+               </tbody>
+            </table>
+            <div id="divprivilege">
+               <div class="profile-block-with-bg ">
+                  @Html.HiddenFor(m => m.tab)
+                  @Html.HiddenFor(m => m.PrivilegeID)
+                  @Html.HiddenFor(m => m.CategoryID)
+                  @Html.HiddenFor(m => m.Create_By)
+                  @Html.HiddenFor(m => m.Create_On)
+                  @Html.HiddenFor(m => m.Update_By)
+                  @Html.HiddenFor(m => m.Update_On)
+                  @Html.HiddenFor(m => m.Index)
+                  @Html.HiddenFor(m => m.Inited)
+                  @Html.HiddenFor(m => m.NextInit)
+                  @Html.HiddenFor(m => m.ImgUrl)
+                  <div class="profile-row">
+                     <div class="profile-col-full">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>ร้านค้า/บริการ<span class="text-red">*</span></td>
+                                 <td>
+                                    <select asp-for="MerchantID" asp-items="@(new SelectList(ViewBag.ListMerchant, "MerchantID", "MerchantName"))" onchange="merchant_onchange(this)"></select>
+                                    @Html.ValidationMessageFor(m => m.MerchantID, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ประเภทสิทธิพิเศษ<span class="text-red">*</span></td>
+                                 <td id="tdcate"></td>
+                              </tr>
+                              <tr>
+                                 <td>สิทธิพิเศษ<span class="text-red">*</span></td>
+                                 <td>
+                                    <textarea asp-for="PrivilegeName" required placeholder="สิทธิพิเศษ"></textarea>
+                                    @Html.ValidationMessageFor(m => m.PrivilegeName, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>เงื่อนไข</td>
+                                 <td>
+                                    <textarea asp-for="PrivilegeCondition" placeholder="เงื่อนไข"></textarea>
+                                    @Html.ValidationMessageFor(m => m.PrivilegeCondition, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ที่อยู่</td>
+                                 <td>
+                                    <textarea asp-for="Allowable_Outlet" placeholder="ที่อยู่"></textarea>
+                                    @Html.ValidationMessageFor(m => m.Allowable_Outlet, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>Youtube</td>
+                                 <td>
+                                    <input type="text" class="input-text url" asp-for="Youtube" placeholder="Youtube" />
+                                    @Html.ValidationMessageFor(m => m.Youtube, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+
+                           </tbody>
+                        </table>
+                     </div>
+                     <div class="profile-col">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>คะแนนที่ใช้แลก</td>
+                                 <td>
+                                    <input type="text" class="input-text number" asp-for="CreditPoint" placeholder="คะแนน" />
+                                    @Html.ValidationMessageFor(m => m.CreditPoint, "", new { @class = "warning" })
+                                 </td>
+                                 <td colspan="2">คะแนน</td>
+                              </tr>
+                              <tr>
+                                 <td>เริ่มตั้งแต่</td>
+                                 <td colspan="3">
+                                    <input type="text" data-toggle="datepicker" class="input-text" asp-for="sDate" placeholder="วว/ดด/ปปปป" />
+                                    @Html.ValidationMessageFor(m => m.sDate, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ถึงวันที่</td>
+                                 <td colspan="3">
+                                    <input type="text" data-toggle="datepicker" class="input-text" asp-for="eDate" placeholder="วว/ดด/ปปปป" />
+                                    @Html.ValidationMessageFor(m => m.eDate, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ประเภทสมาชิก<span class="text-red">*</span></td>
+                                 <td colspan="3">
+                                    @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                                    {
+                                       var selected = Model.CustomerClassList.Where(w => w.CustomerClassID == item.ID).FirstOrDefault();
+
+                                       <label class="full-block">
+                                          @if (selected != null)
+                                          {
+                                             <input type="hidden" name="CustomerClassList[@cCount].ID" value="@selected.ID">
+                                             <input type="checkbox" class="with-gap filled-in" id="ccID@(@cCount)" name="CustomerClassList[@cCount].CustomerClassID" value="@item.ID" checked>
+                                          }
+                                          else
+                                          {
+                                             <input type="hidden" name="CustomerClassList[@cCount].ID" value="0">
+                                             <input type="checkbox" class="with-gap filled-in" id="ccID@(@cCount)" name="CustomerClassList[@cCount].CustomerClassID" value="@item.ID">
+                                          }
+                                          <span>@item.Name</span>
+                                       </label>
+                                       cCount++;
+                                    }
+                                    <div id="divccClasserr"></div>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                                 <td>
+                                    <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                    @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>ผู้แก้ไขล่าสุด</td>
+                                 <td>
+                                    @Model.Update_By
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>แก้ไขล่าสุด</td>
+                                 <td>
+                                    @Html.DisplayFor(m => m.Update_On)
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                     <div class="profile-col ">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>QR</td>
+                                 <td>
+                                    <div id="qrcode" style="width:200px;height:200px;"></div>
+                                    <a href="" onclick="downloadqr(); return false;" download="qrcode.png">ดาวน์โหลด</a>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>รูปหน้าปก</td>
+                                 <td>
+                                    @if (!string.IsNullOrEmpty(Model.ImgUrl))
+                                    {
+                                       <img src="@Url.Content(Model.ImgUrl)" height="200" />
+                                       <br />
+                                    }
+                                    <input type="file" name="file" accept="image/*" /><br />
+                                    510x390 px
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div><!-- .profile-row -->
+               </div>
+            </div>
+            <div id="divcondition">
+               <div class="profile-block-with-bg">
+                  <div class="profile-row">
+                     <div class="profile-col-full">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>ต่อสิทธิพิเศษ<span class="text-red">*</span></td>
+                                 <td colspan="4">
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPrivilegePeriod" value="@Period.None" onchange="perpri_onchange(this)">
+                                       <span>ไม่จำกัด</span>
+                                    </label>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td width="140px">
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPrivilegePeriod" value="@Period.Day" onchange="perpri_onchange(this)">
+                                       <span>ต่อวัน</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clPriDay">
+                                       <input type="text" class="input-text number" asp-for="PerPrivilegeLimitedDay" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPrivilegeLimitedDay, "", new { @class = "warning" })
+
+                                    </div>
+                                 </td>
+                                 <td> <div class="clPriDay">ครั้ง</div></td>
+                                 <td>
+                                    @if (Model.PrivilegeID > 0)
+                                    {
+                                       <div class="clPriDay">ใช้สิทธิ์แล้ว <span>@context.Redeems.Where(w => w.PrivilegeID == Model.PrivilegeID & w.RedeemDate >= DateUtil.Now().AddDays(-1)).Count()</span> ครั้ง </div>
+                                    }
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td>
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPrivilegePeriod" value="@Period.Week" onchange="perpri_onchange(this)">
+                                       <span>ต่อสัปดาห์</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clPriWeek">
+                                       <input type="text" class="input-text number" asp-for="PerPrivilegeLimitedWeek" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPrivilegeLimitedWeek, "", new { @class = "warning" })
+                                    </div>
+                                 </td>
+                                 <td><div class="clPriWeek">ครั้ง</div></td>
+                                 <td>
+                                    @if (Model.PrivilegeID > 0)
+                                    {
+                                       <div class="clPriWeek">ใช้สิทธิ์แล้ว <span>@context.Redeems.Where(w => w.PrivilegeID == Model.PrivilegeID & w.RedeemDate >= DateUtil.Now().AddDays(-7)).Count()</span> ครั้ง</div>
+                                    }
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td>
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPrivilegePeriod" value="@Period.Month" onchange="perpri_onchange(this)">
+                                       <span>ต่อเดือน</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clPriMonth">
+                                       <input type="text" class="input-text number" asp-for="PerPrivilegeLimitedMonth" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPrivilegeLimitedMonth, "", new { @class = "warning" })
+                                    </div>
+                                 </td>
+                                 <td> <div class="clPriMonth">ครั้ง</div></td>
+                                 <td>
+                                    @if (Model.PrivilegeID > 0)
+                                    {
+                                       <div class="clPriMonth">ใช้สิทธิ์แล้ว <span>@context.Redeems.Where(w => w.PrivilegeID == Model.PrivilegeID & w.RedeemDate >= DateUtil.Now().AddMonths(-1)).Count()</span> ครั้ง</div>
+                                    }
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                     <div class="profile-col">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>ต่อสมาชิก<span class="text-red">*</span></td>
+                                 <td colspan="3">
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPersonPeriod" value="@Period.None" onchange="permember_onchange(this)">
+                                       <span>ไม่จำกัด</span>
+                                    </label>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td colspan="3">
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPersonPeriod" value="@Period.Once" onchange="permember_onchange(this)">
+                                       <span>ครั้งเดียว</span>
+                                    </label>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td width="140px">
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPersonPeriod" value="@Period.Day" onchange="permember_onchange(this)">
+                                       <span>ต่อวัน</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clMemDay">
+                                       <input type="text" class="input-text number" asp-for="PerPersonLimitedDay" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPersonLimitedDay, "", new { @class = "warning" })
+                                    </div>
+                                 </td>
+                                 <td><div class="clMemDay">ครั้ง</div></td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td>
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPersonPeriod" value="@Period.Week" onchange="permember_onchange(this)">
+                                       <span>ต่อสัปดาห์</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clMemWeek">
+                                       <input type="text" class="input-text number" asp-for="PerPersonLimitedWeek" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPersonLimitedWeek, "", new { @class = "warning" })
+                                    </div>
+                                 </td>
+                                 <td><div class="clMemWeek">ครั้ง</div></td>
+                              </tr>
+                              <tr>
+                                 <td></td>
+                                 <td>
+                                    <label class="full-block">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PerPersonPeriod" value="@Period.Month" onchange="permember_onchange(this)">
+                                       <span>ต่อเดือน</span>
+                                    </label>
+                                 </td>
+                                 <td>
+                                    <div class="clMemMonth">
+                                       <input type="text" class="input-text number" asp-for="PerPersonLimitedMonth" placeholder="ครั้ง" />
+                                       @Html.ValidationMessageFor(m => m.PerPersonLimitedMonth, "", new { @class = "warning" })
+                                    </div>
+                                 </td>
+                                 <td> <div class="clMemMonth">ครั้ง</div></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div><!-- .profile-row -->
+                  <div class="profile-row">
+                     <div class="profile-col">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>ประเภทการรับสิทธิ์<span class="text-red">*</span></td>
+                                 <td>
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in" asp-for="RedeemType" value="@RedeemType.Redeem">
+                                       <span>ใช้รหัสรับสิทธิ์</span>
+                                    </label>
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in" asp-for="RedeemType" value="@RedeemType.Delivery">
+                                       <span>จัดส่งสิทธิพิเศษ</span>
+                                    </label>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div id="divimage">
+               @if (Model.PrivilegeID > 0)
+               {
+                  <div class="profile-title-block " id="divimg">
+                     <div class="heading-wrapper">
+                        <h4 class="title"><small>ขนาดแนะนำ 510x390 px</small></h4>
+                        <div class="title-right">
+                           <button type="button" onclick="upload_onclick()" class="button button-blue">เพิ่มรูป</button>
+                        </div>
+
+                     </div>
+                  </div><!-- .profile-title-block -->
+                  <div class="profile-block-with-bg">
+                     <div class="profile-row">
+                        <div class="profile-col-full">
+                           @if (Model.PrivilegeImages != null && Model.PrivilegeImages.Count() > 0)
+                           {
+                              foreach (var img in Model.PrivilegeImages)
+                              {
+                                 <div class="privilege-image-preview">
+                                    <img src="@Url.Content(img.Url)" />
+                                    <div class="action">
+                                       <a onclick="remove_onclick(event,'@img.PrivilegeImageID')"
+                                          class="btn btn-link">
+                                          ลบ
+                                       </a>
+                                    </div>
+                                 </div>
+                              }
+                           }
+                        </div>
+                     </div>
+                  </div>
+               }
+            </div>
+            <div id="divcode">
+               <div class="profile-block-with-bg">
+                  <div class="profile-row">
+                     <div class="profile-col-full">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>ประเภทรหัสสิทธิพิเศษ<span class="text-red">*</span></td>
+                                 <td>
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PrivilegeCodeType" value="@PrivilegeCodeType.Random" onchange="codetype_onchange(this)">
+                                       <span>แบบอัตโนมัติ</span>
+                                    </label>
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in" asp-for="PrivilegeCodeType" value="@PrivilegeCodeType.Custom" onchange="codetype_onchange(this)">
+                                       <span>แบบกำหนดเอง</span>
+                                    </label>
+
+                                 </td>
+                                 <td style="float:right">
+                                    <div class="divcodecustom" style="@(Model.PrivilegeCodeType == PrivilegeCodeType.Custom ? "" : "display:none;")">
+                                       @*<button type="button" onclick="addNode()" class="button button-blue">เพิ่ม/แก้ไข</button>*@
+                                       @*<button type="button" onclick="excel_onopen()" class="button button-blue">เพิ่มจาก Excel</button>*@
+                                       <a href="@Url.Action("PrivilegeCode","Privilege", new { PrivilegeID = Model.PrivilegeID })" class="button button-blue" target="_blank">เพิ่มจาก Excel</a>
+                                       <a href="@Url.Action("TemplateCode","Privilege")" class="button button-white" target="_blank">ตัวอย่างไฟล์</a>
+                                    </div>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+                  </div>
+                  <div class="profile-row divcoderandom">
+                     <div class="profile-col ">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td>จำนวนสิทธิพิเศษ</td>
+                                 <td width="150px">
+                                    <input type="text" class="input-text number" asp-for="Quantity" placeholder="สิทธิ์" onchange="quantity_onchange(this)" />
+                                    @Html.ValidationMessageFor(m => m.Quantity, "", new { @class = "warning" })
+                                 </td>
+                                 <td>ใช้สิทธิ์แล้ว</td>
+                                 <td>
+                                    @NumUtil.FormatCurrency(ViewBag.TotalQuantity)
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div class="profile-row divcodecustom">
+                     <div class="profile-col-full ">
+                        <table class="profile-table">
+                           <tbody>
+                              <tr>
+                                 <td >
+                                    <input id="search_code" type="text" class="input-text" placeholder="ค้นหาจาก Code">
+                                 </td>
+                                 <td >
+                                    <button class="button button-white" type="button" onclick="code_search()">ค้นหา</button>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+                     <div class="profile-col-full ">
+                        <table class="table table-hover" id="codetable">
+                           <thead>
+                              <tr>
+                                 <th>ID</th>
+                                 <th>Code</th>
+                                 <th>จำนวนสิทธิพิเศษ</th>
+                                 <th>วันที่เริ่ม</th>
+                                 <th>วันที่หมดอายุ</th>
+                                 <th>สถานะ</th>
+                                 <th>ใช้สิทธิ์แล้ว</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.PrivilegeCodes != null)
+                              {
+                                 foreach (var item in Model.PrivilegeCodes)
+                                 {
+                                    var redeemcnt = context.Redeems.Where(w => w.PrivilegeID == Model.PrivilegeID & w.RedeemCode == item.Code).Count();
+                                    <tr>
+                                       <td>@item.ID</td>
+                                       <td>@item.Code</td>
+                                       <td>@item.MaxUse</td>
+                                       <td>@DateUtil.ToDisplayDate(item.EffectiveDate)</td>
+                                       <td>@DateUtil.ToDisplayDate(item.ExpiryDate)</td>
+                                       <td>@item.Status.toStatusName()</td>
+                                       <td>@item.expDate</td>
+                                       <td>
+                                          @if (redeemcnt > 0)
+                                          {
+                                             <span><a target="_blank" href="@Url.Action("Privilege","Report", new { search_equal_text =   item.Code  })">@NumUtil.FormatCurrency(redeemcnt)</a></span>
+                                          }
+                                          else
+                                          {
+                                             <span>0</span>
+                                          }
+                                       </td>
+
+                                    </tr>
+                                 }
+
+                              }
+
+                           </tbody>
+                        </table>
+
+                     </div>
+                  </div>
+                     <div class="divcodecustom">
+                        @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+                        {
+                           var pno = ViewBag.PageNo;
+                           var pnumber = ((int)(pno / 10) * 10) + 1;
+                           var end = false;
+                           <nav class="pagination">
+                              @if (ViewBag.PageLength > 10)
+                              {
+                                 if (pno > 10)
+                                 {
+                                    <a href="@Url.Action("Update", "Privilege", new {  pno= pnumber - 10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ก่อนหน้า</a>
+                                    <a href="#" class="item" onclick="return false">...</a>
+                                 }
+                                 for (var i = pnumber; i < pnumber + 10; i++)
+                                 {
+                                    if (i <= ViewBag.PageLength)
+                                    {
+                                       if (i == ViewBag.PageNo)
+                                       {
+                                          <a href="" class="item active">@i</a>
+                                       }
+                                       else
+                                       {
+                                          <a href="@Url.Action("Update", "Privilege", new { pno=i, tab = "code", id = Model.PrivilegeID})" class="item">@i</a>
+                                       }
+                                    }
+                                    else
+                                    {
+                                       end = true;
+                                    }
+                                 }
+                                 @if (!end)
+                                 {
+                                    <a href="#" class="item" onclick="return false">...</a>
+                                    <a href="@Url.Action("Update", "Privilege", new { pno=pnumber +10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ถัดไป</a>
+                                 }
+                              }
+                              else
+                              {
+                                 @for (var i = 1; i <= ViewBag.PageLength; i++)
+                                 {
+                                    if (i == ViewBag.PageNo)
+                                    {
+                                       <a href="" class="item active">@i</a>
+                                    }
+                                    else
+                                    {
+                                       <a href="@Url.Action("Update", "Privilege", new {  pno=i,tab= "code", id = Model.PrivilegeID})" class="item">@i</a>
+                                    }
+                                 }
+                              }
+                           </nav>
+
+                        }
+                     </div>
+                  </div>
+            </div>
+            <div class="profile-block-without-bg">
+               <div class="profile-col-full  ">
+                  @if (Model.Inited)
+                  {
+                     <button type="button" onclick="save()" class="button button-blue">บันทึกข้อมูล</button>
+                  }
+                  else
+                  {
+                     <button type="button" onclick="save('@Model.NextInit')" class="button button-blue">บันทึกข้อมูล และ ดำเนินการขั้นตอนถัดไป</button>
+                  }
+
+               </div>
+            </div>
+         </form>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+<div class="privilege-popup" id="privilege-popup">
+   <div class="privilege-popup-close"><i class="fas fa-times"></i></div>
+   <div class="privilege-popup-wrapper">
+      <div class="privilege-popup-body">
+         <div class="privilege-popup-title-wrapper">
+            <div class="privilege-popup-icon"><img id="pop-icon" src="~/tip/img/icon-instagram-white.png" style="transform: scale(1);"></div>
+            <h3 class="privilege-popup-title"><small id="pop-merchant-name">รูปภาพ</small></h3>
+         </div>
+         <div class="privilege-popup-content">
+            <p id="pop-condition"></p>
+         </div>
+         <div class="privilege-popup-content">
+            <form asp-controller="Privilege" asp-action="Image" class="dropzone" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.PrivilegeID)
+               <div class="fallback">
+                  <input name="imgfile" id="imgfile" type="file" multiple />
+               </div>
+            </form>
+
+         </div>
+         <!-- .privilege-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .privilege-popup-wrapper -->
+</div>
+
+<div class="normal-popup" id="excel-popup">
+   <div class="normal-popup-close" id="excel-popup-close"><i class="fas fa-times"></i></div>
+   <div class="normal-popup-wrapper">
+      <div class="normal-popup-body">
+         <div class="normal-popup-content">
+            <form id="excel-form" asp-controller="Privilege" asp-action="ValidateCode" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.PrivilegeID)
+               <input type="file" name="excelfile" class="" accept=".xlsx, .xls, .csv" />
+               <button onclick="validate_excel_onclick()" class="button button-blue" type="button">เพิ่ม</button>
+            </form>
+         </div>
+         <!-- .privilege-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .privilege-popup-wrapper -->
+</div>
+
+@section scripts{
+   <script>
+      function code_search() {
+         var code = $('#search_code').val();
+         var url = '@Url.Action("Update", "Privilege", new { pno= ViewBag.PageNo, tab = "code", id = Model.PrivilegeID})&code=' + code;
+         window.location = url;
+      }
+      function permember_onchange(opt) {
+         $('.clMemDay').hide();
+         $('.clMemWeek').hide();
+         $('.clMemMonth').hide();
+         if (opt != null) {
+            if ($(opt).val() == '@Period.Day')
+               $('.clMemDay').show();
+            else if ($(opt).val() == '@Period.Week')
+               $('.clMemWeek').show();
+            else if ($(opt).val() == '@Period.Month')
+               $('.clMemMonth').show();
+         }
+      }
+      function perpri_onchange(opt) {
+        $('.clPriDay').hide();
+         $('.clPriWeek').hide();
+         $('.clPriMonth').hide();
+         if (opt != null) {
+            if ($(opt).val() == '@Period.Day')
+               $('.clPriDay').show();
+            else if ($(opt).val() == '@Period.Week')
+               $('.clPriWeek').show();
+            else if ($(opt).val() == '@Period.Month')
+               $('.clPriMonth').show();
+         }
+      }
+      function codetype_onchange(opt) {
+         if (opt != null) {
+            if ($(opt).val() == '@PrivilegeCodeType.Custom') {
+               $('.code-required').prop("required", true);
+               $('.divcodecustom').show();
+               $('.divcoderandom').hide();
+
+            }
+            else {
+               $('.code-required').prop("required", false);
+               $('.divcodecustom').hide();
+               $('.divcoderandom').show();
+            }
+         }
+      }
+      function merchant_onchange(obj) {
+         var id = $(obj).val();
+         var merchant = merchants[id];
+         if (merchant != null) {
+            $('#tdcate').text(merchant.name);
+            $('#CategoryID').val(merchant.id);
+         }
+      }
+
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+         tab_manage('@Model.tab');
+         merchant_onchange(document.getElementById("MerchantID"));
+
+         $("div#imgfile").dropzone({ url: "/file/post" });
+
+         new QRCode(document.getElementById("qrcode"),{
+           text: "@(url + "/Home/PrivilegeInfo/?id=" + Model.PrivilegeID)",
+            width: 2000,
+            height: 2000,
+         });
+         if ('@Model.PrivilegeCodeType' == '@PrivilegeCodeType.Custom') {
+            $('.code-required').prop("required", true);
+            $('.divcoderandom').hide();
+            $('.divcodecustom').show();
+         }
+         else {
+            $('.code-required').prop("required", false);
+            $('.divcoderandom').show();
+            $('.divcodecustom').hide();
+         }
+
+         permember_onchange();
+         perpri_onchange();
+
+         if ('@Model.PerPrivilegePeriod' == '@Period.Day')
+            $('.clPriDay').show();
+          else if ('@Model.PerPrivilegePeriod' == '@Period.Week')
+            $('.clPriWeek').show();
+          else if ('@Model.PerPrivilegePeriod' == '@Period.Month')
+            $('.clPriMonth').show();
+
+         if ('@Model.PerPersonPeriod' == '@Period.Day')
+            $('.clMemDay').show();
+          else if ('@Model.PerPersonPeriod' == '@Period.Week')
+            $('.clMemWeek').show();
+          else if ('@Model.PerPersonPeriod' == '@Period.Month')
+            $('.clMemMonth').show();
+      });
+    function downloadqr() {
+        var src= document.querySelector('#qrcode img').getAttribute("src");
+        var url = src.replace(/^data:image\/[^;]+/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=qrcodeconvite.png;');
+        window.open(url);
+
+    }
+      function excel_onopen(e) {
+         if (e != null)
+            e.preventDefault();
+
+         jQuery('#excel-popup').addClass('is-active');
+         jQuery('#excel-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#excel-popup').removeClass('is-active');
+         });
+      }
+      function upload_onclick(e) {
+         if (e != null)
+            e.preventDefault();
+
+            jQuery('#privilege-popup').addClass('is-active');
+            jQuery('.privilege-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#privilege-popup').removeClass('is-active');
+
+               window.location = '@Url.Action("Update","Privilege")?id=' + '@Model.PrivilegeID' + '&tab=' + $('#tab').val() ;
+         });
+      }
+      function remove_onclick(e,id) {
+      if (e != null)
+            e.preventDefault();
+         if (confirm('ต้องการลบรายการนี้?')) {
+            $.ajax({
+               url: "@Url.Action("ImageDelete","Privilege")?id=" + id,
+            })
+            .done(function( data ) {
+               if ( data != null && data== true ) {
+                 window.location = '@Url.Action("Update","Privilege")?id=' + '@Model.PrivilegeID' + '&tab=' + $('#tab').val() ;
+               }
+            });
+         }
+      }
+
+      function quantity_onchange(opt) {
+         var quantity = parseInt($(opt).val());
+         var used = parseInt('@ViewBag.TotalQuantity');
+         if (isNaN(quantity))
+            quantity = 0;
+         if (isNaN(used))
+            used = 0;
+         var left = quantity - used;
+         $('#lblQuantityleft').text(left);
+      }
+
+      function tab_manage(sel) {
+         $('#tab').val(sel);
+
+         $('.tab-table .button').removeClass('button-red');
+         $('.tab-table .button').addClass('button-white');
+         if (sel == 'image') {
+            $('#divprivilege').hide();
+            $('#divcondition').hide();
+            $('#divimage').show();
+            $('#divcode').hide();
+            $('#btn-img').addClass('button-red');
+         } else if (sel == 'condition') {
+            $('#divprivilege').hide();
+            $('#divcondition').show();
+            $('#divimage').hide();
+            $('#divcode').hide();
+            $('#btn-condition').addClass('button-red');
+         }
+         else if (sel == 'code') {
+            $('#divprivilege').hide();
+            $('#divcondition').hide();
+            $('#divimage').hide();
+            $('#divcode').show();
+            $('#btn-code').addClass('button-red');
+         }
+         else {
+            $('#divprivilege').show();
+            $('#divcondition').hide();
+            $('#divimage').hide();
+            $('#divcode').hide();
+            $('#btn-privilege').addClass('button-red');
+         }
+      }
+
+
+  var ItemIdCount = @itemCount;
+
+      function addNode(data) {
+         var tableRows = $("#codetable").find("tbody > tr");
+         var rowCount = tableRows.length;
+         var cloneRow = $(tableRows[0]).clone();
+         var cols = $(cloneRow).find('td');
+         var newItemId = ++ItemIdCount;
+
+         var firstcols = $(tableRows[0]).find('td');
+
+         $(cloneRow).attr('data-id', newItemId);
+         $(cloneRow).attr('data-index', rowCount);
+         $(cloneRow).appendTo("#codetable");
+
+         configureInputControls(cols, rowCount, true,data);
+
+         var removeBtn = $(cols).find('.btn-link');
+         $(removeBtn).removeAttr('disabled');
+         $(removeBtn).attr('onclick', 'removeNode(' + newItemId + ')');
+         jQuery('[data-toggle="datepicker"]').datepicker({
+            format: 'dd/mm/yyyy',
+            language: 'th-th'
+         });
+         return rowCount;
+      }
+
+      function configureInputControls(cols, rowIndex, isEmptyTB, data) {
+         var idx = "PrivilegeCodeList_";
+         var nmx = "PrivilegeCodeList";
+
+
+         var textBox = $(cols[0]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__Code');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].Code');
+         $(textBox).removeAttr('readonly');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         if (data != null) {
+            $(textBox).val(data.code);
+         }
+         textBox = $(cols[1]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__MaxUse');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].MaxUse');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         if (data != null) {
+            $(textBox).val(data.maxUse);
+         }
+         textBox = $(cols[2]).find('input[type="text"]');
+         $(textBox).attr('id', idx + rowIndex + '__effDate');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].effDate');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         if (data != null) {
+            $(textBox).val(data.effDate);
+         }
+
+         textBox = $(cols[3]).find('input[type="text"]');
+         $(textBox).attr('id', idx + rowIndex + '__expDate');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].expDate');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         if (data != null) {
+            $(textBox).val(data.expDate);
+         }
+
+         textBox = $(cols[4]).find('select');
+         $(textBox).attr('id', idx + rowIndex + '__Status');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].Status');
+         if (isEmptyTB) {
+            $(textBox).val('1').change();
+         }
+         if (data != null) {
+            $(textBox).val(data.status).change();
+         }
+         textBox = $(cols[5]).find('span');
+         if (isEmptyTB) {
+            $(textBox).text('0');
+         }
+         var textBox = $(cols[6]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__ID');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].ID');
+         if (isEmptyTB) {
+            $(textBox).val("0");
+         }
+
+
+
+      }
+
+      function removeNode(itemId) {
+         var tableRows = $("#codetable").find("tbody > tr");
+         var rowCount = tableRows.length;
+         if (rowCount > 1) {
+            tableRows = $("#codetable").find("tbody > tr[data-id=" + itemId + "]");
+            var row = $(tableRows);
+            row.remove();
+            resetIndex(itemId);
+         }
+      }
+
+      function resetIndex() {
+         var tableRows = $("#codetable").find("tbody > tr");
+         if (tableRows.length > 1) {
+            for (i = 0; i < tableRows.length; i++) {
+               var row = $(tableRows[i]);
+               var cols = $(row).find('td');
+               configureInputControls(cols, i, false);
+            }
+         }
+         var cols = $(tableRows[0]).find('td');
+         var removeBtn = $(cols[1]).find('.btn-action-remove');
+         $(removeBtn[0]).hide();
+      }
+
+
+      function checkdate(date) {
+         if (date == null || date == '')
+            return true;
+         try {
+            var parts = date.split("/");
+            if (isNaN(Date.parse(parts[2] + "-" + parts[1] + "-" + parts[0]))) {
+               return false;
+            }
+            return true
+         }
+         catch (ex) {
+            return false;
+         }
+      }
+      function process(date) {
+         try {
+            var parts = date.split("/");
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+         }
+         catch (ex) {
+            return null;
+         }
+      }
+      function validate_excel_onclick() {
+
+         var valid = $("#excel-form").valid();
+         if (valid) {
+            var formData = new FormData($("#excel-form")[0]);
+            $.ajax({
+               type: 'POST',
+               contentType: false,
+               processData: false,
+               cache: false,
+               url: '@Url.Action("ValidateCode", "Privilege")',
+               data: formData,
+               success: function (data) {
+                  if (data != null) {
+                     if (data.responseCode == 1) {
+                        if (data.data != null) {
+                           for (var i = 0; i < data.data.length; i++) {
+                              var code = data.data[i];
+                              addNode(code);
+                           }
+                           jQuery('#excel-popup-close').click();
+                        }
+                     }
+                     else {
+                        alert(data.responseDesc);
+                     }
+                  }
+               },
+               error: function (XMLHttpRequest, errorThrown) {
+                  alert(errorThrown);
+               }
+            });
+         }
+      }
+
+      function save(next) {
+         var valid = $("#form").valid();
+
+         var checked = false;
+         for (var i = 0; i < parseInt('@cCount'); i++) {
+            if ($('#ccID' + i).get(0).checked == true) {
+               checked = true;
+            }
+         }
+         $('#divccClasserr').html('');
+         if (checked == false) {
+            valid = false;
+            var element = document.createElement("label");
+            element.className = "warning active";
+            element.innerText = "กรุณาระบุประเภทสมาชิก";
+            $('#divccClasserr')[0].append(element);
+         }
+         var codes = [];
+         var tableRows = $("#codetable").find("tbody > tr");
+         var rowCount = tableRows.length;
+         for (var i = 0; i < rowCount; i++) {
+            var cols = $(tableRows[i]).find('td');
+            var textBox = $(cols[0]).find('input');
+            var code = $(textBox).val();
+            if (code != null && code != '') {
+               if (codes.includes(code)) {
+                  valid = false;
+                  var element = document.createElement("label");
+                  element.className = "warning active";
+                  element.innerText = "รหัสซ้ำ";
+                  $(cols[0])[0].append(element);
+               }
+               else {
+                  codes.push(code);
+               }
+            }
+
+            var sdate = $(cols[2]).find('input').val();
+            var edate = $(cols[3]).find('input').val();
+            if (checkdate(sdate) == false) {
+               valid = false;
+               var element = document.createElement("label");
+               element.className = "warning active";
+               element.innerText = "วันที่ไม่ถูกต้อง";
+               $(cols[2])[0].append(element);
+            }
+            if (checkdate(edate) == false) {
+               valid = false;
+               var element = document.createElement("label");
+               element.className = "warning active";
+               element.innerText = "วันที่ไม่ถูกต้อง";
+               $(cols[3])[0].append(element);
+            }
+            if (sdate != null && edate != null && checkdate(sdate) == true && checkdate(edate) == true) {
+               if (process(sdate) > process(edate)) {
+                  valid = false;
+                  var element = document.createElement("label");
+                  element.className = "warning active";
+                  element.innerText = "วันหมดอายุต้องมากกว่าวันเริ่มต้น";
+                  $(cols[3])[0].append(element);
+               }
+            }
+         }
+         if (valid) {
+            if (next != null)
+               $('#tab').val(next);
+            document.forms['form'].submit();
+         }
+      }
+   </script>
+}

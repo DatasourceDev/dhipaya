@@ -1,0 +1,97 @@
+﻿@model Dhipaya.DTO.PointConditionDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "เงื่อนไขการสะสมคะแนน";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">เงื่อนไข<small>การสะสมคะแนน</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","Condition")" class="button button-blue">เพิ่มเงื่อนไขการสะสมคะแนน</a>
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @foreach (var item in Model.PointConditions)
+               {
+                  <div class="history-table-container">
+                     <div class="history-date"></div>
+                     <div class="history-table-wrapper add-point">
+                        <div class="history-detail">
+                           <div class="history-detail-logo">
+
+                           </div>
+                           <div class="history-detail-text">
+                              <a href="@Url.Action("Update", "Condition", new { id = item.ConditionID })">@item.ConditionCode</a>
+                              <span>@item.Name</span>
+                           </div>
+                        </div>
+                        <div class="history-total-point">
+                          @item.PointTransacionType
+                        </div>
+                        <div class="history-point">
+                           <a href="@Url.Action("Update", "Condition", new { id = item.ConditionID })"
+                              class="btn btn-link">
+                              แก้ไข
+                           </a>
+                           @if (canDelete(item.ConditionID))
+                           {
+                              <a href="@Url.Action("Delete", "Condition", new { id = item.ConditionID })"
+                                 onclick="return confirm('ต้องการลบรายการนี้?')"
+                                 class="btn btn-link">
+                                 ลบ
+                              </a>
+                           }
+                        </div>
+                     </div>
+
+                  </div> <!-- .history-table-container -->
+
+               }
+            </div>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null)
+         {
+            <nav class="pagination">
+               @for (var i = 1; i <= ViewBag.PageLength; i++)
+               {
+                  if (i == ViewBag.PageNo)
+                  {
+                     <a href="" class="item active">@i</a>
+                  }
+                  else
+                  {
+                     <a href="@Url.Action("Index", "Condition", new { id = 1, pno=i})" class="item">@i</a>
+                  }
+               }
+            </nav>
+         }
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

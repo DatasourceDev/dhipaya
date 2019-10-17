@@ -1,0 +1,128 @@
+﻿@model Dhipaya.DTO.CustomersImportDTO
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "นำเข้าสมาชิก";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>นำเข้า</small>สมาชิก</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("TemplateCustomer","Customer")" class="button button-white" target="_blank">ดาวน์โหลดไฟล์ตัวอย่าง</a>
+               </div>
+            </div>
+            @if (Model.result == true)
+            {
+               <div class="profile-block-with-bg">
+                  <h2>นำเข้าข้อมูลสำเร็จ</h2>
+               </div>
+            }
+            else if (Model.result == false)
+            {
+               <div class="profile-block-with-bg">
+                  <h2> นำเข้าข้อมูลไม่สำเร็จ</h2>
+               </div>
+            }
+            <form id="form" asp-controller="Customer" asp-action="Import" role="form" autocomplete="off" asp-route-id="" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.valid)
+               <div class="profile-block-with-bg">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              @if (Model.valid)
+                              {
+                                 <td style="text-align:right">
+                                    <button type="submit" class="button button-blue" name="dosave" value="true">นำข้อมูลเข้า</button>
+                                 </td>
+                              }
+                              else
+                              {
+                                 <td>
+                                    <input type="file" name="excelfile" class="" accept=".xlsx, .xls, .csv" />
+                                 </td>
+                                 <td>
+                                    <button class="button button-blue" type="submit">ตรวจสอบไฟล์</button>
+                                 </td>
+                              }
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
+               @if (Model.Imports != null && Model.Imports.Count() > 0)
+               {
+                  var i = 0;
+                  <div class="profile-block-with-bg">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>ลำดับ</th>
+                              <th>row no.</th>
+                              <th>คำนำหน้าชื่อ</th>
+                              <th>ชื่อ</th>
+                              <th>นามสกุล</th>
+                              <th>หมายเลขบัตรประชาชน</th>
+                              <th>Passport</th>
+                              <th>เบอร์โทร</th>
+                              <th>อีเมล</th>
+                              <th>หมายเหตุ</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @foreach (var item in Model.Imports)
+                           {
+                              <tr @(item.succeed ? "" : "style=color:red")>
+                                 <td>@(i + 1).</td>
+                                 <td>
+                                    @Model.Imports[i].No
+                                 </td>
+                                 <td>@Model.Imports[i].PrefixTh</td>
+                                 <td>@Model.Imports[i].NameTh</td>
+                                 <td>@Model.Imports[i].SurNameTh</td>
+                                 <td>@Model.Imports[i].IDCard</td>
+                                 <td>@Model.Imports[i].Passport</td>
+                                 <td>@Model.Imports[i].MoblieNo</td>
+                                 <td>@Model.Imports[i].Email</td>
+                                 <td>
+                                    <p>
+                                       @if (!item.succeed)
+                                       {
+                                          @("Error:") @Model.Imports[i].Msg
+                                       }
+                                    </p>
+                                 </td>
+                              </tr>
+                              i++;
+                           }
+                        </tbody>
+
+                     </table>
+                  </div><!-- .profile-title-block -->
+               }
+            </form>
+
+         </div><!-- .container -->
+
+      </div>
+   </div>
+</div>
+
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}

@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Dhipaya.Models.Product>
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "ประกันภัย";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">ประกันภัย<small></small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("Create","Product")" class="button button-blue">เพิ่มประกันภัย</a>
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <div class="history-table">
+               @foreach (var item in Model)
+               {
+                  <div class="history-table-container">
+                     <div class="history-date"></div>
+                     <div class="history-table-wrapper add-point">
+                        <div class="history-detail">
+                           <div class="history-detail-logo">
+
+                           </div>
+                           <div class="history-detail-text">
+                              <a href="@Url.Action("Update", "Product", new { id = item.ProductID })">@item.ProductCode @(!string.IsNullOrEmpty(item.SubProductCode) ? "[" + item.SubProductCode + "]" : "")</a>
+                              <span>@item.ProductName</span>
+                           </div>
+                        </div>
+
+                        <div class="history-total-point">
+                          
+                        </div>
+                        <div class="history-point">
+                           <a href="@Url.Action("Update", "Product", new { id = item.ProductID })"
+                              class="btn btn-link">
+                              แก้ไข
+                           </a>
+                           @if (canDelete(item.ProductID))
+                           {
+                              <a href="@Url.Action("Delete", "Product", new { id = item.ProductID })"
+                                 onclick="return confirm('ต้องการลบรายการนี้?')"
+                                 class="btn btn-link">
+                                 ลบ
+                              </a>
+                           }
+                        </div>
+                     </div>
+
+                  </div> <!-- .history-table-container -->
+
+               }
+            </div>
+         </div>
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

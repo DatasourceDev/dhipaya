@@ -1,0 +1,152 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@using Dhipaya.Services;
+@model Dhipaya.Models.Merchant
+@{
+   ViewData["Title"] = "ร้านค้า/บริการ";
+   Layout = "_LayoutTIP";
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.MerchantID > 0)
+            {
+               <h2>แก้ไข<small>ร้านค้า/บริการ</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>ร้านค้า/บริการ</small></h2>
+            }
+            <div class="icon"><i class="fa fa-store-alt"></i></div>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <form id="form" class="profile-edit-form" asp-controller="Merchant" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.MerchantID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               @Html.HiddenFor(m => m.Url)
+               @Html.HiddenFor(m => m.UserID)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ประเภทร้านค้า/บริการ<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="CategoryID" asp-items="@(new SelectList(ViewBag.ListType, "CategoryID", "CategoryName"))"></select>
+                                 @Html.ValidationMessageFor(m => m.CategoryID, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ร้านค้า/บริการ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="MerchantName" class="input-text" required placeholder="ร้านค้า/บริการ">
+                                 @Html.ValidationMessageFor(m => m.MerchantName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รหัสผู้ดูแลร้านค้า<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="UserName" class="input-text" required placeholder="รหัสผู้ดูแลร้านค้า">
+                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           @if (!string.IsNullOrEmpty(Model.Password) && Model.UserID.HasValue)
+                           {
+                              <tr>
+                                 <td>รหัสผ่าน<span class="text-red">*</span></td>
+                                 <td>
+                                    @(Model.Password)
+                                 </td>
+                              </tr>
+                           }
+                           else
+                           {
+                              <tr>
+                                 <td>รหัสผ่าน<span class="text-red">*</span></td>
+                                 <td>
+                                    <input class="input-text" type="password" placeholder="รหัสผ่าน" asp-for="Password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#Password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
+                                    <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+                                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                           }
+
+                           <tr>
+                              <td>จังหวัด</td>
+                              <td>
+                                 <select asp-for="ProvinceID" asp-items="@(new SelectList(ViewBag.ListProvinces, "ProvinceID", "ProvinceName"))"></select>
+                                 @Html.ValidationMessageFor(m => m.ProvinceID, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รูปร้านค้า/บริการ</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.Url))
+                                 {
+                                    <img src="@Url.Content(Model.Url)" />
+                                 }
+                                 <input type="file" name="file" accept="image/*" />
+                                 <br />
+                                 510x390 px
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="button" class="button button-blue" onclick="save_onclick()">บันทึกข้อมูล</button>
+
+                  </div>
+
+               </div><!-- .profile-row -->
+            </form>
+         </div>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+      function save_onclick() {
+         var valid = $("#form").valid();
+         $('#error_password').hide();
+
+         if ($('#Password').get(0) != null) {
+            if (!validatepwd($('#Password').val())) {
+               $('#error_password').show();
+               valid = false;
+            }
+         }
+         if (valid)
+            document.forms['form'].submit();
+      }
+   </script>
+}
+
+

@@ -1,0 +1,8 @@
+﻿@model Dhipaya.DTO.PrivilegeDTO
+@{
+}
+
+@foreach (var itemdtl in Model.Privileges)
+{
+   Html.RenderPartial("_Privilege", itemdtl);
+}

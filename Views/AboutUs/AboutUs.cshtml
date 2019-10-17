@@ -1,0 +1,144 @@
+﻿@model Dhipaya.Models.AboutUs
+@{
+   ViewData["Title"] = "เกี่ยวกับเรา";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">เกี่ยวกับ<small>เรา</small></h2>
+               <div class="title-right">
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="AboutUs" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               @Html.HiddenFor(m => m.Url)
+               <div class="profile-row">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>หัวข้อ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="Title" class="input-text " required placeholder="หัวข้อ">
+                                 @Html.ValidationMessageFor(m => m.Title, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เนื้อหา</td>
+                              <td>
+                                 <textarea asp-for="Description" class="summernote" placeholder="เนิ้อหา" rows="20"></textarea>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หน้าปก</td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="MediaTypeImage" asp-for="MediaType" value="@MediaType.Image" onchange="mediatype_onchange(this)">
+                                    <span>รูปภาพ</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="MediaTypeVideo" asp-for="MediaType" value="@MediaType.Video" onchange="mediatype_onchange(this)">
+                                    <span>วีดีโอ</span>
+                                 </label>
+                              </td>
+                           </tr>
+                           <tr id="divMainImg">
+                              <td>รูปหน้าปก</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.Url))
+                                 {
+                                    <img src="@Url.Content(Model.Url)" height="350" />
+                                    <br />
+                                 }
+                                 <input type="file" name="file" accept="image/*" />
+                                 <br />
+                                 500x350 px
+                              </td>
+                           </tr>
+                           <tr id="divMainVideo">
+                              <td>วีดีโอหน้าปก</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                                 {
+                                    <video class="video-js vjs-default-skin" controls preload="auto" height="280" width="100%" poster="" data-setup="{}">
+                                       <source src="@Url.Content(Model.VideoUrl)" type='video/mp4' />
+                                    </video>
+                                 }
+                                 <input type="file" name="video" accept="video/*" />
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tr>
+                           <td>ผู้แก้ไขล่าสุด</td>
+                           <td>
+                              @Model.Update_By
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>แก้ไขล่าสุด</td>
+                           <td>
+                              @Html.DisplayFor(m => m.Update_On)
+                           </td>
+                        </tr>
+                        <tbody></tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                  </div>
+               </div>
+
+            </div><!-- .profile-row -->
+      </form>
+
+   </div><!-- .container -->
+</div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+         $('.summernote').summernote({
+            height: 300
+         });
+
+         if ('@Model.MediaType' == '@MediaType.Image')
+            mediatype_onchange($('#MediaTypeImage').get(0));
+         else if('@Model.MediaType' == '@MediaType.Video')
+           mediatype_onchange($('#MediaTypeVideo').get(0));
+      });
+
+      function mediatype_onchange(obj) {
+         if (obj.checked == true) {
+            if (obj.value == '@MediaType.Video') {
+               $('#divMainVideo').show();
+               $('#divMainImg').hide();
+            }
+            else {
+               $('#divMainVideo').hide();
+               $('#divMainImg').show();
+            }
+         }
+      }
+
+   </script>
+}
+

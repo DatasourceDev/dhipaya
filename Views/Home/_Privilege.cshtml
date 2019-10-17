@@ -1,0 +1,109 @@
+﻿@model Dhipaya.Models.Privilege
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   var item = Model;
+   var icon = item.MerchantCategory != null ? Url.Content(item.MerchantCategory.Logo) : "";
+   var url = Url.Content("~/tip/img/privilege-default.jpg");
+   if (!string.IsNullOrEmpty(item.ImgUrl))
+   {
+      url = Url.Content(item.ImgUrl);
+   }
+   else if (item.Merchant != null && !string.IsNullOrEmpty(item.Merchant.Url))
+   {
+      url = Url.Content(item.Merchant.Url);
+   }
+   var periodfrom = "วันนี้ - ";
+   if (item.StartDate.HasValue)
+   {
+      periodfrom = item.StartDate.Value.Day + " " + DateUtil.GetShortMonth(item.StartDate.Value.Month) + " " + item.StartDate.Value.Year + " - ";
+   }
+   var periodto = "";
+   if (item.EndDate.HasValue)
+   {
+      periodto = item.EndDate.Value.Day + " " + DateUtil.GetShortMonth(item.EndDate.Value.Month) + " " + item.EndDate.Value.Year;
+   }
+
+   var youtube = "";
+   if (!string.IsNullOrEmpty(item.Youtube))
+   {
+      item.Youtube = item.Youtube.Replace("\n", "");
+      youtube = Url.Content(item.Youtube);
+      if (!item.Youtube.Contains("https://"))
+      {
+         youtube = Url.Content("https://" + item.Youtube);
+      }
+   }
+
+   var gold = false;
+   var silver = false;
+   var others = new List<string>();
+   foreach (var c in item.PrivilegeCustomerClasses)
+   {
+      if (c.CustomerClassID == 1)
+      {
+         silver = true;
+      }
+      else if (c.CustomerClassID == 2)
+      {
+         gold = true;
+      }
+      else
+      {
+         var cClass = context.CustomerClasses.Where(w => w.ID == c.CustomerClassID).FirstOrDefault();
+         if (cClass != null)
+         {
+            others.Add(cClass.Name);
+         }
+      }
+   }
+}
+
+<li class="privilege-item">
+   <script>
+      lastprivilegeID = @item.PrivilegeID;
+     lastindex = @item.Index;
+   </script>
+   <div class="privilege-inner">
+      <div class="privilege-item-thumb">
+         <a onclick="privilege_onclick(event, @item.PrivilegeID)"><img src="@Url.Content(url)"></a>
+      </div>
+      <div class="privilege-item-body">
+         <div class="privilege-item-icon">
+            <img src="@Url.Content(icon)">
+         </div>
+         <div class="privilege-item-discount">
+            @item.PrivilegeName
+         </div>
+         <h3 class="privilege-item-title">
+            <a onclick="privilege_onclick(event, @item.PrivilegeID)">
+               <small>@Html.Raw(item.Merchant.MerchantName.Replace("\n", "<br/>"))<br /><span style="font-size:0.6em;font-weight: normal;" >ดูรายละเอียดเพิ่มเติม</span></small>
+            </a>
+         </h3>
+         <div class="privilege-item-meta">
+            <div class="privilege-item-period">
+               @periodfrom<br />@periodto
+            </div>
+            <div class="privilege-item-point @(gold & !silver & others.Count() ==0 ? "privilege-item-gold-point" : "")">
+               คะแนนที่ใช้
+               @if (item.CreditPoint > 0)
+               {
+
+                  <span>@item.CreditPoint แต้ม</span>
+               }
+               else
+               {
+                  <span>-</span>
+               }
+               @if (!gold & !silver & others.Count() == 1)
+               {
+                  <span class="note">*เฉพาะลูกค้า @others[0]</span>
+               }
+               else if (gold & !silver)
+               {
+                  <span class="note">*เฉพาะลูกค้า TIP Gold</span>
+               }
+            </div>
+         </div>
+      </div>
+   </div>
+</li><!-- .privilege-item -->

@@ -1,0 +1,94 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.QuestionGroup
+@{
+   ViewData["Title"] = "กลุ่มคำถามที่พบบ่อย";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.ID > 0)
+            {
+               <h2>แก้ไข<small>กลุ่มคำถามที่พบบ่อย</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>กลุ่มคำถามที่พบบ่อย</small></h2>
+            }
+            <div class="icon"><i class="fa fa-store-alt"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="QuestionGroup" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+ @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ชื่อกลุ่ม<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="Name" class="input-text " required placeholder="ชื่อกลุ่ม">
+                                 @Html.ValidationMessageFor(m => m.Name, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รายละเอียด</td>
+                              <td>
+
+                                 <textarea asp-for="Description" class="summernote" placeholder="รายละเอียด"></textarea>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+<tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td >
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td >
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+
+                  </div>
+               </div><!-- .profile-row -->
+
+            </div>
+
+
+         </form>
+
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+      });
+   </script>
+}
+
+

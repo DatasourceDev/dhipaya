@@ -1,0 +1,287 @@
+﻿
+@model Dhipaya.DTO.CustomersDTO
+@using Dhipaya.DTO;
+@using  Dhipaya.ModelsDapper;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "สมาชิก";
+   Layout = "_LayoutTIP";
+}
+
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">สมาชิก</h2>
+               <div class="title-right">
+                  <a href="@Url.Action("ExcelCustomer","Report", new { search_birthyear= Model.search_birthyear, search_birthday = Model.search_birthday, search_birthmonth = Model.search_birthmonth, customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="Customer" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ นามสกุล, อีเมล, รหัสบัตรประชาชน, เบอร์โทรศัพท์, หมายเลขสมาชิก, Friend Code">
+                  <select class="disable-search col20" asp-for="customerClassID">
+                     <option value="">ค้นหาจากประเภทสมาชิก</option>
+                     @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                     {
+                        <option value="@item.ID">@item.Name</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่สมัครจาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col15" placeholder="วันที่สมัครถึง" />
+                  <select asp-for="search_birthday" class="col10">
+                     <option value="" class="blank">วันเกิด</option>
+                     @for (var i = 1; i < 32; i++)
+                     {
+                        <option value="@i">@i</option>
+                     }
+                  </select>
+                  <select asp-for="search_birthmonth" class="col10">
+                     <option value="" class="blank">เดือนเกิด</option>
+                     @for (var i = 1; i < 13; i++)
+                     {
+                        <option value="@i">@DateUtil.GetFullMonth(i)</option>
+                     }
+                  </select>
+                  <input type="text" class="input-text col10 number" asp-for="search_birthyear" placeholder="ปีเกิด(ค.ศ.)">
+                  <select asp-for="customer_chanal" class="col20">
+                     <option value="" class="blank">ค้นหาจากช่องทางการสมัคร</option>
+                     <option value="@CustomerChanal.TIP">@CustomerChanal.TIP.toName()</option>
+                     <option value="@CustomerChanal.Mobile">@CustomerChanal.Mobile.toName()</option>
+                     <option value="@CustomerChanal.MobileImport">@CustomerChanal.MobileImport.toName()</option>
+                     <option value="@CustomerChanal.ShareHolderImport">@CustomerChanal.ShareHolderImport.toName()</option>
+                     <option value="@CustomerChanal.AmazonImport">@CustomerChanal.AmazonImport.toName()</option>
+                     <option value="@CustomerChanal.DhiMemberImport">@CustomerChanal.DhiMemberImport.toName()</option>
+                     <option value="@CustomerChanal.INTIntersect">@CustomerChanal.INTIntersect.toName()</option>
+                     <option value="@CustomerChanal.TipInsure">@CustomerChanal.TipInsure.toName()</option>
+
+                  </select>
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>หมายเลขสมาชิก</th>
+                     <th>ชื่อสมาชิก</th>
+                     <th>รหัสผู้ใช้งาน</th>
+                     <th>ประเภทสมาชิก</th>
+                     <th>วันเกิด</th>
+                     <th>ช่องทางการสมัคร</th>
+                     <th>วันที่สมัคร</th>
+                     <th>คะแนนสะสม</th>
+                     <th>IIA</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.Customers)
+                  {
+                     <tr>
+                        <td><a target="_blank" href="@Url.Action("Update", "Customer", new { id = item.ID })">@item.RefCode</a></td>
+                        <td>@item.NameTh @item.SurNameTh</td>
+                        <td>@item.User.UserName</td>
+                        <td>
+                           @if (item.CustomerClass != null)
+                           {
+                              @item.CustomerClass.Name
+                           }
+                        </td>
+                        <td>@DateUtil.ToDisplayDate(item.DOB)</td>
+                        <td>@item.Channel.toName()</td>
+                        <td>@DateUtil.ToDisplayDateTime(item.Create_On)</td>
+                        <td>@NumUtil.FormatCurrency(item.Point - item.RedeemPoint)</td>
+                        <td><a href="#" onclick="iia_check('@item.NameTh','@item.SurNameTh','@item.IDCard'); return false;">IIA</a></td>
+                     </tr>
+                  }
+
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pno = ViewBag.PageNo;
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("Customer", "Report", new { id = 1, pno= pnumber - 10,search_birthyear= Model.search_birthyear, search_birthday = Model.search_birthday, search_birthmonth = Model.search_birthmonth,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("Customer", "Report", new { id = 1, pno=i,search_birthyear= Model.search_birthyear, search_birthday = Model.search_birthday, search_birthmonth = Model.search_birthmonth,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("Customer", "Report", new { id = 1, pno=pnumber +10,search_birthyear= Model.search_birthyear, search_birthday = Model.search_birthday, search_birthmonth = Model.search_birthmonth,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("Customer", "Report", new { id = 1, pno=i,search_birthyear= Model.search_birthyear, search_birthday = Model.search_birthday, search_birthmonth = Model.search_birthmonth,customer_chanal = Model.customer_chanal, customerClassID = Model.customerClassID, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+
+         }
+      </div><!-- .container -->
+   </div>
+</div>
+
+<div class="normal-popup" id="iia-popup">
+   <div class="normal-popup-close" id="iia-popup-close"><i class="fas fa-times"></i></div>
+   <div class="normal-popup-wrapper" style="overflow-y:auto;">
+      <div class="normal-popup-body">
+         <div class="normal-popup-content">
+            <div id="iiacontent">
+            </div>
+         </div>
+         <!-- .privilege-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .privilege-popup-wrapper -->
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+   <script>
+      function iia_onopen(e) {
+         if (e != null)
+            e.preventDefault();
+
+         jQuery('#iia-popup').addClass('is-active');
+         jQuery('#iia-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#iia-popup').removeClass('is-active');
+         });
+      }
+      function iia_check(name, surname, idc) {
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Action("IIACheck", "Report")',
+            data: { name: name, surname: surname, idc: idc },
+            success: function (data) {
+               if (data != null) {
+                  var text = "";
+                  if (data.resultCode == "Y") {
+                     text += name + ' ' + surname + " เป็นลูกค้าทิพยประกันภัย<br/><br/>"
+                     if (data.data != null && data.data.length > 0) {
+                        text += "<table cellpadding='3' cellspacing='3'>";
+                        for (var i = 0; i < data.data.length; i++) {
+                           var item = data.data[i];
+                           var effectiveDate = "";
+                           if (item.effectiveDate != null && item.effectiveDate != '') {
+                              var split = item.effectiveDate.split(' ');
+                              split = split[0].split('/');
+                              effectiveDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           var expiryDate = "";
+                           if (item.expiryDate != null && item.expiryDate != '') {
+                              var split = item.expiryDate.split(' ');
+                              split = split[0].split('/');
+                              expiryDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           text += "<tr >";
+                           text += "<td style='font-weight:700;'>" + (i + 1) + ".</td>";
+                           text += "<td style='font-weight:700;'>PolicyNo:</td>";
+                           text += "<td>" + item.policyNo + "</td>";
+                           text += "<td style='font-weight:700;'>PreviousPolicyNo:</td>";
+                           text += "<td>" + item.previousPolicyNo + "</td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>InsuranceClass:</td>";
+                           text += "<td>" + item.insuranceClass + "</td>";
+                           text += "<td style='font-weight:700;'>ProjectCode:</td>";
+                           text += "<td>" + item.projectCode + "</td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>EffectiveDate:</td>";
+                           text += "<td>" + effectiveDate + "</td>";
+                           text += "<td style='font-weight:700;'>ExpiryDate:</td>";
+                           text += "<td>" + expiryDate + "</td>";
+                           text += "</tr>";
+
+                           var outlet = item.outletCode;
+                           if (item.outletCode == '@OutletCode.MobileApplication') {
+                              outlet = '@OutletCodeName.MobileApplication';
+                           }
+                           else if (item.outletCode == '@OutletCode.TipInsureWeb') {
+                              outlet = '@OutletCodeName.TipInsureWeb';
+                           }
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>OutletCode:</td>";
+                           text += "<td>" + outlet + "</td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td><br/></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "</tr>";
+                         }
+                        text += "</table>";
+
+                     }
+                  }
+                  else {
+                     text += "ไม่ใช่ลูกค้าทิพยประกันภัยหรือระบุข้อมูลไม่ถูกต้อง";
+                  }
+                  $('#iiacontent').html(text);
+                  iia_onopen();
+               }
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+               alert(errorThrown);
+            }
+         });
+      }
+
+   </script>
+}

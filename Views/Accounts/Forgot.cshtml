@@ -1,0 +1,39 @@
+﻿@model Dhipaya.DTO.Accounts.Forgot
+
+@{
+   ViewData["Title"] = "ลืมรหัสผ่าน";
+   Layout = "_LayoutTIP";
+}
+<main class="main forget-main">
+   <div class="login-block">
+      <div class="login-body">
+         <h3 class="login-title">ลืมรหัสผ่าน</h3>
+         <form class="login-form" id="form-login" name="form-login" role="form" asp-action="Forgot">
+            <div class="login-input-block">
+               <input type="email" asp-for="Email" placeholder="อีเมล (รหัสผู้ใช้งาน)" required email>
+            </div>
+            @if (ViewData["ErrorMessage"] != null && ViewData["ErrorMessage"].ToString() != string.Empty)
+            {
+               <span class="warning">@ViewData["ErrorMessage"]</span>
+            }
+            @if (ViewData["Message"] != null && ViewData["Message"].ToString() != string.Empty)
+            {
+               <span>@ViewData["Message"]</span>
+            }
+            <button type="submit" class="submit-button button button-red">ส่งข้อมูล</button>
+         </form>
+      </div><!-- .login-body -->
+   </div><!-- .login-block -->
+</main>
+
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+      });
+   </script>
+}
+
+
+

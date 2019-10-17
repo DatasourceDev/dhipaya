@@ -1,0 +1,151 @@
+﻿@model Dhipaya.DTO.ReportDTO
+@{
+   ViewData["Title"] = "อันดับการแลกสิทธิพิเศษของร้านค้า/บริการ";
+   Layout = "_LayoutTIP";
+   var no = 0;
+   var pno = 1;
+   if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+   {
+      pno = ViewBag.PageNo;
+   }
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title"><small>อันดับการแลก</small>สิทธิพิเศษ<small>ของ</small>ร้านค้า/บริการ</h2>
+               <div class="title-right">
+               </div>
+            </div>
+            <form id="form" asp-controller="Report" asp-action="PrivilegeRank" role="form" autocomplete="off" method="get" asp-route-id="">
+               <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
+               <h4 class="sub-heading-right">
+                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ ร้านค้า/บริการ, สิทธิพิเศษ, เงื่อนไข, ที่อยู่">
+                  <select class="disable-search col20" asp-for="search_category_id">
+                     <option value="">ค้นหาจากประเภทสิทธิพิเศษ</option>
+                     @foreach (var item in ViewBag.ListCategory)
+                     {
+                        <option value="@item.CategoryID">@item.CategoryName</option>
+                     }
+                  </select>
+                  <button class="submit-button" type="submit"><i class="fa fa-search"></i></button>
+               </h4>
+            </form>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>ลำดับ</th>
+                     <th>ร้านค้า</th>
+                     <th>สิทธิพิเศษ</th>
+                     <th>ใช้สิทธิ์</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  @foreach (var item in Model.PrivilegeRanks)
+                  {
+                     no++;
+                     <tr>
+                        <td>@(no + ((pno - 1) * 100))</td>
+                        <td>
+                           <a target="_blank" href="@Url.Action("Update", "Merchant", new { id = item.MerchantID })" title="@item.Merchant.MerchantName">
+                              @if (!string.IsNullOrEmpty(item.Merchant.MerchantName) && @item.Merchant.MerchantName.Length > 40)
+                              {
+                                 item.Merchant.MerchantName = item.Merchant.MerchantName.Substring(0, 40) + "...";
+                              }
+                              @item.Merchant.MerchantName
+                           </a>
+                        </td>
+                        <td>
+                           <small title="@item.PrivilegeName">
+                              @if (!string.IsNullOrEmpty(item.PrivilegeName) && item.PrivilegeName.Length > 40)
+                              {
+                                 item.PrivilegeName = item.PrivilegeName.Substring(0, 40) + "...";
+                              }
+                              @item.PrivilegeName
+                           </small>
+                        </td>
+                        <td>
+                           <a href="@Url.Action("Redeem", "Privilege", new { search_privilege = item.PrivilegeID })"
+                              class="btn btn-link" target="_blank">
+                              @NumUtil.FormatCurrency(item.Redeems.Count())
+                           </a>
+                        </td>
+                     </tr>
+                  }
+               </tbody>
+
+            </table>
+         </div>
+         @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+         {
+            var pnumber = ((int)(pno / 10) * 10) + 1;
+            var end = false;
+            <nav class="pagination">
+               @if (ViewBag.PageLength > 10)
+               {
+                  if (pno > 10)
+                  {
+                     <a href="@Url.Action("PrivilegeRank", "Report", new { id = 1, pno= pnumber - 10,search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item" style="width:80px">ก่อนหน้า</a>
+                     <a href="#" class="item" onclick="return false">...</a>
+                  }
+                  for (var i = pnumber; i < pnumber + 10; i++)
+                  {
+                     if (i <= ViewBag.PageLength)
+                     {
+                        if (i == ViewBag.PageNo)
+                        {
+                           <a href="" class="item active">@i</a>
+                        }
+                        else
+                        {
+                           <a href="@Url.Action("PrivilegeRank", "Report", new { id = 1, pno=i,search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item">@i</a>
+                        }
+                     }
+                     else
+                     {
+                        end = true;
+                     }
+                  }
+                  @if (!end)
+                  {
+                     <a href="#" class="item" onclick="return false">...</a>
+                     <a href="@Url.Action("PrivilegeRank", "Report", new { id = 1, pno=pnumber +10,search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item" style="width:80px">ถัดไป</a>
+                  }
+               }
+               else
+               {
+                  @for (var i = 1; i <= ViewBag.PageLength; i++)
+                  {
+                     if (i == ViewBag.PageNo)
+                     {
+                        <a href="" class="item active">@i</a>
+                     }
+                     else
+                     {
+                        <a href="@Url.Action("PrivilegeRank", "Report", new { id = 1, pno=i,search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate })" class="item">@i</a>
+                     }
+                  }
+               }
+            </nav>
+
+         }
+
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+
+   </script>
+}
+

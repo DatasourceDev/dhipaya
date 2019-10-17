@@ -1,0 +1,160 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.PointLimit
+@{
+   ViewData["Title"] = "การจำกัดคะแนน";
+   Layout = "_LayoutTIP";
+
+}
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+         if ('@Model.Period' == '@Period.Once')
+            period_onchange($('#PeriodOnce').get(0));
+         else if('@Model.Period' == '@Period.Day')
+           period_onchange($('#PeriodDay').get(0));
+         else if('@Model.Period' == '@Period.Week')
+               period_onchange($('#PeriodWeek').get(0));
+         else if('@Model.Period' == '@Period.Month')
+             period_onchange($('#PeriodMonth').get(0));
+         else
+             period_onchange($('#PeriodUnlimited').get(0));
+      });
+
+      function period_onchange(obj) {
+         $('#LimitedOnce').prop("required", false);
+         $('#LimitedDay').prop("required", false);
+         $('#LimitedWeek').prop("required", false);
+         $('#LimitedMonth').prop("required", false);
+
+         if (obj.checked == true) {
+            if (obj.value == '@Period.Once') {
+               $('#LimitedOnce').prop("required", true);
+            }
+            else if (obj.value == '@Period.Day') {
+               $('#LimitedDay').prop("required", true);
+            }
+            else if (obj.value == '@Period.Week') {
+               $('#LimitedWeek').prop("required", true);
+            }
+            else if (obj.value == '@Period.Month') {
+               $('#LimitedMonth').prop("required", true);
+            }
+         }
+      }
+   </script>
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <h2><small>การ</small>จำกัด<small>คะแนน</small></h2>
+            <div class="icon"><i class="fa fa-coins"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="Limit" asp-action="Modify" role="form" method="post">
+            @Html.HiddenFor(m => m.ID)
+            @Html.HiddenFor(m => m.Create_By)
+            @Html.HiddenFor(m => m.Create_On)
+ @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+            <div class="profile-block-with-bg">
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>จำกัดคะแนน<span class="text-red">*</span></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodUnlimited" asp-for="Period" value="@Period.None" onchange="period_onchange(this)">
+                                    <span>ไม่จำกัด</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px"></td>
+                              <td></td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodOnce" asp-for="Period" value="@Period.Once" onchange="period_onchange(this)">
+                                    <span>ต่อครั้ง</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedOnce" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedOnce, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodDay" asp-for="Period" value="@Period.Day" onchange="period_onchange(this)">
+                                    <span>ต่อวัน</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedDay" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedDay, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodWeek" asp-for="Period" value="@Period.Week" onchange="period_onchange(this)">
+                                    <span>ต่อสัปดาห์</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedWeek" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedWeek, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodMonth" asp-for="Period" value="@Period.Month" onchange="period_onchange(this)">
+                                    <span>ต่อเดือน</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedMonth" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedMonth, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+<tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td colspan="3">
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td colspan="3">
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                  </div>
+               </div>
+            </div>
+
+         </form>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+
+

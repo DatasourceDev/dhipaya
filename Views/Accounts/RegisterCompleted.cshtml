@@ -1,0 +1,47 @@
+﻿@model Dhipaya.DTO.CustomerDTO;
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "สมัครสำเร็จ";
+   Layout = "_LayoutTIP";
+   @if (ViewBag.TotalPoint == null)
+   {
+      var points = context.CustomerPoints.Where(w => w.CustomerID == Model.ID);
+      ViewBag.TotalPoint = points.Sum(s => s.Point);
+   }
+}
+<main class="main register-end">
+   <div class="register-block">
+      <h1>ยินดีต้อนรับ สู่ TIP Society</h1>
+      <h3>โซเชียลแห่งความสุข สนุกได้ทุกไลฟ์สไตล์</h3>
+      <div class="member-detail-block">
+         <div class="member-detail-wrapper">
+            <div class="member-type">
+               คุณเป็นสมาชิกระดับ
+               <strong><span class="text-gold">@Model.customerClassName</span></strong>
+            </div>
+            <div class="member-point">
+               คะแนนสะสมเริ่มต้น
+               <strong>@NumUtil.FormatCurrency(ViewBag.TotalPoint)</strong>
+            </div>
+         </div>
+         <div class="member-number">หมายเลขสมาชิก : @Model.refCode</div>
+      </div>
+      <div class="register-action">
+         <a href="@Url.Action("Update","Customer")" class="button button-white">ข้อมูลสมาชิก</a>
+         <a href="@Url.Action("Privilege","Home")" class="button button-red">สิทธิพิเศษ</a>
+      </div>
+   </div><!-- .register-block -->
+</main>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('body').addClass('login-page');
+         $("#form-register").validate({
+            submitHandler: function (form) {
+               form.submit();
+            }
+         });
+      });
+   </script>
+}

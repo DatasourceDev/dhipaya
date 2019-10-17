@@ -1,0 +1,65 @@
+﻿@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "หน้าหลัก";
+   Layout = "_LayoutTIP";
+
+   var merchantcnt = this.context.Merchants.Where(w => w.Status == StatusType.Active).Count();
+   var privilegecnt = this.context.Privileges.Where(w => w.Status == StatusType.Active).Count();
+   var membercnt = this.context.Customers.Count();
+   var news = this.context.NewsActivities.Where(w => w.Status == StatusType.Active).Count();
+   var subscriber = this.context.Subscribers.Count();
+   var faq = this.context.Questions.Where(w => w.Status == StatusType.Active).Count();
+}
+
+
+
+<div class="faq">
+   <div id="faq-condition" class="faq-content">
+      <div class="container">
+         <ul class="faq-condition-list">
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(merchantcnt)</h1> </div>
+               <h3 class="faq-condition-title"><small>ร้านค้า/บริการ</small></h3>
+               <p class="faq-condition-text">
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(privilegecnt)</h1></div>
+               <h3 class="faq-condition-title"><small>สิทธิพิเศษ</small></h3>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(membercnt)</h1></div>
+               <h3 class="faq-condition-title"><small>สมาชิก</small></h3>
+               <p class="faq-condition-text">
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(subscriber)</h1></div>
+               <h3 class="faq-condition-title"><small>ผู้สมัครรับข่าวสาร</small></h3>
+               <p class="faq-condition-text">
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(news)</h1></div>
+               <h3 class="faq-condition-title"><small>ข่าวสารและกิจกรรม</small></h3>
+               <p class="faq-condition-text">
+               </p>
+            </li>
+            <li class="faq-condition-item">
+               <div class="faq-condition-icon"><h1>@NumUtil.FormatCurrency(faq)</h1></div>
+               <h3 class="faq-condition-title"><small>คำถามที่พบบ่อย</small></h3>
+               <p class="faq-condition-text">
+               </p>
+            </li>
+         </ul>
+      </div><!-- .container -->
+   </div><!-- #faq-condition -->
+   <!-- .container -->
+</div><!-- .faq-main -->
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('faq-main');
+      });
+   </script>
+}

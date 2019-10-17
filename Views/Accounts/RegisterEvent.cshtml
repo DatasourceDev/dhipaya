@@ -1,0 +1,157 @@
+﻿@model Dhipaya.DTO.CustomerDTO;
+@{
+    ViewData["Title"] = "สมัครสมาชิก";
+    Layout = "_RegisterLayout";
+}
+
+
+<!-- START Login Form -->
+@*@Html.ValidationSummary()*@
+@if (Model.result_code == 1)
+{
+    <div class="alert alert-success" role="alert">
+        <button class="close" data-dismiss="alert"></button>
+        ลงทะเบียนสำเร็จ
+    </div>
+}
+<form id="form-register" name="form-register" class="p-t-15" role="form" asp-action="RegisterEvent">
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-6">
+                <label>ชื่อ (ภาษาไทย)</label>
+                <input type="text" asp-for="firstName" class="form-control" required placeholder="ชื่อ (ภาษาไทย)">
+                @Html.ValidationMessageFor(m => m.firstName, "", new { @class = "error" })
+            </div>
+            <div class="col-lg-6">
+                <label>นามสกุล (ภาษาไทย)</label>
+                <input type="text" asp-for="lastName" class="form-control" required placeholder="นามสกุล (ภาษาไทย)">
+                @Html.ValidationMessageFor(m => m.lastName, "", new { @class = "error" })
+            </div>
+        </div>
+    </div>
+    @*<div class="form-group">
+            <div class="row">
+                <div class="col-lg-6">
+                    <label>ชื่อ(ภาษาอังกฤษ)</label>
+                    <input type="text" asp-for="NameEn" class="form-control" required placeholder="ชื่อ(ภาษาอังกฤษ)">
+                    @Html.ValidationMessageFor(m => m.NameEn, "", new { @class = "error" })
+                </div>
+                <div class="col-lg-6">
+                    <label>นามสกุล(ภาษาอังกฤษ)</label>
+                    <input type="text" asp-for="LastNameEn" class="form-control" required placeholder="นามสกุล(ภาษาอังกฤษ)">
+                    @Html.ValidationMessageFor(m => m.LastNameEn, "", new { @class = "error" })
+                </div>
+            </div>
+        </div>*@
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-6">
+                <label>หมายเลขโทรศัพท์มือถือ</label>
+                <input type="text" asp-for="moblieNo" class="form-control phone" placeholder="หมายเลขโทรศัพท์มือถือ" data-placement="left" data-toggle="tooltip" data-original-title="ตัวอย่าง 081-234-5678">
+                @Html.ValidationMessageFor(m => m.moblieNo, "", new { @class = "error" })
+            </div>
+            <div class="col-lg-6">
+                <label>อีเมล (รหัสผู้ใช้งาน)</label>
+                <input type="text" asp-for="email" class="form-control" placeholder="อีเมล (รหัสผู้ใช้งาน)" autocomplete="off">
+                @Html.ValidationMessageFor(m => m.email, "", new { @class = "error" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-12">
+                <label>คุณเป็นลูกค้าทิพยประกันภัยหรือไม่</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="radio radio-success">
+                    @if (Model.isDhiMember)
+                    {
+                        <input type="radio" value="true" asp-for="isDhiMember" id="yes" onchange="$('#divMember').show();" checked>
+                        <label for="yes">ใช่</label>
+                        <input type="radio" value="false" asp-for="isDhiMember" id="no" onchange="$('#divMember').hide();">
+                        <label for="no">ไม่ใช่</label>
+                    }
+                    else
+                    {
+                        <input type="radio" value="true" asp-for="isDhiMember" id="yes" onchange="$('#divMember').show();" >
+                        <label for="yes">ใช่</label>
+                        <input type="radio" value="false" asp-for="isDhiMember" id="no" onchange="$('#divMember').hide();" checked>
+                        <label for="no">ไม่ใช่</label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.isDhiMember, "", new { @class = "error" })
+            </div>
+        </div>
+    </div>
+    <div id="divMember" style="@(Model.isDhiMember ? "" : "display:none;")" >
+        <div class="form-group">
+            <div class="row">
+                <div class="col-lg-12">
+                    <label>กรอกหมายเลขบัตรประชาชนและชื่อ-นามสกุลของผู้เอาประกันภัยให้ถูกต้องตามกรมธรรม์เพื่อรับสิทธิพิเศษพิเศษสำหรับลูกค้าทิพยประกันภัย</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-lg-6">
+                    <label>หมายเลขบัตรประชาชน</label>
+                    <input type="text" asp-for="citizenId" class="form-control idcard" placeholder="หมายเลขบัตรประชาชน">
+                    @Html.ValidationMessageFor(m => m.citizenId, "", new { @class = "error" })
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="checkbox check-success ">
+                    <input type="checkbox" asp-for="userConfirm" value="true">
+                    <label for="UserConfirm">ยอมรับ <a href="@Url.Action("TermsAndConditions", "Accounts")" target="_blank"><u>ข้อตกลงและเงื่อนไข</u></a></label>
+                </div>
+                @Html.ValidationMessageFor(m => m.userConfirm, "", new { @class = "error" })
+            </div>
+        </div>
+    </div>
+    <!-- START Form Control-->
+    <div class="row">
+        <div class="col-md-6 no-padding sm-p-l-10">
+
+        </div>
+
+    </div>
+    <div class="row">
+        @*@Html.ValidationSummary()*@
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 no-padding sm-p-l-10 text-center">
+            <a class="btn btn-primary btn-block btn-cons m-t-10 text-center" href="javascript:void(0);" onclick="regsiter()">ลงทะเบียน</a>
+        </div>
+        <div class="col-md-6 no-padding sm-p-l-10 text-center">
+            <a class="btn btn-primary btn-danger m-t-10 pull-right" asp-action="Login">กลับหน้าล๊อคอิน</a>
+        </div>
+    </div>
+</form>
+<!--END Login Form-->
+<div class="pull-bottom sm-pull-bottom"></div>
+
+<script>
+    function regsiter() {
+        if ($('#userConfirm').get(0).checked == false) {
+            alert('โปรดยินยอมข้อตกลงและเงื่อนไขก่อนทำรายการขั้นต่อไป');
+            return;
+        }
+        if ($('#yes').get(0).checked == false) {
+           if ($('#citizenId').val() == null) {
+                alert('กรุณาระบุหมายเลขบัตรประชาชน');
+
+            }
+        }
+        document.forms['form-register'].submit();
+    }
+</script>

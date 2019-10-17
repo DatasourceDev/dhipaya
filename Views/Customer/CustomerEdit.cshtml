@@ -1,0 +1,776 @@
+﻿@using Dhipaya.Extensions;
+@using Dhipaya.Services;
+@inject Dhipaya.Services.LoginServices loginServices
+@model Dhipaya.DTO.CustomerDTO;
+@{
+   ViewData["Title"] = "ข้อมูลสมาชิก";
+   Layout = "_LayoutTIP";
+   var admin = false;
+}
+
+@if (loginServices.isInRoles(new string[] { RoleName.Admin }))
+{
+   admin = true;
+}
+@{
+   if (Model.ID > 0)
+   {
+      Html.RenderPartial("_CustomerHdr", Model);
+   }
+}
+<div class="profile-container">
+   <nav class="profile-navigation">
+      <div class="container">
+         <ul class="profile-menu">
+
+            @if (Model.ID > 0)
+            {
+               <li class="profile-menu-item is-active">
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("Info","Customer",new {id=Model.ID })"><img src="~/tip/img/icon-9.png"></a>
+                  </div>
+                  <a href="@Url.Action("Info","Customer",new {id=Model.ID })"><span class="profile-menu-text">ข้อมูลสมาชิก</span></a>
+               </li>
+               <li class="profile-menu-item">
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("Point","Customer",new {id=Model.ID })">
+                        <img src="~/tip/img/icon-10.png">
+                     </a>
+                  </div>
+                  <a href="@Url.Action("Point","Customer",new {id=Model.ID })">
+                     <span class="profile-menu-text">คะแนนสะสม</span>
+                  </a>
+               </li>
+               <li class="profile-menu-item">
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("History","Customer",new {id=Model.ID })">
+                        <img src="~/tip/img/icon-11.png">
+                     </a>
+                  </div>
+                  <a href="@Url.Action("History","Customer",new {id=Model.ID })">
+                     <span class="profile-menu-text">ประวัติการใช้สิทธิพิเศษ</span>
+                  </a>
+               </li>
+               @if (Model.username.Contains("@"))
+               {
+                  if (admin)
+                  {
+                     <li class="profile-menu-item">
+                        <div class="profile-menu-icon">
+                           <a href="@Url.Action("ResetPwd","Customer", new { id = Model.ID})">
+                              <img src="~/tip/img/icon-12.png">
+                           </a>
+                        </div>
+                        <a href="@Url.Action("ResetPwd","Customer", new { id = Model.ID})">
+                           <span class="profile-menu-text">เปลี่ยนรหัสผ่าน</span>
+                        </a>
+                     </li>
+                  }
+                  else
+                  {
+                     <li class="profile-menu-item">
+                        <div class="profile-menu-icon">
+                           <a href="@Url.Action("ResetPwdO","Customer", new { id = Model.ID})">
+                              <img src="~/tip/img/icon-12.png">
+                           </a>
+                        </div>
+
+                        <a href="@Url.Action("ResetPwdO","Customer", new { id = Model.ID})">
+                           <span class="profile-menu-text">เปลี่ยนรหัสผ่าน</span>
+                        </a>
+                     </li>
+                  }
+
+               }
+
+            }
+            else
+            {
+               <li class="profile-menu-item is-active">
+                  <div class="profile-menu-icon">
+                     <a href="@Url.Action("Create","Customer")"><img src="~/tip/img/icon-9.png"></a>
+                  </div>
+                  <a href="@Url.Action("Create","Customer")"><span class="profile-menu-text">ข้อมูลสมาชิก</span></a>
+               </li>
+
+            }
+         </ul>
+      </div><!-- .container -->
+   </nav><!-- .profile-navigation -->
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <h2>ข้อมูล<small>สมาชิก</small></h2>
+            @if (admin)
+            {
+               <div class="icon"><a href="#" onclick="iia_check('@Model.firstName','@Model.lastName','@Model.citizenId'); return false;"><i class="fa fa-user" style="color:#fff"></i></a></div>
+            }
+            else
+            {
+               <div class="icon"><i class="fa fa-user"></i></div>
+            }
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <form id="form-profile" class="profile-edit-form" asp-controller="Customer" asp-action="Modify" role="form" method="post">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.userID)
+               @Html.HiddenFor(m => m.userLevel)
+               @Html.HiddenFor(m => m.customerNo)
+               @Html.HiddenFor(m => m.channelInt)
+               @Html.HiddenFor(m => m.villageNo)
+               @Html.HiddenFor(m => m.lane)
+               @Html.HiddenFor(m => m.laneEn)
+               @Html.HiddenFor(m => m.facebookFlag)
+               @Html.HiddenFor(m => m.prefix)
+               @Html.HiddenFor(m => m.prefixEn)
+               @Html.HiddenFor(m => m.refCode)
+               @Html.HiddenFor(m => m.isDhiMember)
+               @Html.HiddenFor(m => m.facebookID)
+               @Html.HiddenFor(m => m.username)
+               @Html.HiddenFor(m => m.prefixInt)
+               @Html.HiddenFor(m => m.prefixEnInt)
+               @Html.HiddenFor(m => m.IIAIgnoreSyned)
+               @Html.HiddenFor(m => m.pEncyprt)
+               @Html.HiddenFor(m => m.customerClassID)
+               @Html.HiddenFor(m => m.customerClassName)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ชื่อ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="firstName" required placeholder="ชื่อ" />
+                                 @Html.ValidationMessageFor(m => m.firstName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>นามสกุล<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="lastName" required placeholder="นามสกุล" />
+                                 @Html.ValidationMessageFor(m => m.lastName, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เบอร์โทรศัพท์มือถือ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="tel" class="input-text digits" asp-for="moblieNo" required maxlength="10" minlength="10" placeholder="เบอร์โทรศัพท์มือถือ" />
+                                 @Html.ValidationMessageFor(m => m.moblieNo, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ไลน์ไอดี</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="lineId" placeholder="ไลน์ไอดี" />
+                                 @Html.ValidationMessageFor(m => m.lineId, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หมายเลขบัตรประชาชน<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="hidden" asp-for="citizenIdInit" />
+                                 @if (string.IsNullOrEmpty(Model.citizenIdInit) | admin)
+                                 {
+                                    <input type="text" class="input-text digits" asp-for="citizenId" required maxlength="13" minlength="13" placeholder="หมายเลขบัตรประชาชน" />
+                                    @Html.ValidationMessageFor(m => m.citizenId, "", new { @class = "warning" })
+                                 }
+                                 else
+                                 {
+                                    @Model.citizenId
+                                    <input type="hidden" asp-for="citizenId" />
+                                 }
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>วันเกิด</td>
+                              <td>
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="birthdate" placeholder="วว/ดด/ปปปป" />
+                                 @Html.ValidationMessageFor(m => m.birthdate, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           @if (admin)
+                           {
+                              <tr>
+                                 <td>อีเมล<span class="text-red">*</span></td>
+                                 <td>
+                                    <input type="email" class="input-text email" asp-for="email" required placeholder="อีเมล" />
+                                    @Html.ValidationMessageFor(m => m.email, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              @if (Model.ID == 0)
+                              {
+                                 <tr>
+                                    <td>รหัสผ่าน<span class="text-red">*</span></td>
+                                    <td>
+                                       <input class="input-text" type="password" placeholder="รหัสผ่าน" asp-for="password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
+                                       <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+                                       @Html.ValidationMessageFor(m => m.password, "", new { @class = "warning" })
+                                    </td>
+                                 </tr>
+                                 <tr>
+                                    <td>ยืนยันรหัสผ่าน<span class="text-red">*</span></td>
+                                    <td>
+                                       <input class="input-text" type="password" placeholder="ยืนยันรหัสผ่าน" asp-for="confirmPassword" required autocomplete="off" maxlength="12" equalTo="#password">
+                                       @Html.ValidationMessageFor(m => m.confirmPassword, "", new { @class = "warning" })
+                                    </td>
+                                 </tr>
+                              }
+                              else
+                              {
+                                 <tr>
+                                    <td>รหัสผ่าน<span class="text-red">*</span></td>
+                                    <td>
+                                       @if (!string.IsNullOrEmpty(Model.pEncyprt))
+                                       {
+                                          @DataEncryptor.Decrypt(Model.pEncyprt)
+                                       }
+                                    </td>
+                                 </tr>
+
+                              }
+                              <tr>
+                                 <td>สถานะสมาชิก<span class="text-red">*</span></td>
+                                 <td>
+                                    <select class="disable-search" asp-for="status">
+                                       @foreach (var item in Model.status.toUserStatus().ToReverseDictionary())
+                                       {
+                                          if (Model.status == ((UserStatusType)item.Key).toStatusName() | Model.status == ((UserStatusType)item.Key).toStatusNameEn())
+                                          {
+                                             <option value="@(((UserStatusType)item.Key).toStatusName())" selected>@item.Value</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(((UserStatusType)item.Key).toStatusName())">@item.Value</option>
+                                          }
+                                       }
+                                    </select>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>Promotion Code</td>
+                                 <td>
+                                    <input type="text" class="input-text" asp-for="promotionCode" placeholder="Promotion Code" />
+                                    @Html.ValidationMessageFor(m => m.promotionCode, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td>Friend Code</td>
+                                 <td>
+                                    <input type="text" class="input-text" asp-for="friendCode" placeholder="Friend Code" />
+                                    @Html.ValidationMessageFor(m => m.friendCode, "", new { @class = "warning" })
+                                 </td>
+                              </tr>
+                           }
+                           else
+                           {
+                              <tr>
+                                 <td>อีเมล<span class="text-red">*</span></td>
+                                 <td>
+                                    @Model.email
+                                    @Html.HiddenFor(m => m.email)
+                                    @Html.HiddenFor(m => m.status)
+                                    @Html.HiddenFor(m => m.promotionCode)
+                                    @Html.HiddenFor(m => m.friendCode)
+                                 </td>
+                              </tr>
+                           }
+                           @if (admin)
+                           {
+                              <tr>
+                                 <td>ช่องทางการสมัคร</td>
+                                 <td>
+                                    @Model.channelInt.toName()
+                                 </td>
+                              </tr>
+                           }
+                           <tr>
+                              <td>วันที่สมัคร</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.createon)
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.updateon)
+                              </td>
+                           </tr>
+
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ชื่อ(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="firstNameEn" placeholder="ชื่อ(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.firstNameEn, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>นามสกุล(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="lastNameEn" placeholder="นามสกุล(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.lastNameEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>Passport</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="passport" placeholder="Passport" />
+                                 @Html.ValidationMessageFor(m => m.passport, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right hide-mobile">
+
+
+                     @*<img src="~/tip/img/card.png">*@
+                  </div>
+               </div><!-- .profile-row -->
+               <div class="profile-title-block">
+                  <h3>ที่อยู่<small>ปัจจุบัน</small></h3>
+               </div><!-- .profile-title-block -->
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>บ้านเลขที่</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="houseNo" placeholder="บ้านเลขที่" />
+                                 @Html.ValidationMessageFor(m => m.houseNo, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หมู่บ้าน</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="villageName" placeholder="หมู่บ้าน" />
+                                 @Html.ValidationMessageFor(m => m.villageName, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หมู่</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="moo" placeholder="หมู่" />
+                                 @Html.ValidationMessageFor(m => m.moo, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ซอย</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="soi" placeholder="ซอย" />
+                                 @Html.ValidationMessageFor(m => m.soi, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ถนน</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="road" placeholder="ถนน" />
+                                 @Html.ValidationMessageFor(m => m.road, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>จังหวัด</td>
+                              <td class="input-block">
+                                 <select asp-for="provinceId" asp-items="@(ViewBag.ListProvince)" onchange="ProvinceOnchange(this)" relatedto="districtId"></select>
+                                 @Html.ValidationMessageFor(m => m.provinceId, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เขต/อำเภอ</td>
+                              <td class="input-block">
+                                 <select asp-for="districtId" onchange="AumphurOnchange(this)" relatedto="subDistrictId">
+                                    <option value="">-</option>
+                                 </select>
+                                 @Html.ValidationMessageFor(m => m.districtId, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แขวง/ตำบล</td>
+                              <td class="input-block">
+                                 <select asp-for="subDistrictId" onchange="TumbonOnchange(this)" relatedto="postalCode">
+                                    <option value="">-</option>
+                                 </select>
+                                 @Html.ValidationMessageFor(m => m.subDistrictId, "", new { @class = "warning " })
+
+                              </td>
+
+                           </tr>
+                           <tr>
+                              <td>รหัสไปรษณีย์</td>
+                              <td>
+                                 <input type="text" class="input-text digits" asp-for="postalCode" maxlength="5" placeholder="รหัสไปรษณีย์" readonly />
+                                 @Html.ValidationMessageFor(m => m.postalCode, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>บ้านเลขที่(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="houseNoEn" placeholder="บ้านเลขที่(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.houseNoEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หมู่บ้าน(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="villageNameEn" placeholder="หมู่บ้าน(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.villageNameEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>หมู่(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="mooEn" placeholder="หมู่(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.mooEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ซอย(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="soiEn" placeholder="ซอย(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.soiEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ถนน(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text" asp-for="roadEn" placeholder="ถนน(อังกฤษ)" />
+                                 @Html.ValidationMessageFor(m => m.roadEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>จังหวัด(อังกฤษ)</td>
+                              <td class="input-block">
+                                 <select asp-for="provinceIdEn" asp-items="@(ViewBag.ListProvinceEn)" onchange="ProvinceOnchange(this,null,null,'EN')" relatedto="districtIdEn"></select>
+                                 @Html.ValidationMessageFor(m => m.districtIdEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เขต/อำเภอ(อังกฤษ)</td>
+                              <td class="input-block">
+                                 <select asp-for="districtIdEn" onchange="AumphurOnchange(this,null,'EN')" relatedto="subDistrictIdEn">
+                                    <option value="">-</option>
+                                 </select>
+                                 @Html.ValidationMessageFor(m => m.districtIdEn, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แขวง/ตำบล(อังกฤษ)</td>
+                              <td class="input-block">
+                                 <select asp-for="subDistrictIdEn" onchange="TumbonOnchange(this,'EN')" relatedto="postalCodeEn">
+                                    <option value="">-</option>
+                                 </select>
+                                 @Html.ValidationMessageFor(m => m.subDistrictIdEn, "", new { @class = "warning " })
+
+                              </td>
+
+                           </tr>
+                           <tr>
+                              <td>รหัสไปรษณีย์(อังกฤษ)</td>
+                              <td>
+                                 <input type="text" class="input-text digits" asp-for="postalCodeEn" maxlength="5" placeholder="รหัสไปรษณีย์(อังกฤษ)" readonly />
+                                 @Html.ValidationMessageFor(m => m.postalCodeEn, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col ">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td></td>
+                              <td>
+                                 <button type="button" class="button button-blue" onclick="save_onclick()">บันทึกข้อมูล</button>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div><!-- .profile-row -->
+            </form>
+         </div>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div><!-- .profile-container -->
+<div class="normal-popup" id="iia-popup">
+   <div class="normal-popup-close" id="iia-popup-close"><i class="fas fa-times"></i></div>
+   <div class="normal-popup-wrapper" style="overflow-y:auto;">
+      <div class="normal-popup-body">
+         <div class="normal-popup-content">
+            <div id="iiacontent">
+            </div>
+         </div>
+         <!-- .privilege-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .privilege-popup-wrapper -->
+</div>
+<div class="normal-popup" id="normal-popup">
+   <div class="normal-popup-close"><i class="fas fa-times"></i></div>
+   <div class="normal-popup-wrapper">
+      <div class="normal-popup-body">
+         <div class="normal-popup-content">
+            <p id="pop-condition"></p>
+         </div>
+         <div class="normal-popup-content">
+            <h3>เลขบัตรประชาชนนี้ได้มีการลงทะเบียนแล้ว</h3>
+            <br />
+            @if (Model.dupEmail != null)
+            {
+               foreach (var email in Model.dupEmail)
+               {
+                  @("อีเมล " + email + " ที่เคยใช้ลงทะเบียน")
+                  <br />
+               }
+            }
+            @if (Model.dupFBID != null)
+            {
+               foreach (var fb in Model.dupFBID)
+               {
+                  @("Facebook " + fb + " ที่เคยใช้ลงทะเบียน")
+                  <br />
+               }
+            }
+            <a href="@Url.Action("SendDeleteAccount", "Accounts", new {idcard =Model.dupIdcard})"><b>ลบบัญชีเดิม</b></a>
+         </div>
+         <!-- .normal-popup-action -->
+      </div><!-- .prvilege-popup-body -->
+   </div><!-- .normal-popup-wrapper -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+          if ($('#provinceId').val() != null)
+            ProvinceOnchange(document.getElementById("provinceId"), '@Model.districtId', '@Model.subDistrictId');
+
+         if ($('#provinceIdEn').val() != null)
+            ProvinceOnchange(document.getElementById("provinceIdEn"), '@Model.districtIdEn', '@Model.subDistrictIdEn', 'EN');
+
+         if ('@Model.ShowIdcardDupPopup'.toLowerCase() == 'true') {
+            popup_onclick(event);
+         }
+      });
+      function popup_onclick(e) {
+         if (e != null)
+            e.preventDefault();
+         jQuery('#normal-popup').addClass('is-active');
+         jQuery('.normal-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#normal-popup').removeClass('is-active');
+
+         });
+      }
+      function save_onclick() {
+         var valid = $("#form-profile").valid();
+         $('#error_userConfirm').hide();
+         $('#error_password').hide();
+
+         if ($('#password').get(0) != null) {
+         if (!validatepwd($('#password').val())) {
+               $('#error_password').show();
+               valid = false;
+            }
+         }
+         if (valid)
+            document.forms['form-profile'].submit();
+      }
+
+
+       function ProvinceOnchange(obj, aID, tID, lang) {
+           if (obj.attributes.relatedto == null)
+               return;
+           $.ajax({
+               type: 'get',
+               url: '@Url.Action("LoadAumphur", "Admin")',
+               contentType: 'application/json; charset=utf-8',
+               data: { pID: obj.value, lang:lang },
+               dataType: 'json',
+               success: function (data) {
+                   var relatedto = obj.attributes.relatedto.value;
+                   var result = '';
+                   for (var i = 0, iL = data.length; i < iL; i++) {
+                       if (aID == data[i].value)
+                           result += '<option selected value="' + data[i].value + '">' + data[i].text + '</option>';
+                       else
+                           result += '<option value="' + data[i].value + '">' + data[i].text + '</option>';
+                   }
+                   $('#' + relatedto).html(result);
+                  AumphurOnchange(document.getElementById(relatedto), tID, lang);
+               }
+           });
+       }
+      function AumphurOnchange(obj, tID, lang) {
+           if (obj.attributes.relatedto == null)
+               return;
+           $.ajax({
+               type: 'get',
+               url: '@Url.Action("LoadTumbon", "Admin")',
+               contentType: 'application/json; charset=utf-8',
+              data: { aID: obj.value, lang: lang },
+               dataType: 'json',
+               success: function (data) {
+                   var relatedto = obj.attributes.relatedto.value;
+                   var result = '';
+                   for (var i = 0, iL = data.length; i < iL; i++) {
+                       if (tID == data[i].value)
+                           result += '<option selected value="' + data[i].value + '">' + data[i].text + '</option>';
+                       else
+                           result += '<option value="' + data[i].value + '">' + data[i].text + '</option>';
+                   }
+                  $('#' + relatedto).html(result);
+                  TumbonOnchange(document.getElementById(relatedto), lang);
+               }
+           });
+
+      }
+      function TumbonOnchange(obj, lang) {
+           if (obj.attributes.relatedto == null)
+               return;
+           $.ajax({
+               type: 'get',
+               url: '@Url.Action("LoadPostal", "Admin")',
+               contentType: 'application/json; charset=utf-8',
+              data: { tID: obj.value, lang: lang },
+               dataType: 'json',
+               success: function (data) {
+                   var relatedto = obj.attributes.relatedto.value;
+                   $('#' + relatedto).val(data);
+               }
+           });
+
+       }
+   </script>
+   <script>
+      function iia_onopen(e) {
+         if (e != null)
+            e.preventDefault();
+
+         jQuery('#iia-popup').addClass('is-active');
+         jQuery('#iia-popup-close').click(function (e) {
+            jQuery('body').removeClass('popup-is-active');
+            jQuery('#iia-popup').removeClass('is-active');
+         });
+      }
+      function iia_check(name, surname, idc) {
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Action("IIACheck", "Report")',
+            data: { name: name, surname: surname, idc: idc },
+            success: function (data) {
+               if (data != null) {
+                  var text = "";
+                  if (data.resultCode == "Y") {
+                     text += name + ' ' + surname + " เป็นลูกค้าทิพยประกันภัย<br/><br/>"
+                     if (data.data != null && data.data.length > 0) {
+                        text += "<table cellpadding='3' cellspacing='3'>";
+                        for (var i = 0; i < data.data.length; i++) {
+                           var item = data.data[i];
+                           var effectiveDate = "";
+                           if (item.effectiveDate != null && item.effectiveDate != '') {
+                              var split = item.effectiveDate.split(' ');
+                              split = split[0].split('/');
+                              effectiveDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           var expiryDate = "";
+                           if (item.expiryDate != null && item.expiryDate != '') {
+                              var split = item.expiryDate.split(' ');
+                              split = split[0].split('/');
+                              expiryDate = split[1] + '/' + split[0] + '/' + split[2];
+                           }
+                           text += "<tr >";
+                           text += "<td style='font-weight:700;'>" + (i + 1) + ".</td>";
+                           text += "<td style='font-weight:700;'>PolicyNo:</td>";
+                           text += "<td>" + item.policyNo + "</td>";
+                           text += "<td style='font-weight:700;'>PreviousPolicyNo:</td>";
+                           text += "<td>" + item.previousPolicyNo + "</td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>InsuranceClass:</td>";
+                           text += "<td>" + item.insuranceClass + "</td>";
+                           text += "<td style='font-weight:700;'>ProjectCode:</td>";
+                           text += "<td>" + item.projectCode + "</td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>EffectiveDate:</td>";
+                           text += "<td>" + effectiveDate + "</td>";
+                           text += "<td style='font-weight:700;'>ExpiryDate:</td>";
+                           text += "<td>" + expiryDate + "</td>";
+                           text += "</tr>";
+
+                           var outlet = item.outletCode;
+                           if (item.outletCode == '@OutletCode.MobileApplication') {
+                              outlet = '@OutletCodeName.MobileApplication';
+                           }
+                           else if (item.outletCode == '@OutletCode.TipInsureWeb') {
+                              outlet = '@OutletCodeName.TipInsureWeb';
+                           }
+                           text += "<tr>";
+                           text += "<td></td>";
+                           text += "<td style='font-weight:700;'>OutletCode:</td>";
+                           text += "<td>" + outlet + "</td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "</tr>";
+
+                           text += "<tr>";
+                           text += "<td><br/></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "<td></td>";
+                           text += "</tr>";
+                         }
+                        text += "</table>";
+
+                     }
+                  }
+                  else {
+                     text += "ไม่ใช่ลูกค้าทิพยประกันภัยหรือระบุข้อมูลไม่ถูกต้อง";
+                  }
+                  $('#iiacontent').html(text);
+                  iia_onopen();
+               }
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+               alert(errorThrown);
+            }
+         });
+      }
+
+   </script>
+}
+

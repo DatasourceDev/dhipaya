@@ -1,0 +1,144 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.Question
+@{
+  ViewData["Title"] = "คำถามที่พบบ่อย";
+  Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+  <div class="profile-information">
+    <div class="container">
+      <div class="profile-title-block">
+        @if (Model.ID > 0)
+        {
+          <h2>แก้ไข<small>คำถามที่พบบ่อย</small></h2>
+        }
+        else
+        {
+          <h2>เพิ่ม<small>คำถามที่พบบ่อย</small></h2>
+        }
+        <div class="icon"><i class="fa fa-store-alt"></i></div>
+      </div><!-- .profile-title-block -->
+      <form id="form" class="profile-edit-form" asp-controller="Question" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+        <div class="profile-block-with-bg">
+          @Html.HiddenFor(m => m.ID)
+          @Html.HiddenFor(m => m.Create_By)
+          @Html.HiddenFor(m => m.Create_On)
+          @Html.HiddenFor(m => m.Update_By)
+          @Html.HiddenFor(m => m.Update_On)
+          @Html.HiddenFor(m => m.Index)
+          <div class="profile-row">
+
+            <div class="profile-col-full">
+              <table class="profile-table">
+                <tbody>
+                  <tr>
+                    <td>หัวข้อ<span class="text-red">*</span></td>
+                    <td>
+                      <input type="text" asp-for="Title" class="input-text " required placeholder="หัวข้อ">
+                      @Html.ValidationMessageFor(m => m.Title, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>เนื้อหา<span class="text-red">*</span></td>
+                    <td>
+                      <textarea asp-for="Description" class="summernote" placeholder="เนิ้อหา" rows="20" required></textarea>
+                      <p class="warning" id="error_description" style="display:none;">กรุณาระบุเนื้อหา</p>
+                      @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="profile-col">
+              <table class="profile-table">
+                <tbody>
+                  <tr>
+                    <td>กลุ่มคำถาม</td>
+                    <td class="input-block">
+                      <select asp-for="QuestionGroupID" asp-items="@(new SelectList(ViewBag.ListGroup, "ID", "Name"))">
+                        <option value="">-</option>
+                      </select>
+                      @Html.ValidationMessageFor(m => m.QuestionGroupID, "", new { @class = "warning" })
+
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>แสดงตั้งแต่</td>
+                    <td>
+                      <input type="text" data-toggle="datepicker" class="input-text" asp-for="sDate" placeholder="วว/ดด/ปปปป" />
+                      @Html.ValidationMessageFor(m => m.sDate, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>แสดงถึงวันที่</td>
+                    <td>
+                      <input type="text" data-toggle="datepicker" class="input-text" asp-for="eDate" placeholder="วว/ดด/ปปปป" />
+                      @Html.ValidationMessageFor(m => m.eDate, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                    <td>
+                      <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                      @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>ผู้แก้ไขล่าสุด</td>
+                    <td>
+                      @Model.Update_By
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>แก้ไขล่าสุด</td>
+                    <td>
+                      @Html.DisplayFor(m => m.Update_On)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="profile-col align-right">
+                 <button type="button" class="button button-blue" onclick="submit_onclick()">บันทึกข้อมูล</button>
+
+            </div>
+          </div><!-- .profile-row -->
+
+        </div>
+
+
+      </form>
+
+    </div><!-- .container -->
+  </div><!-- .profile-information -->
+</div>
+@section scripts{
+  <script>
+
+    $(document).ready(function () {
+      $('main').addClass('profile-main');
+
+
+      $('.summernote').summernote({
+        height: 600
+      });
+    });
+
+  function submit_onclick() {
+      var valid = $("#form").valid();
+      $('#error_description').hide();
+      var text = get_content($('#Description').val());
+        if (text == null || text== '') {
+          $('#error_description').show();
+          valid = false;
+        }
+
+      if (valid)
+        document.forms['form'].submit();
+    }
+  </script>
+}
+
+

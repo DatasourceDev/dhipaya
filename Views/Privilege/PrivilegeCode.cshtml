@@ -1,0 +1,157 @@
+﻿@model Dhipaya.Models.PrivilegeCodeValidate
+@inject Dhipaya.DAL.ChFrontContext context
+@{
+   ViewData["Title"] = "นำเข้ารหัสสิทธิพิเศษ";
+   Layout = "_LayoutTIP";
+}
+@functions
+{
+bool canDelete(int Id)
+{
+   bool retVal = true;
+
+   return retVal;
+}
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">นำเข้า<small>รหัสสิทธิพิเศษ</small></h2>
+               <div class="title-right">
+                  <a href="@Url.Action("TemplateCode","Privilege")" class="button button-white" target="_blank">ดาวน์โหลดไฟล์ตัวอย่าง</a>
+               </div>
+            </div>
+            <form id="form" asp-controller="Privilege" asp-action="ModifyPrivilegeCode" role="form" autocomplete="off" asp-route-id="" method="post" enctype="multipart/form-data">
+               <input type="hidden" asp-for="PrivilegeID" />
+               <div class="profile-block-with-bg">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>
+                                 <input type="file" name="file" class="" accept=".xlsx, .xls, .csv" />
+                              </td>
+                              <td>
+                                 <button class="button button-blue" type="submit">ตรวจสอบไฟล์</button>
+                              </td>
+                              <td style="text-align:right">
+                                 @if (Model.PrivilegeCodes != null && Model.PrivilegeCodes.Count() > 0)
+                                 {
+                                    <button class="button button-blue" type="submit" value="true" name="valid">บันทึกข้อมูล</button>
+                                 }
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+               @if (Model.PrivilegeCodes != null && Model.PrivilegeCodes.Count() > 0)
+               {
+                  <br />
+                  <div class="profile-title-block">
+                     <h2><small>รายการนำเข้า</small>ได้</h2>
+                  </div><!-- .profile-title-block -->
+                  <div class="profile-block-with-bg">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>Code</th>
+                              <th>จำนวนสิทธิพิเศษ</th>
+                              <th>วันที่เริ่ม</th>
+                              <th>วันที่หมดอายุ</th>
+                              <th>สถานะ</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @for (var i = 0; i < Model.PrivilegeCodes.Count(); i++)
+                           {
+                              <tr>
+                                 <td>
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].Code" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].MaxUse" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].EffectiveDate" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].ExpiryDate" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].Status" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].effDate" />
+                                    <input type="hidden" asp-for="PrivilegeCodes[i].expDate" />
+                                    @Model.PrivilegeCodes[i].Code
+                                 </td>
+                                 <td>@NumUtil.FormatCurrency(Model.PrivilegeCodes[i].MaxUse)</td>
+                                 <td>@Model.PrivilegeCodes[i].effDate</td>
+                                 <td>@Model.PrivilegeCodes[i].expDate</td>
+                                 <td>@Model.PrivilegeCodes[i].Status.toStatusName()</td>
+                              </tr>
+                           }
+                        </tbody>
+
+                     </table>
+                     <div class="profile-row">
+                        <div class="profile-col">
+                        </div>
+                        <div class="profile-col align-right">
+                           <button class="button button-blue" type="submit" value="true" name="valid">บันทึกข้อมูล</button>
+                        </div>
+                     </div>
+                  </div><!-- .profile-title-block -->
+               }
+
+               @if (Model.PrivilegeCodeFails != null && Model.PrivilegeCodeFails.Count() > 0)
+               {
+                  <br />
+                  <div class="profile-title-block">
+                     <h2><small>รายการที่นำเข้า</small>ไม่ได้<small></small></h2>
+                  </div><!-- .profile-title-block -->
+                  <div class="profile-block-with-bg">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>บรรทัดที่</th>
+                              <th>Code</th>
+                              <th>จำนวนสิทธิพิเศษ</th>
+                              <th>วันที่เริ่ม</th>
+                              <th>วันที่หมดอายุ</th>
+                              <th>สถานะ</th>
+                              <th>รายละเอียด</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @for (var i = 0; i < Model.PrivilegeCodeFails.Count(); i++)
+                           {
+                              <tr style="color:red">
+                                 <td>@Model.PrivilegeCodeFails[i].row</td>
+                                 <td>@Model.PrivilegeCodeFails[i].Code</td>
+                                 <td>@Model.PrivilegeCodeFails[i].MaxUse</td>
+                                 <td>@Model.PrivilegeCodeFails[i].EffectiveDate</td>
+                                 <td>@Model.PrivilegeCodeFails[i].ExpiryDate</td>
+                                 <td>@Model.PrivilegeCodeFails[i].Status</td>
+                                 <td><p>@Model.PrivilegeCodeFails[i].message</p></td>
+                              </tr>
+                           }
+                        </tbody>
+
+                     </table>
+                  </div><!-- .profile-title-block -->
+               }
+            </form>
+
+         </div><!-- .container -->
+
+      </div>
+   </div>
+</div>
+
+@section scripts{
+   <script>
+         $(document).ready(function () {
+            $('main').addClass('profile-main');
+
+            if (parseInt('@Model.result') > 0) {
+               alert('นำเข้าสำเร็จ');
+            }
+         });
+
+   </script>
+}
+

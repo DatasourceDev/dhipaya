@@ -1,0 +1,58 @@
+﻿@model Dhipaya.DTO.MailSendDeleteAccountDTO
+@using Dhipaya.DTO;
+@using Dhipaya.Services;
+
+@{
+   ViewData["Title"] = "MailDeleteAccount";
+   var root = Url.ActionContext.HttpContext.Request.Scheme + "://" + Url.ActionContext.HttpContext.Request.Host;
+   var idcard = Model.customers.FirstOrDefault().IDCard;
+   var codes = Model.codes;
+   var i = 0;
+}
+
+<style type="text/css">
+   .button:hover {
+      color: #d9192b !important;
+   }
+</style>
+
+<div class="site-wrapper" style="max-width: 430px;color: #000;font-size: 12pt;text-align:left;">
+   <main class="main">
+      <div>
+         <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
+      </div>
+      <p style="text-align:left; padding: 5px;">
+         เรียนสมาชิก เลขบัตรประชาชน @idcard
+         <br />
+         ท่านทีบัญชีสมาชิก TIP Society จำนวน @Model.customers.Count() บัญชี ดังนี้
+         <br />
+         <br />
+         @foreach (var customer in Model.customers)
+         {
+            var url = root + "/Accounts/Terminate?code=" + codes[i];
+            i++;
+            @(i + ". ชื่อสมาชิก " + customer.NameTh + " " + customer.SurNameTh )
+            <br />
+            @("ประเภทสมาชิก " + customer.CustomerClass.Name)
+            <br />
+            @("สมาชิกเลขที่ " + customer.RefCode )
+            <br />
+            @( "คะแนนสะสมคงเหลือ " + customer.Point + " คะแนน") <a href="@(url)" target="_blank">ลบบัญชีนี้</a>
+            <br />
+            <br />
+            <br />
+         }
+         <br />
+         ติดต่อสอบถาม
+         <br />
+         Line : <a style="text-decoration:underline;color: #15c !important;" href="http://line.me/ti/p/~@@tipsociety">@("@Tipsociety")</a>
+         <br />
+         โทร. <a href="tel:1736" style="text-decoration: underline;" target="_blank">1736</a>
+      </p>
+      <div style="text-align:center;">
+         <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
+      </div>
+
+
+   </main>
+</div>

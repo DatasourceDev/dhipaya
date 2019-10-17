@@ -1,0 +1,121 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.MerchantCategory
+@{
+   ViewData["Title"] = "กลุ่มร้านค้า/บริการ";
+   Layout = "_LayoutTIP";
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.CategoryID > 0)
+            {
+               <h2>แก้ไข<small>กลุ่มร้านค้า/บริการ</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>กลุ่มร้านค้า/บริการ</small></h2>
+            }
+            <div class="icon"><i class="fa fa-th-large"></i></div>
+         </div><!-- .profile-title-block -->
+         <div class="profile-block-with-bg">
+            <form id="form" class="profile-edit-form" asp-controller="Category" asp-action="Modify" role="form" method="post" enctype="multipart/form-data">
+               @Html.HiddenFor(m => m.CategoryID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+                  @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               @Html.HiddenFor(m => m.Index)
+               @Html.HiddenFor(m => m.Url)
+               @Html.HiddenFor(m => m.Logo)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ชื่อกลุ่มร้านค้า/บริการ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="CategoryName" class="input-text" required placeholder="ชื่อกลุ่มร้านค้า/บริการ">
+                                 @Html.ValidationMessageFor(m => m.CategoryName, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ชื่อ[อักษรสีแดง]</td>
+                              <td>
+                                 <input type="text" asp-for="RedWord" class="input-text" required placeholder="ชื่อ[อักษรสีแดง]">
+                                 @Html.ValidationMessageFor(m => m.RedWord, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>คำอธิบาย<span class="text-red">*</span></td>
+                              <td>
+                                 <textarea asp-for="Description" placeholder="คำอธิบาย"></textarea>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+
+                           <tr>
+                              <td>ไอคอน</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.Logo))
+                                 {
+                                    <img src="@Url.Content(Model.Logo)" height="100" /><br/>
+                                 }
+                                 <input type="file" name="logo" accept="image/*" /><br/>
+                                 60x60 px
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รูปหน้าปก</td>
+                              <td>
+                                 @if (!string.IsNullOrEmpty(Model.Url))
+                                 {
+                                    <img src="@Url.Content(Model.Url)" height="200" /><br/>
+                                 }
+                                 <input type="file" name="file" accept="image/*" /><br/>
+                                 280x200 px
+                              </td>
+                           </tr>                    
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+<tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+
+                  </div>
+               </div><!-- .profile-row -->
+            </form>
+         </div>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+      });
+   </script>
+}
+
+

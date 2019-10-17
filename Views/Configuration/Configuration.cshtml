@@ -1,0 +1,68 @@
+﻿@model Dhipaya.Models.Configuration
+@{
+   ViewData["Title"] = "กำหนดค่าระบบ";
+   Layout = "_LayoutTIP";
+}
+
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            <div class="heading-wrapper">
+               <h2 class="title">กำหนดค่า<small>ระบบ</small></h2>
+               <div class="title-right">
+               </div>
+            </div>
+
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="Configuration" asp-action="Modify" role="form" method="post">
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               @Html.HiddenFor(m => m.Name)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>ส่งอีเมล friend get friend<span class="text-red">*</span></td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" asp-for="Value" value="1">
+                                    <span>เปิด</span>
+                                 </label>
+                              </td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" asp-for="Value" value="0">
+                                    <span>ปิด</span>
+                                 </label>
+                              </td>
+                           </tr>
+                     </table>
+                  </div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                  </div>
+               </div>
+
+            </div><!-- .profile-row -->
+         </form>
+
+      </div><!-- .container -->
+   </div>
+</div>
+
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+         
+      });
+   </script>
+}
+

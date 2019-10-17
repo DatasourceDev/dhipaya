@@ -1,0 +1,774 @@
+﻿@using Dhipaya.Extensions;
+@using Microsoft.EntityFrameworkCore;
+@model Dhipaya.Models.PointCondition
+@{
+   ViewData["Title"] = "เงื่อนไขการสะสมคะแนน";
+   Layout = "_LayoutTIP";
+   var productCount = 0;
+   int itemCount = 0;
+   var cCount = 0;
+
+}
+@section scripts{
+   <script>
+      $(document).ready(function () {
+         $('main').addClass('profile-main');
+
+         if ('@Model.PointType' == '@PointType.Fix')
+            pointtype_onchange($('#PointTypeFix').get(0));
+         else if('@Model.PointType' == '@PointType.Percentage')
+           pointtype_onchange($('#PointTypePercent').get(0));
+         else if('@Model.PointType' == '@PointType.Calculate')
+               pointtype_onchange($('#PointTypeCalculate').get(0));
+         else if('@Model.PointType' == '@PointType.Tier')
+             pointtype_onchange($('#PointTypeTier').get(0));
+
+         if ('@Model.Period' == '@Period.Once')
+            period_onchange($('#PeriodOnce').get(0));
+         else if('@Model.Period' == '@Period.Day')
+           period_onchange($('#PeriodDay').get(0));
+         else if('@Model.Period' == '@Period.Week')
+               period_onchange($('#PeriodWeek').get(0));
+         else if('@Model.Period' == '@Period.Month')
+             period_onchange($('#PeriodMonth').get(0));
+         else
+             period_onchange($('#PeriodUnlimited').get(0));
+
+         tran_onchange(document.getElementById("TransacionTypeID"));
+      });
+
+      function period_onchange(obj) {
+         $('#LimitedOnce').prop("required", false);
+         $('#LimitedDay').prop("required", false);
+         $('#LimitedWeek').prop("required", false);
+         $('#LimitedMonth').prop("required", false);
+
+         if (obj.checked == true) {
+            if (obj.value == '@Period.Once') {
+               $('#LimitedOnce').prop("required", true);
+            }
+            else if (obj.value == '@Period.Day') {
+               $('#LimitedDay').prop("required", true);
+            }
+            else if (obj.value == '@Period.Week') {
+               $('#LimitedWeek').prop("required", true);
+            }
+            else if (obj.value == '@Period.Month') {
+               $('#LimitedMonth').prop("required", true);
+            }
+
+         }
+      }
+
+      function pointtype_onchange(obj) {
+         $('.divfixpoint').hide();
+         $('.divpercentpoint').hide();
+         $('.divtierpoint').hide();
+         $('.divcalpoint').hide();
+         $('#Point').prop("required", false);
+         $('#Percent').prop("required", false);
+         $('#CalPointPurchaseAmt').prop("required", false);
+         $('#CalPoint').prop("required", false);
+         $('.tier-required').prop("required", false);
+         if (obj.checked == true) {
+            if (obj.value == '@PointType.Fix') {
+               $('.divfixpoint').show();
+               $('#Point').prop("required", true);
+            }
+            else if (obj.value == '@PointType.Percentage') {
+               $('.divpercentpoint').show();
+               $('#Percent').prop("required", true);
+            }
+            else if (obj.value == '@PointType.Calculate') {
+               $('.divcalpoint').show();
+               $('#CalPointPurchaseAmt').prop("required", true);
+               $('#CalPoint').prop("required", true);
+            }
+            else if (obj.value == '@PointType.Tier') {
+               $('.divtierpoint').show();
+               $('.tier-required').prop("required", true);
+            }
+
+         }
+      }
+      function day_onchange(all) {
+         if (all == true) {
+            $('.specialday').prop('checked',false);
+         }
+         else {
+            $('#IsAllDay').get(0).checked = false;
+         }
+      }
+
+      function tran_onchange(obj) {
+         $('#divProduct').hide();
+         $('#divOutlet').hide();
+         $('#divChannel').hide();
+         
+         $('#PointTypeFix').get(0).disabled = false;
+         $('#PointTypePercent').get(0).disabled = false;
+         $('#PointTypeCalculate').get(0).disabled = false;
+         $('#PointTypeTier').get(0).disabled = false;
+
+         $('#PeriodOnce').get(0).disabled = false;
+         $('#PeriodDay').get(0).disabled = false;
+         $('#PeriodWeek').get(0).disabled = false;
+         $('#PeriodMonth').get(0).disabled = false;
+
+         $('#LimitedDay').get(0).disabled = false;
+         $('#LimitedOnce').get(0).disabled = false;
+         $('#LimitedWeek').get(0).disabled = false;
+         $('#LimitedMonth').get(0).disabled = false;
+
+         //$('#LimitedDay').prop("required", false);
+         //$('#LimitedOnce').prop("required", false);
+         //$('#LimitedWeek').prop("required", false);
+         //$('#LimitedMonth').prop("required", false);
+
+         if ($(obj).val() == '@((int)TransacionTypeID.Register)' | $(obj).val() == '@((int)TransacionTypeID.Update)' | $(obj).val() ==  '@((int)TransacionTypeID.InviteFriend)' | $(obj).val() ==  '@((int)TransacionTypeID.ShareFacebook)') {
+            $('#PeriodUnlimited').get(0).checked = true;
+            $('#PointTypeFix').get(0).checked = true;
+
+            pointtype_onchange( $('#PointTypeFix').get(0));
+
+            $('#PeriodOnce').get(0).disabled = true;
+            $('#PeriodDay').get(0).disabled = true;
+            $('#PeriodWeek').get(0).disabled = true;
+            $('#PeriodMonth').get(0).disabled = true;
+
+            $('#LimitedDay').get(0).disabled = true;
+            $('#LimitedOnce').get(0).disabled = true;
+            $('#LimitedWeek').get(0).disabled = true;
+            $('#LimitedMonth').get(0).disabled = true;
+
+            $('#PointTypePercent').get(0).disabled = true;
+            $('#PointTypeCalculate').get(0).disabled = true;
+            $('#PointTypeTier').get(0).disabled = true;
+         }
+         else if ($(obj).val() == '@((int)TransacionTypeID.BuyInsure)'  | $(obj).val() == '@((int)TransacionTypeID.Renew)') {
+            $('#divProduct').show();
+            $('#divOutlet').show();
+            $('#divChannel').show();
+
+         }
+         else if ($(obj).val() ==  '@((int)TransacionTypeID.ClaimInsure)' ) {
+
+         }
+         else if ($(obj).val() ==  '@((int)TransacionTypeID.Other)') {
+
+         }
+      }
+
+
+      var ItemIdCount = @itemCount;
+
+      function addNode() {
+         var tableRows = $("#tiertable").find("tbody > tr");
+         var rowCount = tableRows.length;
+         var cloneRow = $(tableRows[0]).clone();
+         var cols = $(cloneRow).find('td');
+         var newItemId = ++ItemIdCount;
+
+         var firstcols = $(tableRows[0]).find('td');
+         var radio5 = $(firstcols[5]).find('input[type="radio"]');
+         var radio7 = $(firstcols[7]).find('input[type="radio"]');
+         var firstsel5 = radio5.get(0).checked;
+         var firstsel7 = radio7.get(0).checked;
+
+         $(cloneRow).attr('data-id', newItemId);
+         $(cloneRow).attr('data-index', rowCount);
+         $(cloneRow).appendTo("#tiertable");
+
+         configureInputControls(cols, rowCount, true,newItemId);
+
+
+         radio5.get(0).checked = firstsel5;
+         radio7.get(0).checked = firstsel7;
+         var removeBtn = $(cols).find('.btn-link');
+         $(removeBtn).attr('onclick', 'removeNode(' + newItemId + ')');
+         var rdoamt = $(cols).find('.rdoamt');
+         $(rdoamt).attr('onchange', 'number_onchange(' + newItemId + ')');
+         var rdopercent = $(cols).find('.rdopercent');
+         $(rdopercent).attr('onchange', 'number_onchange(' + newItemId + ')');
+      }
+
+      function configureInputControls(cols, rowIndex, isEmptyTB) {
+         var idx = "TierList_";
+         var nmx = "TierList";
+         var textBox = $(cols[0]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__ID');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].ID');
+         if (isEmptyTB) {
+            $(textBox).val("0");
+         }
+
+         textBox = $(cols[1]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__PurchaseAmtFrom');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].PurchaseAmtFrom');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         textBox = $(cols[3]).find('input');
+         $(textBox).attr('id', idx + rowIndex + '__PurchaseAmtTo');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].PurchaseAmtTo');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+
+
+
+         textBox = $(cols[7]).find('input[type="text"]');
+         $(textBox).attr('id', idx + rowIndex + '__Percent');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].Percent');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+         var  radio = $(cols[7]).find('input[type="radio"]');
+         $(radio).attr('id', idx + rowIndex + '__NumberType');
+         $(radio).attr('name', nmx + '[' + rowIndex + '].NumberType');
+         if (isEmptyTB) {
+            $(radio).get(0).checked = false;
+            //$(textBox).attr('required', false);
+         }
+
+
+
+         textBox = $(cols[5]).find('input[type="text"]');
+         $(textBox).attr('id', idx + rowIndex + '__Point');
+         $(textBox).attr('name', nmx + '[' + rowIndex + '].Point');
+         if (isEmptyTB) {
+            $(textBox).val("");
+         }
+
+         radio = $(cols[5]).find('input[type="radio"]');
+         $(radio).attr('id', idx + rowIndex + '__NumberType');
+         $(radio).attr('name', nmx + '[' + rowIndex + '].NumberType');
+         if (isEmptyTB) {
+            $(radio).get(0).checked = true;
+            //$(textBox).attr('required', true);
+         }
+      }
+
+      function number_onchange(itemId){
+         var tableRows = $("#tiertable").find("tbody > tr[data-id=" + itemId + "]");
+         var cols = tableRows.find('td');
+         var radio = $(cols[5]).find('input[type="radio"]');
+         if (radio.get(0).checked == true) {
+            var textBox = $(cols[5]).find('input[type="text"]');
+            //$(textBox).attr('required', true);
+
+            textBox = $(cols[7]).find('input[type="text"]');
+            //$(textBox).attr('required', false);
+         }
+         else {
+            var textBox = $(cols[7]).find('input[type="text"]');
+            //$(textBox).attr('required', true);
+            textBox = $(cols[5]).find('input[type="text"]');
+           // $(textBox).attr('required', false);
+         }
+      }
+      function removeNode(itemId) {
+         var tableRows = $("#tiertable").find("tbody > tr");
+         var rowCount = tableRows.length;
+         if (rowCount > 1) {
+             tableRows = $("#tiertable").find("tbody > tr[data-id=" + itemId + "]");
+            var row = $(tableRows);
+            row.remove();
+            resetIndex(itemId);
+         }
+      }
+
+      function resetIndex() {
+         var tableRows = $("#tiertable").find("tbody > tr");
+         if (tableRows.length > 1) {
+            for (i = 0; i < tableRows.length; i++) {
+                  var row = $(tableRows[i]);
+                  var cols = $(row).find('td');
+                  configureInputControls(cols, i, false);
+            }
+         }
+         var cols = $(tableRows[0]).find('td');
+         var removeBtn = $(cols[1]).find('.btn-action-remove');
+         $(removeBtn[0]).hide();
+      }
+
+   </script>
+}
+<div class="profile-container">
+   <div class="profile-information">
+      <div class="container">
+         <div class="profile-title-block">
+            @if (Model.ConditionID > 0)
+            {
+               <h2>แก้ไข<small>เงื่อนไขการสะสมคะแนน</small></h2>
+            }
+            else
+            {
+               <h2>เพิ่ม<small>เงื่อนไขการสะสมคะแนน</small></h2>
+            }
+            <div class="icon"><i class="fa fa-coins"></i></div>
+         </div><!-- .profile-title-block -->
+         <form id="form" class="profile-edit-form" asp-controller="Condition" asp-action="Modify" role="form" method="post">
+
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ConditionID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>รหัส<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="ConditionCode" class="input-text" required placeholder="รหัส">
+                                 @Html.ValidationMessageFor(m => m.ConditionCode, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ชื่อ<span class="text-red">*</span></td>
+                              <td>
+                                 <input type="text" asp-for="Name" class="input-text" required placeholder="ชื่อ">
+                                 @Html.ValidationMessageFor(m => m.Name, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>รายละเอียด</td>
+                              <td>
+                                 <textarea asp-for="Description" placeholder="รายละเอียด"></textarea>
+                                 @Html.ValidationMessageFor(m => m.Description, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ประเภทการทำรายการ<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="TransacionTypeID" asp-items="@(new SelectList(ViewBag.ListTransacionType, "TransacionTypeID", "Name"))" onchange="tran_onchange(this)"></select>
+                                 @Html.ValidationMessageFor(m => m.TransacionTypeID, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr id="divOutlet">
+                              <td>ช่องทางการซื้อ/ต่ออายุ<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="OutletCode">
+                                    <option value="@OutletCode.MobileApplication">@OutletCodeName.MobileApplication</option>
+                                    <option value="@OutletCode.TipInsureWeb">@OutletCodeName.TipInsureWeb</option>
+                                    <option value="@OutletCode.Other" >@OutletCodeName.Other</option>
+                                 </select>
+                              </td>
+                           </tr>
+                           <tr id="divChannel">
+                              <td>ต้นทาง<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="ChannelType">
+                                    <option value="@ChannelType.IIA">@ChannelType.IIA</option>
+                                    <option value="@ChannelType.Online">@ChannelType.Online</option>
+                                 </select>
+                              </td>
+                           </tr>
+                           <tr id="divProduct">
+                              <td>ประกันภัย<span class="text-red">*</span></td>
+                              <td>
+                                 @foreach (Product item in ViewBag.ListProduct)
+                                 {
+                                    var selected = Model.ProductList.Where(w => w.ProductID == item.ProductID).FirstOrDefault();
+                                    <label class="full-block">
+                                       @if (selected != null)
+                                       {
+                                          <input type="hidden" name="ProductList[@productCount].ID" value="@selected.ID">
+                                          <input type="checkbox" class="with-gap filled-in" name="ProductList[@productCount].ProductID" value="@item.ProductID" checked>
+                                       }
+                                       else
+                                       {
+                                          <input type="hidden" name="ProductList[@productCount].ID" value="0">
+                                          <input type="checkbox" class="with-gap filled-in" name="ProductList[@productCount].ProductID" value="@item.ProductID">
+                                       }
+                                          <span>@item.ProductCode @(!string.IsNullOrEmpty(item.SubProductCode) ? "[" + item.SubProductCode + "]" : "") @item.ProductName</span>
+                                    </label>
+                                    productCount++;
+                                 }
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>เริ่มตั้งแต่</td>
+                              <td>
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="sDate" placeholder="วว/ดด/ปปปป" />
+                                 @Html.ValidationMessageFor(m => m.sDate, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ถึงวันที่</td>
+                              <td>
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="eDate" placeholder="วว/ดด/ปปปป" />
+                                 @Html.ValidationMessageFor(m => m.eDate, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ประเภทสมาชิก<span class="text-red">*</span></td>
+                              <td>
+                                 @foreach (CustomerClass item in ViewBag.ListCustomerClass)
+                                 {
+                                    var selected = Model.CustomerClassList.Where(w => w.CustomerClassID == item.ID).FirstOrDefault();
+
+                                    <label class="full-block">
+                                       @if (selected != null)
+                                       {
+                                          <input type="hidden" name="CustomerClassList[@cCount].ID" value="@selected.ID">
+                                          <input type="checkbox" class="with-gap filled-in" name="CustomerClassList[@cCount].CustomerClassID" value="@item.ID" checked>
+                                       }
+                                       else
+                                       {
+                                          <input type="hidden" name="CustomerClassList[@cCount].ID" value="0">
+                                          <input type="checkbox" class="with-gap filled-in" name="CustomerClassList[@cCount].CustomerClassID" value="@item.ID">
+                                       }
+                                       <span>@item.Name</span>
+                                    </label>
+                                    cCount++;
+                                 }
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>สถานะการใช้งาน<span class="text-red">*</span></td>
+                              <td>
+                                 <select asp-for="Status" asp-items="@(new SelectList(Model.Status.ToReverseDictionary(), "Key", "Value"))"></select>
+                                 @Html.ValidationMessageFor(m => m.Status, "", new { @class = "warning" })
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>ผู้แก้ไขล่าสุด</td>
+                              <td>
+                                 @Model.Update_By
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>แก้ไขล่าสุด</td>
+                              <td>
+                                 @Html.DisplayFor(m => m.Update_On)
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div><!-- .profile-col -->
+               </div>
+
+            </div><!-- .profile-row -->
+            <br />
+            <div class="profile-title-block">
+               <h2><small>สะสมคะแนน</small>ตามวัน</h2>
+            </div><!-- .profile-title-block -->
+            <div class="profile-block-with-bg">
+               @Html.HiddenFor(m => m.ConditionID)
+               @Html.HiddenFor(m => m.Create_By)
+               @Html.HiddenFor(m => m.Create_On)
+               @Html.HiddenFor(m => m.Update_By)
+               @Html.HiddenFor(m => m.Update_On)
+               <div class="profile-row">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>วัน</td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in" asp-for="IsAllDay" onchange="day_onchange(true)">
+                                    <span>ทุกวัน</span>
+                                 </label>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>วันประจำสัปดาห์</td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsMon" onchange="day_onchange()">
+                                    <span>วันจันทร์</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsTue" onchange="day_onchange()">
+                                    <span>วันอังคาร</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsWed" onchange="day_onchange()">
+                                    <span>วันพุธ</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsThu" onchange="day_onchange()">
+                                    <span>วันพฤหัส</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsFri" onchange="day_onchange()">
+                                    <span>วันศุกร์</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsSat" onchange="day_onchange()">
+                                    <span>วันเสาร์</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsSun" onchange="day_onchange()">
+                                    <span>วันอาทิตย์</span>
+                                 </label>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>วันเกิด</td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="checkbox" class="with-gap filled-in specialday" asp-for="IsForBirthday" onchange="day_onchange()">
+                                    <span>วันเกิด</span>
+                                 </label>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
+            </div><!-- .profile-row -->
+            <br />
+            <div class="profile-title-block">
+               <h2><small>รูปแบบการ</small>คำนวณ<small>คะแนน</small></h2>
+            </div><!-- .profile-title-block -->
+            <div class="profile-block-with-bg">
+               <div class="profile-row">
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>รูปแบบ<span class="text-red">*</span></td>
+                              <td>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PointTypeFix" asp-for="PointType" value="@PointType.Fix" onchange="pointtype_onchange(this)">
+                                    <span>Fix</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PointTypePercent" asp-for="PointType" value="@PointType.Percentage" onchange="pointtype_onchange(this)">
+                                    <span>เปอร์เซ็นต์จากยอดซื้อ</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PointTypeCalculate" asp-for="PointType" value="@PointType.Calculate" onchange="pointtype_onchange(this)">
+                                    <span>คำนวณจากยอดซื้อ</span>
+                                 </label>
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PointTypeTier" asp-for="PointType" value="@PointType.Tier" onchange="pointtype_onchange(this)">
+                                    <span>Tier</span>
+                                 </label>
+                              </td>
+                              <td style="float:right;"><button type="button" onclick="addNode()" class="button button-blue divtierpoint">เพิ่ม Tier</button></td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col-full">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr class="divfixpoint">
+                              <td></td>
+                              <td style="width:150px">
+                                 <input type="text" class="input-text digits" asp-for="Point" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.Point, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr class="divpercentpoint">
+                              <td></td>
+                              <td style="width:150px">
+                                 <input type="text" class="input-text number" asp-for="Percent" placeholder="เปอร์เซ็นต์" />
+                                 @Html.ValidationMessageFor(m => m.Percent, "", new { @class = "warning" })
+                              </td>
+                              <td>%</td>
+
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col-full divcalpoint">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td></td>
+                              <td style="width:80px">ทุกๆ</td>
+                              <td style="width:150px">
+                                 <input type="text" class="input-text number" asp-for="CalPointPurchaseAmt" placeholder="ยอดซื้อ" />
+                              </td>
+                              <td style="width:80px">ได้รับ</td>
+                              <td style="width:150px">
+                                 <input type="text" class="input-text digits" asp-for="CalPoint" placeholder="คะแนน" />
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col-full divtierpoint">
+                     <table class="profile-table" id="tiertable">
+                        <tbody>
+                           @if (Model.TierList == null || Model.TierList.Count <= 0)
+                           {
+                              <tr data-id="@(++itemCount)" data-index="0">
+                                 <td><input type="hidden" asp-for="TierList[0].ID" value="0" /></td>
+                                 <td style="width:100px">
+                                    <input type="text" asp-for="TierList[0].PurchaseAmtFrom" class="input-text number tier-required" required placeholder="ยอดซื้อ" />
+                                 </td>
+                                 <td style="width:80px">ถึง</td>
+                                 <td style="width:100px">
+                                    <input type="text" asp-for="TierList[0].PurchaseAmtTo" class="input-text number tier-required" required placeholder="ยอดซื้อ" />
+                                 </td>
+                                 <td style="width:80px">ได้รับ</td>
+                                 <td style="width:200px">
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in rdoamt" asp-for="TierList[0].NumberType" value="@NumberType.Amount" onchange="number_onchange(1)" checked>
+                                       <span> <input type="text" asp-for="TierList[0].Point" class="input-text digits " placeholder="คะแนน" /></span>
+                                    </label>
+                                 </td>
+                                 <td>คะแนน</td>
+                                 <td style="width:200px">
+                                    <label class="inline">
+                                       <input type="radio" class="with-gap filled-in rdopercent" asp-for="TierList[0].NumberType" value="@NumberType.Percent" onchange="number_onchange(1)">
+                                       <span> <input type="text" asp-for="TierList[0].Percent" class="input-text number " placeholder="เปอร์เซนต์" /></span>
+                                    </label>
+                                 </td>
+                                 <td>%</td>
+                                 <td><button type="button" onclick="removeNode(1)" class="btn btn-link">ลบ</button></td>
+                              </tr>
+                           }
+                           else
+                           {
+                              for (int i = 0; i < Model.TierList.Count; i++)
+                              {
+                                 <tr data-id="@(++itemCount)" data-index="0">
+                                    <td>
+                                       @if (Model.TierList[0].ID <= 0)
+                                       {
+                                          <input type="hidden" asp-for="TierList[i].ID" value="0" />
+                                       }
+                                       else
+                                       {
+
+                                          <input type="hidden" asp-for="TierList[i].ID" />
+                                       }
+                                    </td>
+                                    <td style="width:100px">
+                                       <input type="text" asp-for="TierList[i].PurchaseAmtFrom" class="input-text number tier-required" required placeholder="ยอดซื้อ" />
+                                    </td>
+                                    <td style="width:80px">ถึง</td>
+                                    <td style="width:100px">
+                                       <input type="text" asp-for="TierList[i].PurchaseAmtTo" class="input-text number tier-required" required placeholder="ยอดซื้อ" />
+                                    </td>
+                                    <td style="width:80px">ได้รับ</td>
+                                    <td style="width:200px">
+                                       <label class="inline">
+                                          <input type="radio" class="with-gap filled-in rdoamt" asp-for="TierList[i].NumberType" value="@NumberType.Amount" onchange="number_onchange(@itemCount)">
+                                          <span> <input type="text" asp-for="TierList[i].Point" class="input-text digits " placeholder="คะแนน" /></span>
+                                       </label>
+                                    </td>
+                                    <td>คะแนน</td>
+                                    <td style="width:200px">
+                                       <label class="inline">
+                                          <input type="radio" class="with-gap filled-in rdopercent" asp-for="TierList[i].NumberType" value="@NumberType.Percent" onchange="number_onchange(@itemCount)">
+                                          <span> <input type="text" asp-for="TierList[i].Percent" class="input-text number " placeholder="เปอร์เซนต์" /></span>
+
+                                       </label>
+                                    </td>
+                                    <td>%</td>
+                                    <td><button type="button" onclick="removeNode(@itemCount)" class="btn btn-link">ลบ</button></td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="profile-col"></div>
+                  <div class="profile-col align-right">
+                     <button type="submit" class="button button-blue">บันทึกข้อมูล</button>
+                  </div>
+               </div>
+            </div>
+            <br />
+            <div class="profile-title-block" style="display:none;">
+               <h2><small>การ</small>จำกัด<small>คะแนน</small></h2>
+            </div><!-- .profile-title-block -->
+            <div class="profile-block-with-bg" style="display:none;">
+               <div class="profile-row">
+                  <div class="profile-col">
+                     <table class="profile-table">
+                        <tbody>
+                           <tr>
+                              <td>จำกัดคะแนน<span class="text-red">*</span></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodUnlimited" asp-for="Period" value="@Period.None" onchange="period_onchange(this)">
+                                    <span>ไม่จำกัด</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px"></td>
+                              <td></td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodOnce" asp-for="Period" value="@Period.Once" onchange="period_onchange(this)">
+                                    <span>ต่อครั้ง</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedOnce" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedOnce, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodDay" asp-for="Period" value="@Period.Day" onchange="period_onchange(this)">
+                                    <span>ต่อวัน</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedDay" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedDay, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodWeek" asp-for="Period" value="@Period.Week" onchange="period_onchange(this)">
+                                    <span>ต่อสัปดาห์</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedWeek" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedWeek, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                           <tr>
+                              <td></td>
+                              <td style="width:150px">
+                                 <label class="inline">
+                                    <input type="radio" class="with-gap filled-in" id="PeriodMonth" asp-for="Period" value="@Period.Month" onchange="period_onchange(this)">
+                                    <span>ต่อเดือน</span>
+                                 </label>
+                              </td>
+                              <td style="width:100px">
+                                 <input type="text" class="input-text digits" asp-for="LimitedMonth" placeholder="คะแนน" />
+                                 @Html.ValidationMessageFor(m => m.LimitedMonth, "", new { @class = "warning" })
+                              </td>
+                              <td>คะแนน</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+
+               </div>
+            </div>
+
+         </form>
+      </div><!-- .container -->
+   </div><!-- .profile-information -->
+</div>
+
+
