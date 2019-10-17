@@ -24,7 +24,7 @@
       <p style="text-align:left; padding: 5px;">
          เรียนสมาชิก เลขบัตรประชาชน @idcard
          <br />
-         ท่านทีบัญชีสมาชิก TIP Society จำนวน @Model.customers.Count() บัญชี ดังนี้
+         ท่านมีบัญชีสมาชิก TIP Society จำนวน @Model.customers.Count() บัญชี ดังนี้
          <br />
          <br />
          @foreach (var customer in Model.customers)
@@ -33,13 +33,11 @@
             i++;
             @(i + ". ชื่อสมาชิก " + customer.NameTh + " " + customer.SurNameTh )
             <br />
-            @("ประเภทสมาชิก " + customer.CustomerClass.Name)
+            @("ประเภทสมาชิก " + (customer.CustomerClass != null ? customer.CustomerClass.Name : ""))
             <br />
             @("สมาชิกเลขที่ " + customer.RefCode )
             <br />
             @( "คะแนนสะสมคงเหลือ " + customer.Point + " คะแนน") <a href="@(url)" target="_blank">ลบบัญชีนี้</a>
-            <br />
-            <br />
             <br />
          }
          <br />

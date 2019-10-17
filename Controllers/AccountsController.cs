@@ -562,6 +562,8 @@ namespace Dhipaya.Controllers
 
                var totalPoint = point - redeempoint;
                customer.Point = NumUtil.ParseInteger(totalPoint);
+               customer.CustomerClass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+
             }
             this._context.SaveChanges();
             await MailDeleteAccount(customers, codes);

@@ -577,7 +577,7 @@ namespace Dhipaya.Controllers
                   }
                   if (customer.PrefixEn.HasValue)
                   {
-                     var prefixEn = this._context.CustomerPrefixs.Where(w =>  w.ID == customer.PrefixEn).FirstOrDefault();
+                     var prefixEn = this._context.CustomerPrefixs.Where(w => w.ID == customer.PrefixEn).FirstOrDefault();
                      if (prefixEn != null)
                         cmodel.prefixEn = prefixEn.NameEng;
                   }
@@ -999,7 +999,7 @@ namespace Dhipaya.Controllers
                prefix = prefix != null ? prefix.Name : "",
                firstName = customer.NameTh,
                lastName = customer.SurNameTh,
-               prefixEn = prefixEn != null ? (!string.IsNullOrEmpty( prefixEn.NameEng2)? prefixEn.NameEng2 : (!string.IsNullOrEmpty(prefixEn.NameEng) ? prefixEn.NameEng : prefixEn.Name)) : "",
+               prefixEn = prefixEn != null ? (!string.IsNullOrEmpty(prefixEn.NameEng2) ? prefixEn.NameEng2 : (!string.IsNullOrEmpty(prefixEn.NameEng) ? prefixEn.NameEng : prefixEn.Name)) : "",
                firstNameEn = customer.NameEn,
                lastNameEn = customer.SurNameEn,
                moblieNo = customer.MoblieNo,
@@ -1040,6 +1040,37 @@ namespace Dhipaya.Controllers
          return Json(new { responseCode = "-1", responseDesc = GetErrorModelState() });
       }
 
+      [HttpGet]
+      [AllowAnonymous]
+      public async Task<JsonResult> GetCustomerByIDcard(string citizenId)
+      {
+
+         var responseDesc = new List<string>();
+         if (string.IsNullOrEmpty(citizenId))
+         {
+            responseDesc.Add("citizenId : กรุณาระบุ citizenId");
+            responseDesc.Add("citizenId_en : citizenId cannot be null.");
+            return Json(new { responseCode = "-1", responseDesc = responseDesc });
+         }
+
+
+
+         var customer = this._context.Customers.Include(i => i.CustomerClass).Where(w => w.IDCard == citizenId);
+         if (customer.Count() == 0)
+         {
+            responseDesc.Add("citizenId : ไม่พบข้อมูลสมาชิก");
+            responseDesc.Add("citizenId_en : Customer data has not found.");
+            return Json(new { responseCode = "-1", responseDesc = responseDesc });
+         }
+
+         var customers = customer.Select(s => new { s.ID, s.RefCode, s.NameTh, s.SurNameTh, s.CustomerClass.Name});
+         return Json(new
+         {
+            responseCode = "200",
+            responseDesc = "SUCCESS",
+            customers = customers
+         });
+      }
 
       /* get customer from Tip Insure only*/
       [HttpPut]
