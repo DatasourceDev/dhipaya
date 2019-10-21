@@ -55,7 +55,7 @@ namespace Dhipaya.DTO
       public string username { get; set; }
 
       [DataType(DataType.Password)]
-      [RegularExpression("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร และอักขระพิเศษ")]
+      [RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
       [StringLength(12, ErrorMessage = "รหัสผ่านต้องไม่น้อยกว่า {2} ตัวและไม่เกิน {1} ตัว", MinimumLength = 8)]
       public string password { get; set; }
 
@@ -216,7 +216,7 @@ namespace Dhipaya.DTO
       public string customerClassName { get; set; }
 
       [DataType(DataType.Password)]
-      [RegularExpression("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร และอักขระพิเศษ")]
+      [RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
       [StringLength(12, ErrorMessage = "รหัสผ่านต้องไม่น้อยกว่า {2} ตัวและไม่เกิน {1} ตัว", MinimumLength = 8)]
       public string password { get; set; }
       public string pEncyprt { get; set; }
