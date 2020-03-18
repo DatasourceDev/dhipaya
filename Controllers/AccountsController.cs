@@ -103,7 +103,11 @@ namespace Dhipaya.Controllers
                if (model.valid)
                {
                   model.password = DataEncryptor.Decrypt(model.pEncyprt);
-                  var customer = CustomerBinding.Binding(null, model);
+                  var customer = new Customer();
+                  customer.Create_On = DateUtil.Now();
+                  customer.ChannelUpdate = CustomerChanal.TIP;
+                  customer = CustomerBinding.Binding(customer, model);
+
                   GetCustomerClass(customer);
                   customer.Create_On = DateUtil.Now();
                   customer.Create_By = customer.User.UserName;
@@ -397,7 +401,7 @@ namespace Dhipaya.Controllers
                         if (customer.FirstLogedIn == false && customer.Channel == CustomerChanal.TipInsure)
                         {
                            var rg = new RijndaelCrypt();
-                           return RedirectToAction("ResetPwd", "Accounts", new {u= rg.Encrypt(customer.User.UserName) });
+                           return RedirectToAction("ResetPwd", "Accounts", new { u = rg.Encrypt(customer.User.UserName) });
                         }
                         if (!string.IsNullOrEmpty(user.Password))
                         {
@@ -407,6 +411,10 @@ namespace Dhipaya.Controllers
                               this._loginServices.Login(user, model.RememberMe);
                               GetCustomerClass(customer);
                               customer.FirstLogedIn = true;
+                              var conditions = this.GetPointCondition(customer, TransacionTypeID.Login);
+                              foreach (var con in conditions)
+                              {
+                              }
                               this._context.SaveChanges();
                               return RedirectToAction("Info", "Customer");
 
@@ -569,9 +577,11 @@ namespace Dhipaya.Controllers
             await MailDeleteAccount(customers, codes);
 
          }
-         return View();
+         var model = new List<string>();
+         model = customers.Select(s => s.Email).ToList();
+         return View(model);
       }
-      public IActionResult Terminate(string code)
+      public async Task<IActionResult> Terminate(string code)
       {
          var acccode = this._context.AccountCodes.Where(w => w.Code == code && w.Status == StatusType.Active).FirstOrDefault();
          if (acccode != null)
@@ -579,6 +589,8 @@ namespace Dhipaya.Controllers
             var customer = _context.Customers.Where(w => w.ID == acccode.CustomerID).FirstOrDefault();
             if (customer != null)
             {
+
+
                var redeems = this._context.Redeems.Where(w => w.CustomerID == customer.ID);
                var mobile = this._context.MobilePoints.Where(w => w.CustomerID == customer.ID);
                var classchages = this._context.CustomerClassChanges.Where(w => w.CustomerID == customer.ID);
@@ -636,6 +648,11 @@ namespace Dhipaya.Controllers
                var user = this._context.Users.Where(w => w.ID == customer.UserID).FirstOrDefault();
                if (user != null)
                {
+                  var rg = new RijndaelCrypt();
+                  var u = rg.Encrypt(user.UserName);
+                  var p = rg.Encrypt(DataEncryptor.Decrypt(user.Password));
+                  var flag = rg.Encrypt(customer.FacebookFlag);
+
                   var tempuser = JsonConvert.SerializeObject(user, new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
                   var tuser = new TerminateUser();
                   tuser = JsonConvert.DeserializeObject<TerminateUser>(tempuser);
@@ -653,6 +670,23 @@ namespace Dhipaya.Controllers
 
                   acccode.Status = StatusType.InActive;
                   this._context.SaveChanges();
+                  /*delete customer imobile*/
+                  using (var client = new HttpClient())
+                  {
+                     client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile/delete");
+                     client.DefaultRequestHeaders.Accept.Clear();
+                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                     var model = new { u = u, p = p, flag = flag };
+
+                     StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                     HttpResponseMessage response = await client.PostAsync(client.BaseAddress, content);
+                     if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
+                     {
+                        customer.Success = true;
+                        this._context.SaveChanges();
+                     }
+                  }
                }
 
             }

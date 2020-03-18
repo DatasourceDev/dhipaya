@@ -134,12 +134,23 @@ namespace Dhipaya.Controllers
 
       [HttpPost]
       [AllowAnonymous]
-      public JsonResult IIAStatusUpdate(int max)
+      public JsonResult IIAStatusUpdate(int max, int month = 0, int year = 0)
       {
          try
          {
             var i = 0;
-            foreach (var customer in this._context.Customers.Where(w => !string.IsNullOrEmpty(w.IDCard) & w.IIASyned == false))
+            var customers = this._context.Customers.Where(w => !string.IsNullOrEmpty(w.IDCard) & w.IIASyned == false);
+            if (month > 0)
+            {
+               customers = customers.Where(w => w.Create_On.Value.Month == month);
+            }
+            if (year > 0)
+            {
+               customers = customers.Where(w => w.Create_On.Value.Year == year);
+            }
+            _logger.LogWarning("Auto Syn Count: " + customers.Count());
+
+            foreach (var customer in customers)
             {
                _logger.LogWarning("Auto Syn(" + i + "):" + customer.NameTh + " " + customer.SurNameTh + " " + customer.IDCard);
                GetCustomerClass(customer, getpoint: false);
@@ -191,6 +202,96 @@ namespace Dhipaya.Controllers
             responseCode = "200",
             responseDesc = "SUCCESS",
          });
+      }
+
+      [HttpPost]
+      [AllowAnonymous]
+      public async Task<JsonResult> SendDeleteAccount([FromBody] SendDeleteDTO model)
+      {
+         var rg = new RijndaelCrypt();
+         model.idcard = rg.Decrypt(model.idcard);
+         if (string.IsNullOrEmpty(model.idcard))
+            return Json(new { responseCode = "-1", responseDesc = "ไม่พบข้อมูลเลขที่บัตรประชาชน" });
+
+         var customers = _context.Customers.Include(i => i.User).Where(w => w.IDCard == model.idcard);
+         if (_conf.SendEmail == true)
+         {
+            foreach (var customer in customers)
+            {
+               GetCustomerClass(customer);
+            }
+            this._context.SaveChanges();
+
+            var codes = new List<string>();
+            foreach (var customer in customers)
+            {
+               var accode = new AccountCode();
+               accode.Code = this.CreateAccountCode();
+               accode.Create_On = DateUtil.Now();
+               accode.Create_By = customer.User.UserName;
+               accode.CustomerID = customer.ID;
+               accode.Status = StatusType.Active;
+               codes.Add(accode.Code);
+               this._context.AccountCodes.Add(accode);
+
+               var point = this._context.CustomerPoints.Where(w => w.CustomerID == customer.ID).Sum(s => s.Point);
+               var redeempoint = this._context.Redeems.Where(w => w.CustomerID == customer.ID).Sum(s => s.Point);
+
+               var totalPoint = point - redeempoint;
+               customer.Point = NumUtil.ParseInteger(totalPoint);
+               customer.CustomerClass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+
+            }
+            this._context.SaveChanges();
+            await MailDeleteAccount(customers, codes);
+
+         }
+         return Json(new { responseCode = "200", responseDesc = "ส่งอีเมลสำเร็จ" });
+
+      }
+
+      [HttpGet]
+      [AllowAnonymous]
+      public async Task<IActionResult> SendDeleteMail(string idcard)
+      {
+         var rg = new RijndaelCrypt();
+         idcard = rg.Decrypt(idcard);
+         if (string.IsNullOrEmpty(idcard))
+            return View();
+         var customers = _context.Customers.Include(i => i.User).Where(w => w.IDCard == idcard);
+         if (_conf.SendEmail == true)
+         {
+            foreach (var customer in customers)
+            {
+               GetCustomerClass(customer);
+            }
+            this._context.SaveChanges();
+
+            var codes = new List<string>();
+            foreach (var customer in customers)
+            {
+               var accode = new AccountCode();
+               accode.Code = this.CreateAccountCode();
+               accode.Create_On = DateUtil.Now();
+               accode.Create_By = customer.User.UserName;
+               accode.CustomerID = customer.ID;
+               accode.Status = StatusType.Active;
+               codes.Add(accode.Code);
+               this._context.AccountCodes.Add(accode);
+
+               var point = this._context.CustomerPoints.Where(w => w.CustomerID == customer.ID).Sum(s => s.Point);
+               var redeempoint = this._context.Redeems.Where(w => w.CustomerID == customer.ID).Sum(s => s.Point);
+
+               var totalPoint = point - redeempoint;
+               customer.Point = NumUtil.ParseInteger(totalPoint);
+               customer.CustomerClass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+
+            }
+            this._context.SaveChanges();
+            await MailDeleteAccount(customers, codes);
+
+         }
+         return View();
       }
 
       //[HttpPost]
@@ -1040,22 +1141,26 @@ namespace Dhipaya.Controllers
          return Json(new { responseCode = "-1", responseDesc = GetErrorModelState() });
       }
 
-      [HttpGet]
+      public class citizenDTO
+      {
+         public string citizenId { get; set; }
+
+      }
+
+      [HttpPost]
       [AllowAnonymous]
-      public async Task<JsonResult> GetCustomerByIDcard(string citizenId)
+      public JsonResult GetCustomerByIDcard([FromBody] citizenDTO model)
       {
 
          var responseDesc = new List<string>();
-         if (string.IsNullOrEmpty(citizenId))
+         if (model == null || string.IsNullOrEmpty(model.citizenId))
          {
             responseDesc.Add("citizenId : กรุณาระบุ citizenId");
             responseDesc.Add("citizenId_en : citizenId cannot be null.");
             return Json(new { responseCode = "-1", responseDesc = responseDesc });
          }
 
-
-
-         var customer = this._context.Customers.Include(i => i.CustomerClass).Where(w => w.IDCard == citizenId);
+         var customer = this._context.Customers.Include(i => i.CustomerClass).Where(w => w.IDCard == model.citizenId);
          if (customer.Count() == 0)
          {
             responseDesc.Add("citizenId : ไม่พบข้อมูลสมาชิก");
@@ -1063,12 +1168,51 @@ namespace Dhipaya.Controllers
             return Json(new { responseCode = "-1", responseDesc = responseDesc });
          }
 
-         var customers = customer.Select(s => new { s.ID, s.RefCode, s.NameTh, s.SurNameTh, s.CustomerClass.Name});
+         var customers = customer.Select(s => new { s.ID, s.RefCode, s.NameTh, s.SurNameTh, s.CustomerClass.Name });
          return Json(new
          {
             responseCode = "200",
             responseDesc = "SUCCESS",
             customers = customers
+         });
+      }
+
+      [HttpPost]
+      [AllowAnonymous]
+      public JsonResult CheckDupAccount([FromBody] citizenDTO model)
+      {
+
+         var responseDesc = new List<string>();
+         if (model == null || string.IsNullOrEmpty(model.citizenId))
+         {
+            responseDesc.Add("citizenId : กรุณาระบุ citizenId");
+            responseDesc.Add("citizenId_en : citizenId cannot be null.");
+            return Json(new { responseCode = "-1", responseDesc = responseDesc });
+         }
+
+         var customer = this._context.Customers.Include(i => i.User).Where(w => w.IDCard == model.citizenId);
+         if (customer.Count() <= 0)
+         {
+            responseDesc.Add("citizenId : ไม่พบข้อมูลสมาชิกที่ซ้ำ");
+            responseDesc.Add("citizenId_en : Customer data has not found.");
+            return Json(new { responseCode = "-1", responseDesc = responseDesc });
+         }
+
+         var dups = new List<string>();
+         foreach (var cus in customer)
+         {
+            if (!string.IsNullOrEmpty(cus.FacebookID))
+               dups.Add("Facebook " + cus.User.UserName);
+            else
+               dups.Add("อีเมล " + cus.User.UserName);
+         }
+         return Json(new
+         {
+            responseCode = "200",
+            responseDesc = "SUCCESS",
+            header = "เลขบัตรประชาชนหมายเลข " + model.citizenId + " มีการสร้างบัญชีไว้แล้ว สำหรับ",
+            accounts = dups,
+            url = _conf.Url +Url.Action("SendDeleteAccount", "Accounts", new { idcard = model.citizenId })
          });
       }
 
@@ -1400,7 +1544,16 @@ namespace Dhipaya.Controllers
 
                if (model.ID <= 0)
                {
-                  var customer = CustomerBinding.Binding(null, model);
+                  var customer = new Customer();
+                  customer.Create_On = DateUtil.Now();
+                  if (model.channel == "TIP Insure")
+                     customer.ChannelUpdate = CustomerChanal.TipInsure;
+                  else if (model.channel == "INT Intersect")
+                     customer.ChannelUpdate = CustomerChanal.INTIntersect;
+                  else
+                     customer.ChannelUpdate = CustomerChanal.Mobile;
+
+                  customer = CustomerBinding.Binding(customer, model);
                   GetCustomerClass(customer);
                   if (model.channel == "INT Intersect")
                      customer.Channel = CustomerChanal.INTIntersect;
@@ -1461,30 +1614,7 @@ namespace Dhipaya.Controllers
                      this._context.SaveChanges();
                   }
 
-                  if (customer.Channel != CustomerChanal.Mobile)
-                  {
-                     using (var client = new HttpClient())
-                     {
-                        client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile/register");
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                        model.username = rg.Encrypt(model.username);
-                        model.password = rg.Encrypt(model.password);
-                        model.status = customer.Status.toStatusNameEn();
-
-
-                        StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-                        HttpResponseMessage response = await client.PostAsync(client.BaseAddress, content);
-                        if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
-                        {
-                           customer.Success = true;
-                           this._context.SaveChanges();
-                        }
-                     }
-                  }
-
-                  if (customer.Channel == CustomerChanal.INTIntersect)
+                  if (customer.Channel == CustomerChanal.INTIntersect /*| customer.Channel == CustomerChanal.TipInsure*/)
                   {
                      if (_conf.SendEmail == true)
                         await MailActivateAcc(customer.Email, customer.ID);
@@ -1493,10 +1623,30 @@ namespace Dhipaya.Controllers
                      //   SendSMS(customer.ID);
                   }
 
-
-
                   if (_conf.SendEmail == true && friend != null && friendpoint > 0)
                      await MailInviteFriend(friend.Email, friend, customer, friendpoint);
+
+                  //if (customer.Channel != CustomerChanal.Mobile)
+                  //{
+                  //   using (var client = new HttpClient())
+                  //   {
+                  //      client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile/register");
+                  //      client.DefaultRequestHeaders.Accept.Clear();
+                  //      client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                  //      model.username = rg.Encrypt(model.username);
+                  //      model.password = rg.Encrypt(model.password);
+                  //      model.status = customer.Status.toStatusNameEn();
+
+                  //      StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                  //      HttpResponseMessage response = await client.PostAsync(client.BaseAddress, content);
+                  //      if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
+                  //      {
+                  //         customer.Success = true;
+                  //         this._context.SaveChanges();
+                  //      }
+                  //   }
+                  //}
 
                   var cusClass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
                   return Json(new
@@ -1830,11 +1980,16 @@ namespace Dhipaya.Controllers
                      if (prefixEn != null)
                         model.prefixEnInt = prefixEn.ID;
                   }
+
                   var iia = new IIAMemberResult();
                   if (model.ID >= 0)
                   {
                      var user = this._context.Users.Where(w => w.ID == model.userID).FirstOrDefault();
                      customer.User = user;
+                     if (model.channel == "TIP Insure")
+                        customer.ChannelUpdate = CustomerChanal.TipInsure;
+                     else
+                        customer.ChannelUpdate = CustomerChanal.Mobile;
                      customer = CustomerBinding.Binding(customer, model);
                      GetCustomerClass(customer);
                      customer.Update_On = DateUtil.Now();
@@ -1889,23 +2044,23 @@ namespace Dhipaya.Controllers
                      this._context.SaveChanges();
 
                      /*update customer imobile*/
-                     using (var client = new HttpClient())
-                     {
-                        client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile");
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        model.username = rg.Encrypt(model.username);
-                        model.password = null;
-                        model.status = customer.Status.toStatusNameEn();
+                     //using (var client = new HttpClient())
+                     //{
+                     //   client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile");
+                     //   client.DefaultRequestHeaders.Accept.Clear();
+                     //   client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                     //   model.username = rg.Encrypt(model.username);
+                     //   model.password = null;
+                     //   model.status = customer.Status.toStatusNameEn();
 
-                        StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-                        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, content);
-                        if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
-                        {
-                           customer.Success = true;
-                           this._context.SaveChanges();
-                        }
-                     }
+                     //   StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                     //   HttpResponseMessage response = await client.PutAsync(client.BaseAddress, content);
+                     //   if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
+                     //   {
+                     //      customer.Success = true;
+                     //      this._context.SaveChanges();
+                     //   }
+                     //}
 
 
                      if (intIntersect)
@@ -2247,6 +2402,8 @@ namespace Dhipaya.Controllers
             return Json(new { msg = ex.Message });
          }
       }
+
+
 
    }
 }

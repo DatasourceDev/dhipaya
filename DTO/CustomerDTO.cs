@@ -55,7 +55,7 @@ namespace Dhipaya.DTO
       public string username { get; set; }
 
       [DataType(DataType.Password)]
-      [RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
+      //[RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
       [StringLength(12, ErrorMessage = "รหัสผ่านต้องไม่น้อยกว่า {2} ตัวและไม่เกิน {1} ตัว", MinimumLength = 8)]
       public string password { get; set; }
 
@@ -149,7 +149,10 @@ namespace Dhipaya.DTO
       public string facebookFlag { get; set; }
       public string ggFlag { get; set; }
    }
-
+   public class SendDeleteDTO
+   {
+      public string idcard { get; set; }
+   }
    public class CustomersImportDTO
    {
       public bool valid { get; set; }
@@ -216,7 +219,7 @@ namespace Dhipaya.DTO
       public string customerClassName { get; set; }
 
       [DataType(DataType.Password)]
-      [RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
+      //[RegularExpression("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,12}$", ErrorMessage = "รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษรใหญ่ และตัวอักษรเล็ก")]
       [StringLength(12, ErrorMessage = "รหัสผ่านต้องไม่น้อยกว่า {2} ตัวและไม่เกิน {1} ตัว", MinimumLength = 8)]
       public string password { get; set; }
       public string pEncyprt { get; set; }
@@ -405,6 +408,7 @@ namespace Dhipaya.DTO
          {
             customer = new Customer();
             customer.Create_On = DateUtil.Now();
+            customer.ChannelUpdate = CustomerChanal.TIP;
          }
 
          if (!string.IsNullOrEmpty(model.email))
@@ -451,33 +455,60 @@ namespace Dhipaya.DTO
 
          /*address*/
 
-         if (!string.IsNullOrEmpty(model.address))
-            customer.CUR_Address = model.address;
-
-         if (!string.IsNullOrEmpty(model.houseNo))
+         if (customer.ChannelUpdate == CustomerChanal.TipInsure)
+         {
             customer.CUR_HouseNo = model.houseNo;
-
-         if (!string.IsNullOrEmpty(model.soi))
-            customer.CUR_Soi = model.soi;
-         else if (!string.IsNullOrEmpty(model.lane))
             customer.CUR_Soi = model.lane;
-
-         if (!string.IsNullOrEmpty(model.moo))
-            customer.CUR_Moo = model.moo;
-         else if (!string.IsNullOrEmpty(model.villageNo))
+            customer.CUR_Lane = model.lane;
+            customer.CUR_Road = model.road;
             customer.CUR_Moo = model.villageNo;
-
-         if (!string.IsNullOrEmpty(model.villageNo))
             customer.CUR_VillageNo = model.villageNo;
-
-         if (!string.IsNullOrEmpty(model.villageName))
             customer.CUR_VillageName = model.villageName;
 
-         if (!string.IsNullOrEmpty(model.lane))
+            customer.CUR_HouseNoEn = model.houseNoEn;
+            customer.CUR_SoiEn = model.laneEn;
+            customer.CUR_LaneEn = model.laneEn;
+            customer.CUR_RoadEn = model.roadEn;
+            customer.CUR_MooEn = model.villageNoEn;
+            customer.CUR_VillageNoEn = model.villageNoEn;
+            customer.CUR_VillageNameEn = model.villageNameEn;
+         }
+         else if (customer.ChannelUpdate == CustomerChanal.Mobile)
+         {
+            customer.CUR_HouseNo = model.houseNo;
+            customer.CUR_Moo = model.villageNo;
+            customer.CUR_VillageNo = model.villageNo;
+            customer.CUR_VillageName = model.villageName;
             customer.CUR_Lane = model.lane;
-
-         if (!string.IsNullOrEmpty(model.road))
+            customer.CUR_Soi = model.lane;
             customer.CUR_Road = model.road;
+
+            customer.CUR_HouseNoEn = model.houseNo;
+            customer.CUR_MooEn = model.villageNo;
+            customer.CUR_VillageNoEn = model.villageNoEn;
+            customer.CUR_VillageNameEn = model.villageNameEn;
+            customer.CUR_LaneEn = model.laneEn;
+            customer.CUR_SoiEn = model.laneEn;
+            customer.CUR_RoadEn = model.roadEn;
+         }
+         else
+         {
+            customer.CUR_HouseNo = model.houseNo;
+            customer.CUR_Road = model.road;
+            customer.CUR_Soi = model.soi;
+            customer.CUR_Lane = model.soi;
+            customer.CUR_Moo = model.moo;
+            customer.CUR_VillageName = model.villageName;
+            customer.CUR_VillageNo = model.moo;
+
+            customer.CUR_HouseNoEn = model.houseNoEn;
+            customer.CUR_RoadEn = model.roadEn;
+            customer.CUR_SoiEn = model.soiEn;
+            customer.CUR_LaneEn = model.soiEn;
+            customer.CUR_MooEn = model.mooEn;
+            customer.CUR_VillageNameEn = model.villageNameEn;
+            customer.CUR_VillageNoEn = model.mooEn;
+         }
 
          if (model.provinceId != null)
             customer.CUR_Province = model.provinceId;
@@ -492,54 +523,6 @@ namespace Dhipaya.DTO
             customer.CUR_ZipCode = model.postalCode;
 
          /*address En*/
-
-         if (!string.IsNullOrEmpty(model.addressEn))
-            customer.CUR_AddressEn = model.addressEn;
-
-         if (!string.IsNullOrEmpty(model.houseNoEn))
-            customer.CUR_HouseNoEn = model.houseNoEn;
-         else if (!string.IsNullOrEmpty(model.houseNo))
-            customer.CUR_HouseNoEn = model.houseNo;
-
-         if (!string.IsNullOrEmpty(model.soiEn))
-            customer.CUR_SoiEn = model.soiEn;
-         else if (!string.IsNullOrEmpty(model.laneEn))
-            customer.CUR_SoiEn = model.laneEn;
-         else if (!string.IsNullOrEmpty(model.soi))
-            customer.CUR_SoiEn = model.soi;
-         else if (!string.IsNullOrEmpty(model.lane))
-            customer.CUR_SoiEn = model.lane;
-
-         if (!string.IsNullOrEmpty(model.mooEn))
-            customer.CUR_MooEn = model.mooEn;
-         else if (!string.IsNullOrEmpty(model.villageNoEn))
-            customer.CUR_MooEn = model.villageNoEn;
-         else if (!string.IsNullOrEmpty(model.moo))
-            customer.CUR_MooEn = model.moo;
-         else if (!string.IsNullOrEmpty(model.villageNo))
-            customer.CUR_MooEn = model.villageNo;
-
-         if (!string.IsNullOrEmpty(model.villageNoEn))
-            customer.CUR_VillageNoEn = model.villageNoEn;
-         else if (!string.IsNullOrEmpty(model.villageNo))
-            customer.CUR_VillageNoEn = model.villageNo;
-
-         if (!string.IsNullOrEmpty(model.villageNameEn))
-            customer.CUR_VillageNameEn = model.villageNameEn;
-         else if (!string.IsNullOrEmpty(model.villageName))
-            customer.CUR_VillageNameEn = model.villageName;
-
-
-         if (!string.IsNullOrEmpty(model.laneEn))
-            customer.CUR_LaneEn = model.laneEn;
-         else if (!string.IsNullOrEmpty(model.lane))
-            customer.CUR_LaneEn = model.lane;
-
-         if (!string.IsNullOrEmpty(model.roadEn))
-            customer.CUR_RoadEn = model.roadEn;
-         else if (!string.IsNullOrEmpty(model.road))
-            customer.CUR_RoadEn = model.road;
-
          if (model.provinceIdEn != null)
             customer.CUR_ProvinceEn = model.provinceIdEn;
          else if (model.provinceId != null)

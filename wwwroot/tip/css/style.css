@@ -329,7 +329,7 @@ ol {
 .header-main {
    width: 100%;
    position: absolute;
-   z-index: 2;
+   z-index: 1002;
    font-family: "Cloud", sans-serif;
 }
 
@@ -730,14 +730,26 @@ ol {
 }
 
    .mobile-menu-toggle a {
-      color: #1c3e95;
+      color: #e6ebf0;
    }
 
+@media (min-width: 576px) {
+   .mobile-menu-toggle a {
+      color: #e6ebf0;
+   }
+}
+@media (min-width: 768px) {
+   .mobile-menu-toggle a {
+      color: #1c3e95;
+   }
+}
 @media (min-width: 992px) {
    .mobile-menu-toggle {
       display: none;
    }
 }
+
+
 
 .slideshow-main {
    font-family: "Cloud", sans-serif;
@@ -1887,7 +1899,6 @@ ol {
 }
 
    .stick-hdr-nav i {
-      
       padding-right: 10px;
    }
 
@@ -3043,12 +3054,13 @@ ol {
 }
 
 .faq-banner {
-   background: url('../img/banner-faq.jpg') no-repeat right bottom;
+   background: url('../img/banner-faq-mobile.jpg') no-repeat right bottom;
    background-size: cover;
-   padding: 20px 0 150px;
+   padding: 80px 0px 150px 0px;
    color: #1c3e95;
    text-align: center;
    font-size: 2em;
+   text-shadow: 1px 1px #bebebe;
 }
 
    .faq-banner h2 {
@@ -3520,6 +3532,48 @@ ol {
    border-color: transparent transparent #1c3e95 transparent;
 }
 
+.about-banner {
+   background: url('../img/banner-about-mobile.jpg') no-repeat right bottom;
+   background-size: cover;
+   padding: 80px 0px 150px 0px;
+   color: #1c3e95;
+   text-align: center;
+   font-size: 2em;
+   text-shadow: 1px 1px #bebebe;
+}
+
+   .about-banner h2 {
+      margin: 0;
+      line-height: 1;
+   }
+
+   .about-banner h4 {
+      font-size: 1.8em;
+      margin: 0;
+      line-height: 1;
+   }
+
+@media (min-width: 992px) {
+   .about-banner {
+      background: url('../img/banner-about.jpg') no-repeat center bottom;
+      background-size: cover;
+      padding: 200px 0 110px;
+      font-size: 3em;
+      text-align: left;
+   }
+
+      .about-banner h2 {
+         margin: 0;
+         line-height: 1;
+      }
+
+      .about-banner h4 {
+         font-size: 1.8em;
+         margin: 0;
+         line-height: 1;
+      }
+}
+
 .select2-container--open .select2-dropdown {
    margin-top: 5px;
 }
@@ -3576,10 +3630,11 @@ ol {
 .news-banner {
    background: url('../img/banner-news-mobile.jpg') no-repeat left bottom;
    background-size: cover;
-   padding: 20px 0 240px;
+   padding: 80px 0px 150px 0px;
    color: #1c3e95;
    text-align: center;
    font-size: 2em;
+   text-shadow: 1px 1px #bebebe;
 }
 
    .news-banner h3 {
@@ -4209,9 +4264,7 @@ ol {
    font-size: 3em;
 }
 
-.mobile-menu-toggle a {
-   color: #e6ebf0;
-}
+
 
 .stick-nav-link span {
    font-size: 0.725em;
@@ -4513,9 +4566,6 @@ input, optgroup, select, textarea, .select, .profile-block-with-bg {
    max-width: 500px;
 }
 
-.mobile-menu-toggle a {
-   color: #1c3e95;
-}
 
 .privilege-image-preview {
    background: rgba(255,255,255,0.8);

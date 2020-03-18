@@ -591,7 +591,8 @@ namespace Dhipaya.Controllers
          model.status = "Active";
          ViewBag.ListProvince = this.ListProvince();
          ViewBag.ListProvinceEn = this.ListProvinceEn();
-
+         ViewBag.ListPrefix = this.ListPrefix();
+         ViewBag.ListPrefixEn = this.ListPrefixEn();
          return View("CustomerEdit", model);
       }
 
@@ -637,6 +638,18 @@ namespace Dhipaya.Controllers
             {
                GetCustomerClass(customer, true);
                model = CustomerBinding.Binding(customer);
+               if (customer.PrefixTh.HasValue)
+               {
+                  var prefix = this._context.CustomerPrefixs.Where(w => w.ID == customer.PrefixTh).FirstOrDefault();
+                  if (prefix != null)
+                     model.prefix = prefix.Name;
+               }
+               if (customer.PrefixEn.HasValue)
+               {
+                  var prefixEn = this._context.CustomerPrefixs.Where(w => w.ID == customer.PrefixEn).FirstOrDefault();
+                  if (prefixEn != null)
+                     model.prefixEn = prefixEn.NameEng;
+               }
                var province = this._context.Provinces.Where(w => w.ProvinceID == model.provinceId).FirstOrDefault();
                if (province != null)
                   model.provinceName = province.ProvinceName;
@@ -724,6 +737,8 @@ namespace Dhipaya.Controllers
          }
          ViewBag.ListProvince = this.ListProvince();
          ViewBag.ListProvinceEn = this.ListProvinceEn();
+         ViewBag.ListPrefix = this.ListPrefix();
+         ViewBag.ListPrefixEn = this.ListPrefixEn();
          return View("CustomerEdit", model);
       }
 
@@ -742,7 +757,8 @@ namespace Dhipaya.Controllers
                ModelState.AddModelError("email", "รหัสผู้ใช้งานซ้ำในระบบ");
             if (model.ID <= 0)
             {
-               if (this.isExistIDCard(model)){
+               if (this.isExistIDCard(model))
+               {
                   model.ShowIdcardDupPopup = true;
                   var ducus = this._context.Customers.Include(i => i.User).Where(c => c.IDCard == model.citizenId & (model.ID > 0 ? c.ID != model.ID : true));
                   model.dupEmail = new List<string>();
@@ -795,7 +811,10 @@ namespace Dhipaya.Controllers
                if (model.ID <= 0)
                {
                   /*new customer*/
-                  var customer = CustomerBinding.Binding(null, model);
+                  var customer = new Customer();
+                  customer.Create_On = DateUtil.Now();
+                  customer.ChannelUpdate = CustomerChanal.TIP;
+                  customer = CustomerBinding.Binding(customer, model);
                   GetCustomerClass(customer);
                   customer.Create_On = DateUtil.Now();
                   customer.Create_By = this.HttpContext.User.Identity.Name;
@@ -902,6 +921,7 @@ namespace Dhipaya.Controllers
                   var customer = this._context.Customers.Where(w => w.ID == model.ID).FirstOrDefault();
                   var user = this._context.Users.Where(w => w.ID == model.userID).FirstOrDefault();
                   customer.User = user;
+                  customer.ChannelUpdate = CustomerChanal.TIP;
                   customer = CustomerBinding.Binding(customer, model);
                   customer.Success = false;
 
@@ -980,7 +1000,8 @@ namespace Dhipaya.Controllers
          }
          ViewBag.ListProvince = this.ListProvince();
          ViewBag.ListProvinceEn = this.ListProvinceEn();
-
+         ViewBag.ListPrefix = this.ListPrefix();
+         ViewBag.ListPrefixEn = this.ListPrefixEn();
          return View("CustomerEdit", model);
       }
 
@@ -1250,7 +1271,7 @@ namespace Dhipaya.Controllers
          return retVal;
       }
 
-      public IActionResult Delete(string search_text, int? customerClassID, int? dup, string orderby)
+      public async Task<IActionResult> Delete(string search_text, int? customerClassID, int? dup, string orderby)
       {
          string idParam = this.RouteData.Values["id"].ToString();
          if (idParam != null && idParam != string.Empty)
@@ -1267,16 +1288,40 @@ namespace Dhipaya.Controllers
                var classchages = this._context.CustomerClassChanges.Where(w => w.CustomerID == customer.ID);
                var adjusts = this._context.PointAdjusts.Where(w => w.CustomerID == customer.ID);
 
+               var rg = new RijndaelCrypt();
+
+               var u = rg.Encrypt(user.UserName);
+               var p = rg.Encrypt(DataEncryptor.Decrypt(user.Password));
+               var flag = rg.Encrypt(customer.FacebookFlag);
+
                this._context.CustomerPoints.RemoveRange(customer.CustomerPoints);
                this._context.MobilePoints.RemoveRange(mobile);
                this._context.Redeems.RemoveRange(redeems);
                this._context.CustomerClassChanges.RemoveRange(classchages);
                this._context.PointAdjusts.RemoveRange(adjusts);
                this._context.Customers.Remove(customer);
+
                if (user != null)
                   this._context.Users.Remove(user);
 
                this._context.SaveChanges();
+               /*delete customer imobile*/
+               using (var client = new HttpClient())
+               {
+                  client.BaseAddress = new Uri(_mobile.Url + "/rewardpoint/customerprofile/delete");
+                  client.DefaultRequestHeaders.Accept.Clear();
+                  client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                  var model = new { u = u, p = p, flag = flag };
+
+                  StringContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                  HttpResponseMessage response = await client.PostAsync(client.BaseAddress, content);
+                  if (response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.OK)
+                  {
+                     customer.Success = true;
+                     this._context.SaveChanges();
+                  }
+               }
 
             }
          }

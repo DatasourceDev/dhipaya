@@ -95,6 +95,7 @@ namespace Dhipaya.Models
       Renew = 10,
       Repay = 11,
       Paybill = 12,
+      Login = 13,
       None = 0
    }
 
@@ -126,6 +127,7 @@ namespace Dhipaya.Models
       public static string Paybill = "Paybill";
       public static string AddPolicy = "AddPolicy";
       public static string Other = "OTHER";
+      public static string Login = "LOGIN";
    }
 
    public static class MBSource

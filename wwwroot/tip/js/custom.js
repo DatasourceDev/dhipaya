@@ -87,11 +87,11 @@ function validatepwd(pwd) {
    if (pwd.length < 8)
       return false;
 
-   if (!LetterContainUpper(pwd))
-      return false;
+   //if (!LetterContainUpper(pwd))
+   //   return false;
 
-   if (!LetterContainNumber(pwd))
-      return false;
+   //if (!LetterContainNumber(pwd))
+   //   return false;
 
    return true;
 }

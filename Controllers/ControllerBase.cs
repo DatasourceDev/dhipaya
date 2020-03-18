@@ -183,7 +183,10 @@ namespace Dhipaya.Controllers
 
                if (f == "y")
                   cmodel.facebookFlag = "Y";
-               var customer = CustomerBinding.Binding(null, cmodel);
+               var customer = new Customer();
+               customer.Create_On = DateUtil.Now();
+               customer.ChannelUpdate = CustomerChanal.Mobile;
+               customer = CustomerBinding.Binding(customer, cmodel);
                customer.Syned = false;
                customer.BCryptPwd = p;
                customer.Create_On = DateUtil.Now();
@@ -537,6 +540,18 @@ namespace Dhipaya.Controllers
       }
       #endregion
 
+      protected SelectList ListPrefix()
+      {
+         var list = new List<CustomerPrefix>();
+         list.AddRange(this._context.CustomerPrefixs.OrderBy(o => o.ID));
+         return new SelectList(list, "ID", "Name");
+      }
+      protected SelectList ListPrefixEn()
+      {
+         var list = new List<CustomerPrefix>();
+         list.AddRange(this._context.CustomerPrefixs.Where(w=>!string.IsNullOrEmpty(w.NameEng)).OrderBy(o => o.ID));
+         return new SelectList(list, "ID", "NameEng");
+      }
       #region  Address
       protected SelectList ListProvince()
       {
@@ -788,33 +803,23 @@ namespace Dhipaya.Controllers
          model.customers = customers;
          model.codes = codes;
 
-         var htmlToConvert = await RenderViewAsync("MailDeleteAccount", model, true);
-         if (_conf.Environment == "Dev")
+         var htmlToConvert = await RenderViewAsync("MailDeleteAccount", model, true);        
+         var email = "";
+         foreach (var customer in customers)
          {
-            var msg = EmailUtil.sendNotificationEmail(_smtp, _conf.SupportEmail, "แจ้งลบบัญชีสมาชิก TIP Society", htmlToConvert.ToString());
-            return Json(new { Msg = msg });
-
+            if (string.IsNullOrEmpty(customer.FacebookID))
+            {
+               email += customer.User.UserName;
+               email += ",";
+            }
          }
-         else
+         if (email.Length > 0)
          {
-            var email = "";
-            foreach (var customer in customers)
-            {
-               if (string.IsNullOrEmpty(customer.FacebookID))
-               {
-                  email += customer.User.UserName;
-                  email += ",";
-               }
-            }
-            if (email.Length > 0)
-            {
-               if (email.Substring(email.Length - 1, 1) == ",")
-                  email = email.Substring(0, email.Length - 1);
-            }
-            var msg = EmailUtil.sendNotificationEmail(_smtp, email, "แจ้งลบบัญชีสมาชิก TIP Society", htmlToConvert.ToString());
-            return Json(new { Msg = msg });
+            if (email.Substring(email.Length - 1, 1) == ",")
+               email = email.Substring(0, email.Length - 1);
          }
-
+         var msg = EmailUtil.sendNotificationEmail(_smtp, email, "แจ้งลบบัญชีสมาชิก TIP Society", htmlToConvert.ToString());
+         return Json(new { Msg = msg });
 
       }
 

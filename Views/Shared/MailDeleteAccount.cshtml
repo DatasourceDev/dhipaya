@@ -8,6 +8,15 @@
    var idcard = Model.customers.FirstOrDefault().IDCard;
    var codes = Model.codes;
    var i = 0;
+
+   var surname = "";
+   var name = "";
+   var cus = Model.customers.FirstOrDefault();
+   if (cus != null)
+   {
+      name = cus.NameTh;
+      surname = cus.SurNameTh;
+   }
 }
 
 <style type="text/css">
@@ -16,30 +25,48 @@
    }
 </style>
 
-<div class="site-wrapper" style="max-width: 430px;color: #000;font-size: 12pt;text-align:left;">
+<div class="site-wrapper" style="color: #000;font-size: 10pt;text-align:left;">
    <main class="main">
-      <div>
+      @*<div>
          <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-top-mb.jpg" />
-      </div>
+      </div>*@
       <p style="text-align:left; padding: 5px;">
-         เรียนสมาชิก เลขบัตรประชาชน @idcard
-         <br />
-         ท่านมีบัญชีสมาชิก TIP Society จำนวน @Model.customers.Count() บัญชี ดังนี้
+         เรียน คุณ @name @surname
          <br />
          <br />
-         @foreach (var customer in Model.customers)
-         {
-            var url = root + "/Accounts/Terminate?code=" + codes[i];
-            i++;
-            @(i + ". ชื่อสมาชิก " + customer.NameTh + " " + customer.SurNameTh )
-            <br />
-            @("ประเภทสมาชิก " + (customer.CustomerClass != null ? customer.CustomerClass.Name : ""))
-            <br />
-            @("สมาชิกเลขที่ " + customer.RefCode )
-            <br />
-            @( "คะแนนสะสมคงเหลือ " + customer.Point + " คะแนน") <a href="@(url)" target="_blank">ลบบัญชีนี้</a>
-            <br />
-         }
+         ด้วยหมายเลขบัตรประจำตัวประชาชนเลขที่ @idcard
+         <br />
+         <br />
+         ได้มีการลงทะเบียนเป็นสมาชิกผ่านเว็บไซต์ TIPInsure.com หรือ เว็บไซต์ TIPsociety.dhipaya.co.th หรือ Mobile application TIPInsure ไว้ก่อนหน้านี้แล้ว เพื่อความสะดวกในการใช้งาน ลูกค้าสามารถเข้ารับบริการได้โดยใช้ Username และ Password เดียวกัน โดยกรุณากดลบบัญชีที่ไม่ต้องการ ตามรายละเอียด ดังนี้
+         <br />
+      </p>
+
+      <table width="100%">
+         <thead>
+            <tr>
+               <th>ชื่อสมาชิก</th>
+               <th>คะแนนสะสม</th>
+               <th>เลือกลบบัญชีนี้</th>
+            </tr>
+         </thead>
+         <tbody>
+            @foreach (var customer in Model.customers)
+            {
+               var url = root + "/Accounts/Terminate?code=" + codes[i];
+               i++;
+               <tr>
+                  <td>
+                     @(i + ". " + customer.NameTh + " " + customer.SurNameTh ) (@(customer.CustomerClass != null ? customer.CustomerClass.Name : ""))
+                     <br />
+                     @customer.Email
+                  </td>
+                  <td valign="top">@customer.Point</td>
+                  <td valign="top"><a href="@(url)" target="_blank">ลบบัญชีนี้</a></td>
+               </tr>
+            }
+         </tbody>
+      </table>
+      <p style="text-align:left; padding: 5px;">
          <br />
          ติดต่อสอบถาม
          <br />
@@ -47,9 +74,9 @@
          <br />
          โทร. <a href="tel:1736" style="text-decoration: underline;" target="_blank">1736</a>
       </p>
-      <div style="text-align:center;">
+      @*<div style="text-align:center;">
          <img src="https://tipsociety.dhipaya.co.th/tip/img/mail-bg-bottom-mb.jpg" />
-      </div>
+      </div>*@
 
 
    </main>

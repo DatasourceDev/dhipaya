@@ -1,11 +1,16 @@
-﻿@{
+﻿@model List<string>
+@{
    ViewData["Title"] = "ส่งอีเมลสำเร็จ";
    Layout = "_LayoutTIP";
 }
 <main class="main register-end">
    <div class="register-block">
-      <h1>ส่งอีเมลสำเร็จ</h1>
-      <h3>โปรดตรวจสอบรายละเอียดที่อีเมลของท่าน</h3>
+      <h1>ระบบได้ส่งอีเมลไปที่</h1>
+      @foreach (var email in Model)
+      {
+         <h3>@email</h3>
+      }
+      <h3>กรุณาลบบัญชีที่ไม่ต้องการ</h3>
       <div class="register-action text-center" style="display:block">
          @*<a href="@Url.Action("Login","Accounts")" class="button button-red">เข้าสู่ระบบ</a>*@
       </div>

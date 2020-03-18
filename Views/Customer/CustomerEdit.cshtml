@@ -127,8 +127,6 @@
                @Html.HiddenFor(m => m.isDhiMember)
                @Html.HiddenFor(m => m.facebookID)
                @Html.HiddenFor(m => m.username)
-               @Html.HiddenFor(m => m.prefixInt)
-               @Html.HiddenFor(m => m.prefixEnInt)
                @Html.HiddenFor(m => m.IIAIgnoreSyned)
                @Html.HiddenFor(m => m.pEncyprt)
                @Html.HiddenFor(m => m.customerClassID)
@@ -137,6 +135,14 @@
                   <div class="profile-col">
                      <table class="profile-table">
                         <tbody>
+                           <tr>
+                              <td>คำนำหน้า <span class="text-red">*</span></td>
+                              <td class="input-block">
+                                 <select asp-for="prefixInt" asp-items="@(ViewBag.ListPrefix)" ></select>
+                                 @Html.ValidationMessageFor(m => m.prefixInt, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
                            <tr>
                               <td>ชื่อ<span class="text-red">*</span></td>
                               <td>
@@ -184,9 +190,9 @@
                               </td>
                            </tr>
                            <tr>
-                              <td>วันเกิด</td>
+                              <td>วันเกิด<span class="text-red">*</span></td>
                               <td>
-                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="birthdate" placeholder="วว/ดด/ปปปป" />
+                                 <input type="text" data-toggle="datepicker" class="input-text" asp-for="birthdate" placeholder="วว/ดด/ปปปป" required />
                                  @Html.ValidationMessageFor(m => m.birthdate, "", new { @class = "warning" })
 
                               </td>
@@ -206,7 +212,7 @@
                                     <td>รหัสผ่าน<span class="text-red">*</span></td>
                                     <td>
                                        <input class="input-text" type="password" placeholder="รหัสผ่าน" asp-for="password" required autocomplete="off" maxlength="12" onchange="if (validatepwd($('#password').val())) { $('#error_password').hide(); } else {$('#error_password').show(); }">
-                                       <p class="warning" id="error_password" style="display:none;">รหัสผ่านต้องประกอบด้วยตัวเลข ตัวอักษร อักขระพิเศษและความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
+                                       <p class="warning" id="error_password" style="display:none;">ความยาวต้องไม่น้อยกว่า 8 ตัว ไม่เกิน 12 ตัว</p>
                                        @Html.ValidationMessageFor(m => m.password, "", new { @class = "warning" })
                                     </td>
                                  </tr>
@@ -305,6 +311,14 @@
                   <div class="profile-col">
                      <table class="profile-table">
                         <tbody>
+                           <tr>
+                              <td>คำนำหน้า (อังกฤษ)<span class="text-red">*</span></td>
+                              <td class="input-block">
+                                 <select asp-for="prefixEnInt" asp-items="@(ViewBag.ListPrefixEn)"></select>
+                                 @Html.ValidationMessageFor(m => m.prefixEnInt, "", new { @class = "warning" })
+
+                              </td>
+                           </tr>
                            <tr>
                               <td>ชื่อ(อังกฤษ)</td>
                               <td>
@@ -542,12 +556,12 @@
             <p id="pop-condition"></p>
          </div>
          <div class="normal-popup-content">
-            <h3>เลขบัตรประชาชนนี้ได้มีการลงทะเบียนแล้ว</h3>
+            <h3>เลขบัตรประชาชนหมายเลข @Model.dupIdcard มีการสร้างบัญชีไว้แล้ว สำหรับ</h3>
             @if (Model.dupEmail != null)
             {
                foreach (var email in Model.dupEmail)
                {
-                  @("อีเมล " + email + " ที่เคยใช้ลงทะเบียน")
+                  @("อีเมล " + email)
                   <br />
                }
             }
@@ -555,11 +569,11 @@
             {
                foreach (var fb in Model.dupFBID)
                {
-                  @("Facebook " + fb + " ที่เคยใช้ลงทะเบียน")
+                  @("Facebook " + fb)
                   <br />
                }
             }
-            <a href="@Url.Action("SendDeleteAccount", "Accounts", new {idcard =Model.dupIdcard})"><b>ลบบัญชีเดิม</b></a>
+            <a href="@Url.Action("SendDeleteAccount", "Accounts", new {idcard =Model.dupIdcard})"><b>ลบบัญชีอื่น</b></a>
          </div>
          <!-- .normal-popup-action -->
       </div><!-- .prvilege-popup-body -->

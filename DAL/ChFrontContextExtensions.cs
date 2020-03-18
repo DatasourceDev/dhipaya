@@ -67,7 +67,7 @@ namespace Dhipaya.DAL
             ListPage.ForEach(s => context.Pages.Add(s));
             context.SaveChanges();
          }
-         
+
          if (context.Pages != null && context.Pages.Count() == 17)
          {
             var ListPage = new List<Page>{
@@ -92,8 +92,7 @@ namespace Dhipaya.DAL
 
          if (context.PointTransacionTypes != null && !context.PointTransacionTypes.Any())
          {
-            var ListPointTransacionType = new List<PointTransacionType>
-        {
+            var ListPointTransacionType = new List<PointTransacionType>{
             new PointTransacionType {TransacionTypeCode  =TransacionTypeCode.Register , Name = "สมัครสมาชิก", Locked  =true },
             new PointTransacionType {TransacionTypeCode  =TransacionTypeCode.Update , Name = "อัพเดตข้อมูล", Locked  =true },
             new PointTransacionType {TransacionTypeCode  =TransacionTypeCode.BuyInsure, Name = "ซื้อประกันภัย", Locked  =true },
