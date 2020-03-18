@@ -1566,6 +1566,7 @@ namespace Dhipaya.Controllers
                   customer.Create_By = customer.User.UserName;
                   customer.Update_On = DateUtil.Now();
                   customer.Update_By = customer.User.UserName;
+                  customer.FirstLogedIn = true;
                   var regs = this.GetPointCondition(customer, TransacionTypeID.Register);
                   foreach (var item in regs)
                   {
