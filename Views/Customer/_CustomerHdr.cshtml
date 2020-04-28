@@ -45,10 +45,17 @@
          </div>
       </div>
       <p class="remark">*บริษัทจะส่งหมายเลขสมาชิกผ่านทางหมายเลขโทรศัพท์มือถือที่ระบุไว้</p>
+
       <div class="table-row">
-         <div class="table-col">@(Model.facebookFlag == "Y" ? "Facebook" : "อีเมล") (รหัสผู้ใช้งาน)</div>
+         <div class="table-col">รหัสผู้ใช้งาน</div>
          <div class="table-col">
             <span class="colon">:</span>@Model.username
+         </div>
+      </div>
+      <div class="table-row">
+         <div class="table-col">ประเภทการสมัคร</div>
+         <div class="table-col">
+            <span class="colon">:</span>@(Model.facebookFlag == "Y" ? "Facebook" : "อีเมล")
          </div>
       </div>
    </div>

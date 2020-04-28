@@ -12,9 +12,10 @@ using System;
 namespace Dhipaya.Migrations
 {
     [DbContext(typeof(ChFrontContext))]
-    partial class ChFrontContextModelSnapshot : ModelSnapshot
+    [Migration("20200415131422_AlterCustomerExport")]
+    partial class AlterCustomerExport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

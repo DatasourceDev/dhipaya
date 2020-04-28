@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dhipaya", "Dhipaya.csproj", "{E4A60823-9723-4DF9-BD27-34AAD52C8BAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DhipayaBGProcess", "..\DhipayaBGProcess\DhipayaBGProcess.csproj", "{F050CA2E-042F-439A-BBE2-09650AF46BEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E4A60823-9723-4DF9-BD27-34AAD52C8BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4A60823-9723-4DF9-BD27-34AAD52C8BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4A60823-9723-4DF9-BD27-34AAD52C8BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F050CA2E-042F-439A-BBE2-09650AF46BEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F050CA2E-042F-439A-BBE2-09650AF46BEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F050CA2E-042F-439A-BBE2-09650AF46BEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F050CA2E-042F-439A-BBE2-09650AF46BEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1599,6 +1599,9 @@
     <Content Update="Views\Shared\UAT.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Shared\_LayoutTIP - Copy.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Shared\_LayoutTIP.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

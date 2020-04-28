@@ -36,6 +36,10 @@
                   @Html.ValidationMessageFor(m => m.moblieNo, "", new { @class = "warning" })
                </div>
                <div class="login-input-block full-block">
+                  <input type="text" data-toggle="datepicker" class="input-text" asp-for="birthdate" placeholder="วันเกิด" required />
+                  @Html.ValidationMessageFor(m => m.birthdate, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block full-block">
                   <input type="email" placeholder="อีเมล (รหัสผู้ใช้งาน)" asp-for="email" required email autocomplete="off">
                   @Html.ValidationMessageFor(m => m.email, "", new { @class = "warning" })
 

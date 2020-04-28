@@ -153,6 +153,10 @@ namespace Dhipaya.DTO
    {
       public string idcard { get; set; }
    }
+   public class TempDTO
+   {
+      public string str { get; set; }
+   }
    public class CustomersImportDTO
    {
       public bool valid { get; set; }

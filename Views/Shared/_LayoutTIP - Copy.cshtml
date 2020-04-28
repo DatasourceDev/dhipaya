@@ -3,7 +3,7 @@
 @using Microsoft.EntityFrameworkCore;
 @using System.Configuration;
 @{
-   var version = "v28042020";
+   var version = "v21032019";
    var rv = ViewContext.RouteData.Values;
    var action = rv["action"].ToString();
    var controller = rv["controller"].ToString();
@@ -116,11 +116,11 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
    <!-- End Google Tag Manager -->
 </head>
 <body>
-   @*<nav class="stick-hdr-nav stick-hdr-nav-mobile">
-         <ul class="stick-hdr-nav-menu">
-            <li class="stick-hdr-nav-item stick-hdr-nav-more"><a href="tipinsure://" class="stick-hdr-nav-link"><i class="fas fa-angle-left"></i><span>TIP Insure</span></a></li>
-         </ul>
-      </nav>*@
+   <nav class="stick-hdr-nav stick-hdr-nav-mobile">
+      <ul class="stick-hdr-nav-menu">
+         <li class="stick-hdr-nav-item stick-hdr-nav-more"><a href="tipinsure://" class="stick-hdr-nav-link"><i class="fas fa-angle-left"></i><span>TIP Insure</span></a></li>
+      </ul>
+   </nav>
    <div class="site-wrapper">
       <header class="header header-main">
          <div class="header-bg"></div>
@@ -135,10 +135,10 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
                      {
                         <li class="nav-main-item @((action == "Info" | action == "Create" | action == "Update" | action == "Point" | action == "History") & controller == "Customer" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Info", "Customer")">ข้อมูลสมาชิก</a></li>
                      }
-                     <li class="nav-main-item @(action == "About" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("About", "Home")">เกี่ยวกับเรา</a></li>
-                     <li class="nav-main-item @((action == "NewsActivity" | action == "NewsActivityInfo") & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("NewsActivity", "Home")">ข่าวสารและกิจกรรม</a></li>
-                     <li class="nav-main-item @(action == "Question" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Question", "Home")">คำถามที่พบบ่อย</a></li>
-                     <li class="nav-main-item @(action == "Contact" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Contact", "Home")">ติดต่อเรา</a></li>
+                     <li class="nav-main-item @(action == "About" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("About","Home")">เกี่ยวกับเรา</a></li>
+                     <li class="nav-main-item @((action == "NewsActivity" | action == "NewsActivityInfo") & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("NewsActivity","Home")">ข่าวสารและกิจกรรม</a></li>
+                     <li class="nav-main-item @(action == "Question" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Question","Home")">คำถามที่พบบ่อย</a></li>
+                     <li class="nav-main-item @(action == "Contact" & controller == "Home" ? "is-active" : "")"><a class="nav-main-link" href="@Url.Action("Contact","Home")">ติดต่อเรา</a></li>
                      <li class="nav-main-item"><a class="nav-main-link" href="https://www.tipinsure.com/" target="_blank">ซื้อประกันภัย</a></li>
                   }
                   @if (loginServices.isInRoles(new string[] { RoleName.Merchant }))
@@ -348,8 +348,8 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
                      </div><!-- .logged-info -->
                      <hr class="line" />
                      <ul class="login-top-action">
-                        <li class="login-top-action-item"><a href="@Url.Action("Info", "Customer")" class="login-top-action-link">ข้อมูลของฉัน</a></li>
-                        <li class="login-top-action-item"><a href="@Url.Action("Logout", "Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
+                        <li class="login-top-action-item"><a href="@Url.Action("Info","Customer")" class="login-top-action-link">ข้อมูลของฉัน</a></li>
+                        <li class="login-top-action-item"><a href="@Url.Action("Logout","Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
                      </ul>
                   </div>
                </div><!-- .login-wrapper -->
@@ -365,7 +365,7 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
                   </div>
                   <div class="login-bottom-wrapper">
                      <ul class="login-top-action">
-                        <li class="login-top-action-item"><a href="@Url.Action("Logout", "Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
+                        <li class="login-top-action-item"><a href="@Url.Action("Logout","Accounts")" class="login-top-action-link">ออกจากระบบ</a></li>
                      </ul>
                   </div>
                </div><!-- .login-wrapper -->
@@ -375,7 +375,7 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
                <div class="login login-top">
                   <div class="login-top-wrapper">
                      <i class="fa fa-user"></i>
-                     <a href="@Url.Action("Login", "Accounts")" class="login-top-link">เข้าสู่ระบบ</a> | <a href="@Url.Action("Register", "Accounts")" class="login-top-link">สมัครสมาชิก</a>
+                     <a href="@Url.Action("Login","Accounts")" class="login-top-link">เข้าสู่ระบบ</a> | <a href="@Url.Action("Register","Accounts")" class="login-top-link">สมัครสมาชิก</a>
                   </div>
                </div><!-- .login-wrapper -->
             }
@@ -383,37 +383,21 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
          </div><!-- .container -->
       </header><!-- .site-header -->
       <main class="main">
-         @if (controller == "Home" | controller == "Accounts")
-         {
-            <style>             
-               .nav-main-link {
-                  color: #1c3e95;
-               }
-               .header-bg {
-                  display: block;
-                  width: 100%;
-                  height: 65px;
-                  position: absolute;
-                  background: rgba(255, 255, 255, 0.9);
-                  z-index: -1;
-               }
-            </style>
-         }
 
          @if ((action == "Index" & controller == "Home") | (action == "Privilege" & controller == "Home") | (action == "Index" & controller == "Admin"))
          {
             @if ((action == "Index" & controller == "Home"))
             {
-               @*<style>
-                  .mobile-menu-toggle a {
+               <style>
+                  /*.mobile-menu-toggle a {
                      color: rgba(167, 171, 181, 0.5);
-                  }
+                  }*/
 
                   .nav-main-link {
                      color: #1c3e95;
                   }
 
-                  @@media (min-width: 992px) {
+                  /*@@media (min-width: 992px) {
                      .header-bg {
                         display: block;
                         width: 100%;
@@ -422,8 +406,16 @@ public bool isValidRoles(IQueryable<string> codes, string[] controllers)
                         background: rgba(255, 255, 255, 0.7);
                         z-index: -1;
                      }
+                  }*/
+                  .header-bg {
+                     display: block;
+                     width: 100%;
+                     height: 65px;
+                     position: absolute;
+                     background: rgba(255, 255, 255, 0.7);
+                     z-index: -1;
                   }
-               </style>*@
+               </style>
             }
             <style>
                /*.mobile-menu-toggle a {

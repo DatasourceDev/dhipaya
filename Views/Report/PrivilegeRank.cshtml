@@ -17,13 +17,16 @@
             <div class="heading-wrapper">
                <h2 class="title"><small>อันดับการแลก</small>สิทธิพิเศษ<small>ของ</small>ร้านค้า/บริการ</h2>
                <div class="title-right">
+                  <a href="@Url.Action("ExcelPrivilegeRank","Report", new { search_category_id = Model.search_category_id, search_text =  Model.search_text, search_sdate = Model.search_sdate, search_edate = Model.search_edate})" class="button button-blue" target="_blank">Export to Excel</a>
                </div>
             </div>
             <form id="form" asp-controller="Report" asp-action="PrivilegeRank" role="form" autocomplete="off" method="get" asp-route-id="">
                <h4 class="sub-heading">ทั้งหมด @NumUtil.FormatCurrency(ViewBag.ItemCount) รายการ</h4>
                <h4 class="sub-heading-right">
-                  <input type="text" class="input-text col70" asp-for="search_text" placeholder="ค้นหาจากชื่อ ร้านค้า/บริการ, สิทธิพิเศษ, เงื่อนไข, ที่อยู่">
-                  <select class="disable-search col20" asp-for="search_category_id">
+                  <input type="text" class="input-text col50" asp-for="search_text" placeholder="ค้นหาจากชื่อ ร้านค้า/บริการ, สิทธิพิเศษ, เงื่อนไข, ที่อยู่">
+                  <input type="text" asp-for="search_sdate" data-toggle="datepicker" class="input-text col10" placeholder="วันที่แลกจาก" />
+                  <input type="text" asp-for="search_edate" data-toggle="datepicker" class="input-text col10" placeholder="วันที่แลกถึง" />
+                  <select class="disable-search col15" asp-for="search_category_id">
                      <option value="">ค้นหาจากประเภทสิทธิพิเศษ</option>
                      @foreach (var item in ViewBag.ListCategory)
                      {

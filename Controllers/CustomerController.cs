@@ -785,7 +785,7 @@ namespace Dhipaya.Controllers
             }
             else
             {
-               if (string.IsNullOrEmpty(model.citizenIdInit))
+               if (!string.IsNullOrEmpty(model.citizenId))
                {
                   if (this.isExistIDCard(model))
                   {

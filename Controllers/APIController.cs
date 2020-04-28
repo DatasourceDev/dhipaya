@@ -62,46 +62,6 @@ namespace Dhipaya.Controllers
 
       [HttpPost]
       [AllowAnonymous]
-      public JsonResult RepairRedeem()
-      {
-         try
-         {
-            foreach (var item in this._context.Redeems)
-            {
-               var pri = _context.Privileges.Include(i => i.Merchant).Where(w => w.PrivilegeID == item.PrivilegeID).FirstOrDefault();
-               if (pri != null)
-               {
-                  item.PrivilegeName = pri.PrivilegeName;
-                  if (pri.Merchant != null)
-                  {
-                     item.MerchantName = pri.Merchant.MerchantName;
-                  }
-               }
-               var customer = _context.Customers.Include(i => i.CustomerClass).Where(w => w.ID == item.CustomerID).FirstOrDefault();
-               if (customer != null && customer.CustomerClass != null)
-               {
-                  item.CustomerClassName = customer.CustomerClass.Name;
-               }
-            }
-            this._context.SaveChanges();
-         }
-         catch (Exception ex)
-         {
-            return Json(new
-            {
-               responseCode = "-1",
-               responseDesc = ex.Message,
-            });
-         }
-         return Json(new
-         {
-            responseCode = "200",
-            responseDesc = "SUCCESS",
-         });
-      }
-
-      [HttpPost]
-      [AllowAnonymous]
       public JsonResult IIACheck(string name, string surname, string idc)
       {
          if (string.IsNullOrEmpty(name))
@@ -130,7 +90,6 @@ namespace Dhipaya.Controllers
          }
          return Json(GetRequestPolicyActive(_iia, idc, name, surname));
       }
-
 
       [HttpPost]
       [AllowAnonymous]
@@ -176,6 +135,61 @@ namespace Dhipaya.Controllers
             responseDesc = "SUCCESS",
          });
       }
+
+      [HttpPut]
+      [AllowAnonymous]
+      public JsonResult GenDOBPoint([FromBody] string str)
+      {
+         _logger.LogWarning(DateUtil.Now() + " " + str);
+
+         if (string.IsNullOrEmpty(str))
+         {
+            return Json(new
+            {
+               responseCode = "-1",
+               responseDesc = "Invalid input",
+            });
+         }
+
+         try
+         {
+            var cusspit = str.Split("|", StringSplitOptions.RemoveEmptyEntries);
+            foreach (var spit in cusspit)
+            {
+               var cusID = NumUtil.ParseInteger(spit);
+               var customer = _context.Customers.Where(w => w.ID == cusID).FirstOrDefault();
+               if (customer != null)
+               {
+                  var regs = this.GetPointCondition(customer, TransacionTypeID.DOB);
+                  foreach (var item in regs)
+                  {
+                     if (item.Point.Value > 0)
+                     {
+                        var point = this.GetCustomerPoint(item, customer, item.Point.Value, (int)TransacionTypeID.DOB, CustomerChanal.TIP, "tipsociety-dob");
+                        customer.LastgivePointDOB = DateUtil.Now().Year;
+                        customer.CustomerPoints.Add(point);
+                     }
+                  }
+               }
+
+            }
+            _context.SaveChanges();
+            return Json(new
+            {
+               responseCode = "200",
+               responseDesc = "SUCCESS",
+            });
+         }
+         catch (Exception ex)
+         {
+            return Json(new
+            {
+               responseCode = "-1",
+               responseDesc = ex.Message,
+            });
+         }
+      }
+
 
       [HttpPost]
       [AllowAnonymous]
@@ -294,23 +308,6 @@ namespace Dhipaya.Controllers
          return View();
       }
 
-      //[HttpPost]
-      //[AllowAnonymous]
-      //public IActionResult RepairPrivilegIndex()
-      //{
-      //   var i = 1;
-      //   foreach (var item in this._context.Privileges.OrderByDescending(o => o.Create_On))
-      //   {
-      //      item.Index = i;
-      //      i++;
-      //   }
-      //   this._context.SaveChanges();
-      //   return Json(new
-      //   {
-      //      responseCode = "200",
-      //      responseDesc = "SUCCESS",
-      //   });
-      //}
 
       [HttpPost]
       [AllowAnonymous]
@@ -621,30 +618,6 @@ namespace Dhipaya.Controllers
          });
       }
 
-      //[HttpPost]
-      //[AllowAnonymous]
-      //public IActionResult RepairFilename()
-      //{
-      //   foreach (var model in _context.Merchants.Where(w => !string.IsNullOrEmpty(w.Url)))
-      //   {
-      //      var mwebRoot = Directory.GetCurrentDirectory() + "\\wwwroot";
-      //      var mfilename = model.Url.Replace("~", mwebRoot);
-      //      mfilename = mfilename.Replace("/", "\\");
-      //      if (System.IO.File.Exists(mfilename))
-      //      {
-      //         var newmfilename = mfilename.Replace(" ", "_").Replace("\\Merchant\\", "\\Merchant\\New\\");
-      //         System.IO.File.Move(mfilename, newmfilename);
-      //      }
-      //      model.Url = model.Url.Replace(" ", "_");
-      //   }
-      //   _context.SaveChanges();
-      //   return Json(new
-      //   {
-      //      responseCode = "200",
-      //      responseDesc = "SUCCESS",
-      //   });
-      //}
-
       [HttpPost]
       [AllowAnonymous]
       public JsonResult CheckLogin([FromBody] SSODTO model)
@@ -699,8 +672,6 @@ namespace Dhipaya.Controllers
             responseDesc = "Invalid username or password.",
          });
       }
-
-
 
       [HttpPut]
       [AllowAnonymous]
@@ -937,7 +908,6 @@ namespace Dhipaya.Controllers
          return Json(new { responseCode = "-1", responseDesc = GetErrorModelState() });
       }
 
-
       [HttpPut]
       [AllowAnonymous]
       public async Task<JsonResult> GetCustomer([FromBody] CustomerStatusDTO model)
@@ -1085,7 +1055,8 @@ namespace Dhipaya.Controllers
             var provinceEn = _context.Provinces.Where(w => w.ProvinceID == customer.CUR_ProvinceEn).FirstOrDefault();
             var districtEn = _context.Aumphurs.Where(w => w.AumphurID == customer.CUR_AumperEn).FirstOrDefault();
             var subdistrictEn = _context.Tumbons.Where(w => w.TumbonID == customer.CUR_TumbonEn).FirstOrDefault();
-            return Json(new
+
+            var result = Json(new
             {
                responseCode = "200",
                responseDesc = "SUCCESS",
@@ -1137,6 +1108,13 @@ namespace Dhipaya.Controllers
                channelupdate = customer.ChannelUpdate.toName(),
                resetedpwd = customer.ResetedPwd,
             });
+            if (customer.ID == 245259)
+            {
+               _logger.LogWarning("GetCustomer");
+               _logger.LogWarning(JsonConvert.SerializeObject(result));
+            }
+
+            return result;
          }
          return Json(new { responseCode = "-1", responseDesc = GetErrorModelState() });
       }
@@ -1144,7 +1122,6 @@ namespace Dhipaya.Controllers
       public class citizenDTO
       {
          public string citizenId { get; set; }
-
       }
 
       [HttpPost]
@@ -1212,12 +1189,12 @@ namespace Dhipaya.Controllers
             responseDesc = "SUCCESS",
             header = "เลขบัตรประชาชนหมายเลข " + model.citizenId + " มีการสร้างบัญชีไว้แล้ว สำหรับ",
             accounts = dups,
-            url = _conf.Url +Url.Action("SendDeleteAccount", "Accounts", new { idcard = model.citizenId })
+            url = _conf.Url + Url.Action("SendDeleteAccount", "Accounts", new { idcard = model.citizenId })
          });
       }
 
-      /* get customer from Tip Insure only*/
-      [HttpPut]
+
+      [HttpPut]  /* get customer from Tip Insure only*/
       [AllowAnonymous]
       public async Task<JsonResult> GetCustomerDataAutoFill([FromBody] CustomerDataAutoFillDTO model)
       {
@@ -1386,7 +1363,6 @@ namespace Dhipaya.Controllers
          }
          return Json(new { responseCode = "-1", responseDesc = GetErrorModelState() });
       }
-
 
       [HttpPost]
       [AllowAnonymous]
@@ -2128,6 +2104,7 @@ namespace Dhipaya.Controllers
          return Json(new { responseCode = "-1", responseDesc = "ไม่พบข้อมูลผุ้ใช้" });
       }
 
+      #region IIA Connect
       private XmlDocument CreateSoapGetProvinceData()
       {
          XmlDocument soapEnvelop = new XmlDocument();
@@ -2403,8 +2380,20 @@ namespace Dhipaya.Controllers
             return Json(new { msg = ex.Message });
          }
       }
+      #endregion
 
-
+      #region Test
+      public async Task<IActionResult> TestSendMail(string email)
+      {
+         var customer = this._context.Customers.Include(i => i.CustomerClass).Include(i => i.User).Where(u => u.Email == email).FirstOrDefault();
+         if (customer != null)
+         {
+            await MailActivateAcc(customer.Email, customer.ID);
+            return Json(new { responseCode = "200", responseDesc = "ส่งอีเมลสำเร็จ" });
+         }
+         return Json(new { responseCode = "-1", responseDesc = "ไม่พบข้อมูลสมาชิก" });
+      }
+      #endregion
 
    }
 }

@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using OfficeOpenXml;
 using Dhipaya.ModelsDapper;
 using System.Net;
+using Microsoft.Extensions.FileProviders;
 
 namespace Dhipaya.Controllers.Admin
 {
@@ -73,68 +74,92 @@ namespace Dhipaya.Controllers.Admin
          return View("Customer", model);
 
       }
-
       [HttpGet]
-      public async Task<IActionResult> ExcelCustomer(CustomersDTO model)
+      public async Task<IActionResult> ExcelCustomer()
       {
-         model.search_user_type = UserLevelType.Member;
-         model.orderby = "ID desc";
-         model.Customers = await _cusRepo.ListAll(model);
+         var webRoot = Directory.GetCurrentDirectory() + "\\wwwroot\\files\\";
 
-         var comlumHeadrs = new string[]
-           {
-               "หมายเลขสมาชิก",
-               "ชื่อ",
-               "นามสกุล",
-               "อีเมล (รหัสผู้ใช้งาน)",
-               "หมายเลขโทรศัพท์มือถือ",
-               "หมายเลขบัตรประชาชน",
-               "ประเภทสมาชิก",
-               "ช่องทางการสมัคร",
-               "ที่อยู่",
-               "วันที่สมัคร",
-               //"คะแนนสะสม"
-           };
-
-         byte[] result;
-
-         using (var package = new ExcelPackage())
+         var filename = Directory.GetFiles(webRoot, "*.xlsx").Where(w => w.Contains("รายชื่อสมาชิก")).OrderByDescending(f => f).FirstOrDefault();
+         if (filename != null)
          {
-            // add a new worksheet to the empty workbook
-            var worksheet = package.Workbook.Worksheets.Add("รายชื่อสมาชิก"); //Worksheet name
-            using (var cells = worksheet.Cells[1, 1, 1, comlumHeadrs.Count()]) //(1,1) (1,5)
+            //filename = filename.Replace(webRoot, "");
+            IFileProvider provider = new PhysicalFileProvider(webRoot);
+            if (System.IO.File.Exists(filename))
             {
-               cells.Style.Font.Bold = true;
+               var memory = new MemoryStream();
+               using (var stream = new FileStream(filename, FileMode.Open))
+               {
+                  await stream.CopyToAsync(memory);
+               }
+               memory.Position = 0;
+               var mimeType = "application/vnd.ms-excel";
+               return File(memory, mimeType, Path.GetFileName(filename));
             }
-
-            //First add the headers
-            for (var i = 0; i < comlumHeadrs.Count(); i++)
-            {
-               worksheet.Cells[1, i + 1].Value = comlumHeadrs[i];
-            }
-
-            //Add values
-            var j = 2;
-            foreach (var customer in model.Customers)
-            {
-               worksheet.Cells["A" + j].Value = customer.RefCode;
-               worksheet.Cells["B" + j].Value = customer.NameTh;
-               worksheet.Cells["C" + j].Value = customer.SurNameTh;
-               worksheet.Cells["D" + j].Value = customer.User.UserName;
-               worksheet.Cells["E" + j].Value = customer.MoblieNo;
-               worksheet.Cells["F" + j].Value = customer.IDCard;
-               worksheet.Cells["G" + j].Value = customer.CustomerClass != null ? customer.CustomerClass.Name : "TIP Silver";
-               worksheet.Cells["H" + j].Value = customer.Channel.toName();
-               worksheet.Cells["I" + j].Value = CustomerBinding.GetCustomerAddress(customer, this._context);
-               worksheet.Cells["J" + j].Value = DateUtil.ToDisplayDateTime(customer.Create_On);
-               //worksheet.Cells["K" + j].Value = customer.Point + customer.RedeemPoint;
-               j++;
-            }
-            result = package.GetAsByteArray();
          }
 
-         return File(result, "application/ms-excel", $"รายชื่อสมาชิก " + DateUtil.ToDisplayFullDateTime(DateUtil.Now()) + ".xlsx");
+         return null;
       }
+      //[HttpGet]
+      //public async Task<IActionResult> ExcelCustomer(CustomersDTO model)
+      //{
+      //   model.search_user_type = UserLevelType.Member;
+      //   model.orderby = "ID desc";
+      //   model.Customers = await _cusRepo.ListAll(model);
+
+      //   var comlumHeadrs = new string[]
+      //     {
+      //         "หมายเลขสมาชิก",
+      //         "ชื่อ",
+      //         "นามสกุล",
+      //         "อีเมล (รหัสผู้ใช้งาน)",
+      //         "หมายเลขโทรศัพท์มือถือ",
+      //         "หมายเลขบัตรประชาชน",
+      //         "ประเภทสมาชิก",
+      //         "ช่องทางการสมัคร",
+      //         "ที่อยู่",
+      //         "วันที่สมัคร",
+      //         //"คะแนนสะสม"
+      //     };
+
+      //   byte[] result;
+
+      //   using (var package = new ExcelPackage())
+      //   {
+      //      // add a new worksheet to the empty workbook
+      //      var worksheet = package.Workbook.Worksheets.Add("รายชื่อสมาชิก"); //Worksheet name
+      //      using (var cells = worksheet.Cells[1, 1, 1, comlumHeadrs.Count()]) //(1,1) (1,5)
+      //      {
+      //         cells.Style.Font.Bold = true;
+      //      }
+
+      //      //First add the headers
+      //      for (var i = 0; i < comlumHeadrs.Count(); i++)
+      //      {
+      //         worksheet.Cells[1, i + 1].Value = comlumHeadrs[i];
+      //      }
+
+      //      //Add values
+      //      var j = 2;
+      //      foreach (var customer in model.Customers)
+      //      {
+      //         worksheet.Cells["A" + j].Value = customer.RefCode;
+      //         worksheet.Cells["B" + j].Value = customer.NameTh;
+      //         worksheet.Cells["C" + j].Value = customer.SurNameTh;
+      //         worksheet.Cells["D" + j].Value = customer.User.UserName;
+      //         worksheet.Cells["E" + j].Value = customer.MoblieNo;
+      //         worksheet.Cells["F" + j].Value = customer.IDCard;
+      //         worksheet.Cells["G" + j].Value = customer.CustomerClass != null ? customer.CustomerClass.Name : "TIP Silver";
+      //         worksheet.Cells["H" + j].Value = customer.Channel.toName();
+      //         worksheet.Cells["I" + j].Value = CustomerBinding.GetCustomerAddress(customer, this._context);
+      //         worksheet.Cells["J" + j].Value = DateUtil.ToDisplayDateTime(customer.Create_On);
+      //         //worksheet.Cells["K" + j].Value = customer.Point + customer.RedeemPoint;
+      //         j++;
+      //      }
+      //      result = package.GetAsByteArray();
+      //   }
+
+      //   return File(result, "application/ms-excel", $"รายชื่อสมาชิก " + DateUtil.ToDisplayFullDateTime(DateUtil.Now()) + ".xlsx");
+      //}
 
       [HttpGet]
       public async Task<IActionResult> CustomerClass(ReportDTO model)
@@ -934,6 +959,17 @@ namespace Dhipaya.Controllers.Admin
          if (model.search_category_id.HasValue)
             model.PrivilegeRanks = model.PrivilegeRanks.Where(w => w.CategoryID == model.search_category_id);
 
+         if (!string.IsNullOrEmpty(model.search_sdate))
+         {
+            var sdate = DateUtil.ToDate(model.search_sdate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Create_On.Value.Date >= sdate.Value.Date);
+         }
+         if (!string.IsNullOrEmpty(model.search_edate))
+         {
+            var edate = DateUtil.ToDate(model.search_edate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Create_On.Value.Date <= edate.Value.Date);
+         }
+
          if (!string.IsNullOrEmpty(model.search_text))
          {
             var text = model.search_text.ToLower();
@@ -969,6 +1005,111 @@ namespace Dhipaya.Controllers.Admin
 
          return View("PrivilegeRank", model);
       }
+
+      [HttpGet]
+      public IActionResult ExcelPrivilegeRank(ReportDTO model)
+      {
+         if (!_loginServices.isInAdminRoles(this.GetRoles()))
+         {
+            return RedirectToAction("Login", "Accounts");
+         }
+
+         int pageno = 1;
+         if (this.RouteData.Values["pno"] != null)
+         {
+            pageno = NumUtil.ParseInteger(this.RouteData.Values["pno"].ToString());
+            if (pageno == 0)
+               pageno = 1;
+         }
+         int skipRows = (pageno - 1) * 100;
+
+         model.PrivilegeRanks = this._context.Privileges
+                      .Include(s => s.Merchant)
+                      .Include(s => s.MerchantCategory)
+                      .Include(s => s.Redeems);
+
+
+         if (model.search_category_id.HasValue)
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(w => w.CategoryID == model.search_category_id);
+
+         if (!string.IsNullOrEmpty(model.search_sdate))
+         {
+            var sdate = DateUtil.ToDate(model.search_sdate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Create_On.Value.Date >= sdate.Value.Date);
+         }
+         if (!string.IsNullOrEmpty(model.search_edate))
+         {
+            var edate = DateUtil.ToDate(model.search_edate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Create_On.Value.Date <= edate.Value.Date);
+         }
+
+         if (!string.IsNullOrEmpty(model.search_text))
+         {
+            var text = model.search_text.ToLower();
+            model.PrivilegeRanks = model.PrivilegeRanks
+               .Where(c => (!string.IsNullOrEmpty(c.PrivilegeName) && c.PrivilegeName.ToLower().Contains(text))
+                  | (!string.IsNullOrEmpty(c.Merchant.MerchantName) && c.Merchant.MerchantName.ToLower().Contains(text))
+                  | (!string.IsNullOrEmpty(c.Allowable_Outlet) && c.Allowable_Outlet.ToLower().Contains(text))
+                  | (!string.IsNullOrEmpty(c.PrivilegeCondition) && c.PrivilegeCondition.ToLower().Contains(text))
+                  | (!string.IsNullOrEmpty(c.PrivilegeDesc) && c.PrivilegeDesc.ToLower().Contains(text))
+               );
+         }
+
+
+         if (!string.IsNullOrEmpty(model.search_sdate))
+         {
+            var sdate = DateUtil.ToDate(model.search_sdate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Redeems.Any(a => a.RedeemDate.Value.Date >= sdate.Value.Date));
+         }
+         if (!string.IsNullOrEmpty(model.search_edate))
+         {
+            var edate = DateUtil.ToDate(model.search_edate);
+            model.PrivilegeRanks = model.PrivilegeRanks.Where(c => c.Redeems.Any(a => a.RedeemDate.Value.Date <= edate.Value.Date));
+         }
+         model.PrivilegeRanks = model.PrivilegeRanks.OrderByDescending(c => c.Redeems.Count());
+
+         var comlumHeadrs = new string[]
+                  {
+                     "ลำดับ",
+                     "ร้านค้า",
+                     "สิทธิพิเศษ",
+                     "ใช้สิทธิ์	",
+                  };
+
+         byte[] result;
+
+         using (var package = new ExcelPackage())
+         {
+            // add a new worksheet to the empty workbook
+            var worksheet = package.Workbook.Worksheets.Add("การแลกสิทธิพิเศษของร้านค้า / บริการ"); //Worksheet name
+            using (var cells = worksheet.Cells[1, 1, 1, comlumHeadrs.Count()]) //(1,1) (1,5)
+            {
+               cells.Style.Font.Bold = true;
+            }
+
+            //First add the headers
+            for (var i = 0; i < comlumHeadrs.Count(); i++)
+            {
+               worksheet.Cells[1, i + 1].Value = comlumHeadrs[i];
+            }
+
+            //Add values
+            var j = 2;
+            foreach (var item in model.PrivilegeRanks)
+            {
+               worksheet.Cells["A" + j].Value = j - 1;
+               worksheet.Cells["B" + j].Value = item.Merchant.MerchantName;
+               worksheet.Cells["C" + j].Value = item.PrivilegeName;
+               worksheet.Cells["D" + j].Value = item.Redeems.Count;
+               j++;
+            }
+            result = package.GetAsByteArray();
+         }
+
+         return File(result, "application/ms-excel", $"การแลกสิทธิพิเศษของร้านค้าบริการ " + DateUtil.ToDisplayFullDateTime(DateUtil.Now()) + ".xlsx");
+
+      }
+
 
       [HttpGet]
       public async Task<IActionResult> IIA(CustomersDTO model)
@@ -1129,10 +1270,10 @@ namespace Dhipaya.Controllers.Admin
 
             while (sdate <= edate)
             {
-               foreach (var filename in files.Where(w=>w.Contains(DateUtil.ToInternalDate3(sdate))))
+               foreach (var filename in files.Where(w => w.Contains(DateUtil.ToInternalDate3(sdate))))
                {
-                     datas = GetIIAExpireData(datas, filename);
-                     break;
+                  datas = GetIIAExpireData(datas, filename);
+                  break;
                }
                sdate = sdate.Value.AddDays(1);
             }

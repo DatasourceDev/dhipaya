@@ -124,6 +124,20 @@ namespace Dhipaya.DAL
             ListPointTransacionType.ForEach(s => context.PointTransacionTypes.Add(s));
             context.SaveChanges();
          }
+         if (context.PointTransacionTypes != null && context.PointTransacionTypes.Count() == 12)
+         {
+            var ListPointTransacionType = new List<PointTransacionType>{
+            new PointTransacionType {TransacionTypeCode  =TransacionTypeCode.DOB, Name = "วันเกิด", Locked  =true }};
+            ListPointTransacionType.ForEach(s => context.PointTransacionTypes.Add(s));
+            context.SaveChanges();
+         }
+         if (context.PointTransacionTypes != null && context.PointTransacionTypes.Count() == 13)
+         {
+            var ListPointTransacionType = new List<PointTransacionType>{
+            new PointTransacionType {TransacionTypeCode  =TransacionTypeCode.Login, Name = "เข้าสู่ระบบ", Locked  =true }};
+            ListPointTransacionType.ForEach(s => context.PointTransacionTypes.Add(s));
+            context.SaveChanges();
+         }
          if (context.CustomerPrefixs != null && !context.CustomerPrefixs.Any())
          {
             var ListPrefix = new List<CustomerPrefix>

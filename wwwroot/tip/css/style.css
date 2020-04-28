@@ -295,6 +295,44 @@ ol {
    }
 }
 
+.container2 {
+   width: 100%;
+   padding-right: 15px;
+   padding-left: 15px;
+   margin-right: auto;
+   margin-left: auto;
+}
+
+   .container2:after {
+      content: "";
+      display: table;
+      clear: both;
+   }
+
+/*@media (min-width: 576px) {
+   .container2 {
+      max-width: 540px;
+   }
+}
+
+@media (min-width: 768px) {
+   .container2 {
+      max-width: 720px;
+   }
+}*/
+
+@media (min-width: 992px) {
+   .container2 {
+      max-width: 960px;
+   }
+}
+
+@media (min-width: 1200px) {
+   .container2 {
+      max-width: 1140px;
+   }
+}
+
 .site-wrapper {
    padding-bottom: 65px;
    -webkit-transition: all .25s ease;
@@ -344,7 +382,7 @@ ol {
    margin: 0 -0.5em;
    padding: 0;
    list-style: none;
-   font-size: 1.25em;
+   font-size: 1.1em;
 }
 
 .nav-main-item {
@@ -381,7 +419,7 @@ ol {
    display: none;
    float: right;
    color: #fff;
-   max-width: 250px;
+   max-width: 180px;
    position: relative;
 }
 
@@ -390,9 +428,10 @@ ol {
       -webkit-border-radius: 50%;
       -moz-border-radius: 50%;
       border-radius: 50%;
-      padding: 0.5em;
+      padding: 0.25em;
       color: #eb232e;
-      margin-right: 5px;
+      margin-right: 0px;
+      font-size: 0.8em;
    }
 
    .login-top .logged-username {
@@ -410,12 +449,11 @@ ol {
 
 .login-top-link {
    color: #fff;
-   font-size: 1.25em;
+   font-size: 1em;
 }
-
 .login-top-wrapper {
    box-shadow: inset 0 1px 21px rgba(0, 0, 0, 0.33);
-   padding: 0.75em 1em;
+   padding: 0.5em;
    background-color: #eb232e;
    -webkit-border-bottom-left-radius: 10px;
    -moz-border-radius-bottomleft: 10px;
@@ -426,6 +464,41 @@ ol {
    position: relative;
    z-index: 2;
 }
+
+@media (min-width: 576px) {
+
+   .login-top {
+      max-width: 250px;
+   }
+
+      .login-top .fa {
+         padding: 0.5em;
+         margin-right: 5px;
+         font-size: 1em;
+      }
+
+   .login-top-link {
+      font-size: 1.25em;
+   }
+
+   .login-top-wrapper {
+      padding: 0.75em 1em;
+   }
+}
+
+/*@media (min-width: 768px) {
+   .mobile-menu-app a {
+      color: #1c3e95;
+   }
+}
+
+@media (min-width: 992px) {
+   .mobile-menu-app {
+      display: none;
+   }
+}*/
+
+
 
 .login-bottom-wrapper {
    position: relative;
@@ -491,11 +564,16 @@ ol {
 .login-top-action-link {
    color: #fff;
 }
+/*23-04-2020*/
+.login-top {
+   display: block;
+}
 
 @media (min-width: 992px) {
-   .login-top {
+   /*23-04-2020*/
+   /*.login-top {
       display: block;
-   }
+   }*/
 }
 
 .login-page {
@@ -725,24 +803,27 @@ ol {
 
 .mobile-menu-toggle {
    text-align: right;
-   padding: 0.5em 0 0 0;
+   padding: 0.5em 0 0 0.5em;
    font-size: 2em;
+   float: right;
 }
 
    .mobile-menu-toggle a {
-      color: #e6ebf0;
+      color: #1c3e95;
    }
 
 @media (min-width: 576px) {
    .mobile-menu-toggle a {
-      color: #e6ebf0;
+      color: #1c3e95;
    }
 }
+
 @media (min-width: 768px) {
    .mobile-menu-toggle a {
       color: #1c3e95;
    }
 }
+
 @media (min-width: 992px) {
    .mobile-menu-toggle {
       display: none;
@@ -751,9 +832,45 @@ ol {
 
 
 
+.mobile-menu-app {
+   display: flex;
+   text-align: left;
+   padding: 25px 0;
+   font-size: 2em;
+   float: left;
+   font-family: "Cloud", sans-serif;
+   height: 65px;
+}
+
+   .mobile-menu-app a {
+      color: #1c3e95;
+      font-size: 0.5em;
+      font-weight: 550;
+   }
+
+@media (min-width: 576px) {
+   .mobile-menu-app a {
+      color: #1c3e95;
+   }
+}
+
+@media (min-width: 768px) {
+   .mobile-menu-app a {
+      color: #1c3e95;
+   }
+}
+
+@media (min-width: 992px) {
+   .mobile-menu-app {
+      display: none;
+   }
+}
+
+
 .slideshow-main {
    font-family: "Cloud", sans-serif;
    text-align: center;
+   padding-top: 65px; /*23-04-2020*/
 }
 
    .slideshow-main h1,
@@ -1916,6 +2033,7 @@ ol {
    flex: 1 1 0;
 }
 
+/*23-04-2020*/
 .stick-hdr-nav-link {
    display: block;
    padding: 15px;
@@ -2300,6 +2418,7 @@ ol {
       background-size: cover;
       padding: 70px 20px 40px;
       color: #fff;
+      font-size: 0.8em;
    }
 
    .profile-box .user-detail {
@@ -2307,7 +2426,18 @@ ol {
       background-size: cover;
       padding: 20px;
       color: #fff;
+      font-size: 0.9em;
    }
+
+@media (min-width: 576px) {
+   .profile-box .user-main {
+      font-size: 1em;
+   }
+
+   .profile-box .user-detail {
+      font-size: 1em;
+   }
+}
 
 .profile-name {
    margin-bottom: 2em;
@@ -2785,6 +2915,7 @@ ol {
 
 .contact-main {
    background-color: #e5e1de;
+   padding-top: 65px;
 }
 
 .contact-google-map iframe {

@@ -52,6 +52,8 @@ namespace Dhipaya.Models
 
       public DateTime? DOB { get; set; }
 
+      public int? LastgivePointDOB { get; set; }
+
       [Required]
       [DataType(DataType.EmailAddress)]
       public string Email { get; set; }

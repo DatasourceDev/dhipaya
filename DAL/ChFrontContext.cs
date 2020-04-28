@@ -71,7 +71,8 @@ namespace Dhipaya.DAL
       public DbSet<CustomerImpt> CustomerImpts { get; set; }
       public DbSet<ShareholderImpt> ShareholderImpts { get; set; }
       public DbSet<Configuration> Configurations { get; set; }
-
+      public DbSet<CustomerExport> CustomerExports { get; set; }
+      
       public ChFrontContext(DbContextOptions options) : base(options) { }
 
       public ChFrontContext() { }

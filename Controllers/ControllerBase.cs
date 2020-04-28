@@ -942,8 +942,6 @@ namespace Dhipaya.Controllers
             & (!w.StartDate.HasValue || w.StartDate.Value.Date <= DateUtil.Now().Date)
             & (!w.EndDate.HasValue || w.EndDate.Value.Date >= DateUtil.Now().Date));
 
-
-
          if (trantype == TransacionTypeID.BuyInsure | trantype == TransacionTypeID.Renew)
          {
             if (outlet == OutletCode.MobileApplication | outlet == OutletCode.TipInsureWeb)

@@ -204,7 +204,7 @@ namespace Dhipaya.Controllers
          }
          return View(model);
       }
-
+      
       public IActionResult RegisterCompleted(CustomerDTO model)
       {
          var customer = this._context.Customers.Include(i => i.CustomerClass).Include(i => i.User).Where(u => u.Email == model.email).FirstOrDefault();

@@ -12,9 +12,10 @@ using System;
 namespace Dhipaya.Migrations
 {
     [DbContext(typeof(ChFrontContext))]
-    partial class ChFrontContextModelSnapshot : ModelSnapshot
+    [Migration("20200330092230_AlterLastgivePointDOB")]
+    partial class AlterLastgivePointDOB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -408,48 +409,6 @@ namespace Dhipaya.Migrations
                     b.HasIndex("CustomerID");
 
                     b.ToTable("CustomerClassChanges");
-                });
-
-            modelBuilder.Entity("Dhipaya.Models.CustomerExport", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Address");
-
-                    b.Property<string>("Channel");
-
-                    b.Property<string>("Create_On");
-
-                    b.Property<string>("CustomerClass");
-
-                    b.Property<string>("DOB");
-
-                    b.Property<string>("DOBMonth");
-
-                    b.Property<string>("DOBYear");
-
-                    b.Property<string>("Email");
-
-                    b.Property<string>("IDCard");
-
-                    b.Property<string>("MoblieNo");
-
-                    b.Property<string>("NameTh");
-
-                    b.Property<string>("Point");
-
-                    b.Property<string>("Province");
-
-                    b.Property<string>("RefCode");
-
-                    b.Property<string>("SurNameTh");
-
-                    b.Property<string>("UserName");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("CustomerExports");
                 });
 
             modelBuilder.Entity("Dhipaya.Models.CustomerImpt", b =>
