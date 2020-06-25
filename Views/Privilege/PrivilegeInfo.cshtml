@@ -503,10 +503,10 @@
                         <table class="profile-table">
                            <tbody>
                               <tr>
-                                 <td >
+                                 <td>
                                     <input id="search_code" type="text" class="input-text" placeholder="ค้นหาจาก Code">
                                  </td>
-                                 <td >
+                                 <td>
                                     <button class="button button-white" type="button" onclick="code_search()">ค้นหา</button>
                                  </td>
                               </tr>
@@ -525,6 +525,7 @@
                                  <th>วันที่หมดอายุ</th>
                                  <th>สถานะ</th>
                                  <th>ใช้สิทธิ์แล้ว</th>
+                                 <th></th>
                               </tr>
                            </thead>
                            <tbody>
@@ -551,7 +552,9 @@
                                              <span>0</span>
                                           }
                                        </td>
-
+                                       <td>
+                                          <span><a target="_blank" href="@Url.Action("Privilege","Report", new { search_equal_text =   item.Code  })">@NumUtil.FormatCurrency(redeemcnt)</a></span>
+                                       </td>
                                     </tr>
                                  }
 
@@ -562,47 +565,23 @@
 
                      </div>
                   </div>
-                     <div class="divcodecustom">
-                        @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
-                        {
-                           var pno = ViewBag.PageNo;
-                           var pnumber = ((int)(pno / 10) * 10) + 1;
-                           var end = false;
-                           <nav class="pagination">
-                              @if (ViewBag.PageLength > 10)
+                  <div class="divcodecustom">
+                     @if (ViewBag.PageLength != null && ViewBag.PageLength > 1 && ViewBag.PageNo != null && ViewBag.PageNo <= ViewBag.PageLength)
+                     {
+                        var pno = ViewBag.PageNo;
+                        var pnumber = ((int)(pno / 10) * 10) + 1;
+                        var end = false;
+                        <nav class="pagination">
+                           @if (ViewBag.PageLength > 10)
+                           {
+                              if (pno > 10)
                               {
-                                 if (pno > 10)
-                                 {
-                                    <a href="@Url.Action("Update", "Privilege", new {  pno= pnumber - 10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ก่อนหน้า</a>
-                                    <a href="#" class="item" onclick="return false">...</a>
-                                 }
-                                 for (var i = pnumber; i < pnumber + 10; i++)
-                                 {
-                                    if (i <= ViewBag.PageLength)
-                                    {
-                                       if (i == ViewBag.PageNo)
-                                       {
-                                          <a href="" class="item active">@i</a>
-                                       }
-                                       else
-                                       {
-                                          <a href="@Url.Action("Update", "Privilege", new { pno=i, tab = "code", id = Model.PrivilegeID})" class="item">@i</a>
-                                       }
-                                    }
-                                    else
-                                    {
-                                       end = true;
-                                    }
-                                 }
-                                 @if (!end)
-                                 {
-                                    <a href="#" class="item" onclick="return false">...</a>
-                                    <a href="@Url.Action("Update", "Privilege", new { pno=pnumber +10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ถัดไป</a>
-                                 }
+                                 <a href="@Url.Action("Update", "Privilege", new {  pno= pnumber - 10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ก่อนหน้า</a>
+                                 <a href="#" class="item" onclick="return false">...</a>
                               }
-                              else
+                              for (var i = pnumber; i < pnumber + 10; i++)
                               {
-                                 @for (var i = 1; i <= ViewBag.PageLength; i++)
+                                 if (i <= ViewBag.PageLength)
                                  {
                                     if (i == ViewBag.PageNo)
                                     {
@@ -610,15 +589,39 @@
                                     }
                                     else
                                     {
-                                       <a href="@Url.Action("Update", "Privilege", new {  pno=i,tab= "code", id = Model.PrivilegeID})" class="item">@i</a>
+                                       <a href="@Url.Action("Update", "Privilege", new { pno=i, tab = "code", id = Model.PrivilegeID})" class="item">@i</a>
                                     }
                                  }
+                                 else
+                                 {
+                                    end = true;
+                                 }
                               }
-                           </nav>
+                              @if (!end)
+                              {
+                                 <a href="#" class="item" onclick="return false">...</a>
+                                 <a href="@Url.Action("Update", "Privilege", new { pno=pnumber +10,tab = "code", id = Model.PrivilegeID})" class="item" style="width:80px">ถัดไป</a>
+                              }
+                           }
+                           else
+                           {
+                              @for (var i = 1; i <= ViewBag.PageLength; i++)
+                              {
+                                 if (i == ViewBag.PageNo)
+                                 {
+                                    <a href="" class="item active">@i</a>
+                                 }
+                                 else
+                                 {
+                                    <a href="@Url.Action("Update", "Privilege", new {  pno=i,tab= "code", id = Model.PrivilegeID})" class="item">@i</a>
+                                 }
+                              }
+                           }
+                        </nav>
 
-                        }
-                     </div>
+                     }
                   </div>
+               </div>
             </div>
             <div class="profile-block-without-bg">
                <div class="profile-col-full  ">

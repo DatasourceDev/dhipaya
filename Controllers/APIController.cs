@@ -109,10 +109,10 @@ namespace Dhipaya.Controllers
             }
             _logger.LogWarning("Auto Syn Count: " + customers.Count());
 
-            foreach (var customer in customers)
+            foreach (var customer in customers.OrderBy(o => o.ID).Take(max))
             {
                _logger.LogWarning("Auto Syn(" + i + "):" + customer.NameTh + " " + customer.SurNameTh + " " + customer.IDCard);
-               GetCustomerClass(customer, getpoint: false);
+               GetCustomerClass(customer, getpoint: true);
                customer.Update_On = DateUtil.Now();
                customer.Update_By = "IIAStatusUpdate";
                if (i >= max)

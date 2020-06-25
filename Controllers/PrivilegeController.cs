@@ -548,7 +548,6 @@ namespace Dhipaya.Controllers.Admin
 
       }
 
-
       public IActionResult Delete()
       {
          if (!_loginServices.isInAdminRoles(this.GetRoles()))
@@ -894,6 +893,21 @@ namespace Dhipaya.Controllers.Admin
 
          return View("PrivilegeCode", model);
       }
+
+      //public void DeletePrivilegeCode()
+      //{
+      //   if (!_loginServices.isInAdminRoles(this.GetRoles()))
+      //   {
+      //      return RedirectToAction("Login", "Accounts");
+      //   }
+      //   string idParam = this.RouteData.Values["id"].ToString();
+      //   Privilege model = null;
+      //   if (idParam != null && idParam != string.Empty)
+      //   {
+      //   }
+      //}
+
+
 
       [HttpGet]
       public async Task<IActionResult> TemplateCode()

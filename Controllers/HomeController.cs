@@ -23,8 +23,6 @@ namespace Dhipaya.Controllers
 {
    public class HomeController : ControllerBase
    {
-      public ILoginServices _loginServices;
-
       public HomeController(ICustomerRepository cusRepo, IReportRepository rptRepo, ChFrontContext context, IOptions<SystemConf> conf, ILogger<HomeController> logger, IOptions<Smtp> smtp, IOptions<TIPMobile> _mobile, IOptions<IIA> _iia, ILoginServices loginServices) : base(context, logger, _mobile, _iia, smtp, loginServices, conf, cusRepo, rptRepo)
       {
          this._logger = logger;
@@ -41,12 +39,15 @@ namespace Dhipaya.Controllers
 
       public IActionResult Index()
       {
-         var customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
-         if (customer != null)
-            GetCustomerClass(customer, true);
-
          var model = new HomeDTO();
-         model.CustomerClass = ViewBag.CustomerClass;
+
+         if (_loginServices.isAuthen())
+         {
+            var customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
+            if (customer != null)
+               GetCustomerClass(customer, true);
+            model.CustomerClass = ViewBag.CustomerClass;
+         }
          return View(model);
       }
       [HttpGet]
@@ -133,24 +134,29 @@ namespace Dhipaya.Controllers
             var imgs = model.PrivilegeImages.Select(s => Url.Content(s.Url));
 
             var error = "";
-            var customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
-            if (customer != null)
+            Customer customer = null;
+            if (_loginServices.isAuthen())
             {
-               if (customer.CustomerClassID == 1 | customer.CustomerClassID == 2)
+               customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
+               if (customer != null)
                {
-                  if (!model.PrivilegeCustomerClasses.Where(w => w.CustomerClassID == customer.CustomerClassID).Any())
+                  if (customer.CustomerClassID == 1 | customer.CustomerClassID == 2)
                   {
-                     error = "เฉพาะลูกค้า ";
-                     foreach (var item in model.PrivilegeCustomerClasses.Where(w => w.ID > 0))
+                     if (!model.PrivilegeCustomerClasses.Where(w => w.CustomerClassID == customer.CustomerClassID).Any())
                      {
-                        var cclass = _context.CustomerClasses.Where(w => w.ID == item.CustomerClassID).FirstOrDefault();
-                        if (cclass != null)
-                           error += " " + cclass.Name;
+                        error = "เฉพาะลูกค้า ";
+                        foreach (var item in model.PrivilegeCustomerClasses.Where(w => w.ID > 0))
+                        {
+                           var cclass = _context.CustomerClasses.Where(w => w.ID == item.CustomerClassID).FirstOrDefault();
+                           if (cclass != null)
+                              error += " " + cclass.Name;
+                        }
+                        error += " เท่านั้น";
                      }
-                     error += " เท่านั้น";
                   }
                }
             }
+               
             return Json(new
             {
                msg = error,
@@ -198,16 +204,24 @@ namespace Dhipaya.Controllers
          if (model.CustomerClassID.HasValue)
             model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == model.CustomerClassID));
 
-         var customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
-         if (customer != null)
+         if (_loginServices.isAuthen())
          {
-            GetCustomerClass(customer, true);
-            var customerclass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
-            if (customerclass != null && customerclass.ID != 1 && customerclass.ID != 2)
+            var customer = this._context.Customers.Where(w => w.User.UserName == this.HttpContext.User.Identity.Name).FirstOrDefault();
+            if (customer != null)
             {
-               /*TIP Lady or Other*/
-               model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 1) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 2) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == customerclass.ID));
-               ViewBag.ListCustomerClass = this._context.CustomerClasses.Where(w => w.Status == StatusType.Active & (w.ID == 1 | w.ID == 2 | w.ID == customerclass.ID));
+               GetCustomerClass(customer, true);
+               var customerclass = _context.CustomerClasses.Where(w => w.ID == customer.CustomerClassID).FirstOrDefault();
+               if (customerclass != null && customerclass.ID != 1 && customerclass.ID != 2)
+               {
+                  /*TIP Lady or Other*/
+                  model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 1) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 2) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == customerclass.ID));
+                  ViewBag.ListCustomerClass = this._context.CustomerClasses.Where(w => w.Status == StatusType.Active & (w.ID == 1 | w.ID == 2 | w.ID == customerclass.ID));
+               }
+               else
+               {
+                  model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 1) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 2));
+                  ViewBag.ListCustomerClass = this._context.CustomerClasses.Where(w => w.Status == StatusType.Active & (w.ID == 1 | w.ID == 2));
+               }
             }
             else
             {
@@ -220,14 +234,12 @@ namespace Dhipaya.Controllers
             model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 1) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 2));
             ViewBag.ListCustomerClass = this._context.CustomerClasses.Where(w => w.Status == StatusType.Active & (w.ID == 1 | w.ID == 2));
          }
+         
 
          model.AllPrivilegeCnt = model.Privileges.Count();
          model.Privileges = model.Privileges.OrderBy(c => c.Index).ThenByDescending(o => o.PrivilegeID).Take(12);
 
          model.Provinces = this._context.Provinces.OrderBy(b => b.ProvinceName);
-
-
-
          return View("Privilege", model);
       }
 

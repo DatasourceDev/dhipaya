@@ -40,9 +40,9 @@
                         @if (!string.IsNullOrEmpty(item.Title))
                         {
                            var title = item.Title;
-                           if (title.Length > 23)
+                           if (title.Length > 55)
                            {
-                              @Html.Raw((title).Substring(0, 23) + "...")
+                              @Html.Raw((title).Substring(0, 55) + "...")
                            }
                            else
                            {

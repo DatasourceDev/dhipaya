@@ -3867,7 +3867,7 @@ ol {
 
       .news-condition-list .news-condition-icon img {
          height: 280px;
-         object-fit: cover;
+         object-fit: contain;
          width: 100%;
          cursor: pointer;
       }
@@ -3884,7 +3884,7 @@ ol {
       right: 0px;
       top: 210px;
       width: 65%;
-      padding: 20px;
+      padding: 10px;
       cursor: pointer;
    }
 
