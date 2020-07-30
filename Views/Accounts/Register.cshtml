@@ -35,9 +35,32 @@
                   <p class="remark">* บริษัทจะส่งหมายเลขสมาชิกผ่านทางหมายเลขโทรศัพท์มือถือที่ระบุ</p>
                   @Html.ValidationMessageFor(m => m.moblieNo, "", new { @class = "warning" })
                </div>
-               <div class="login-input-block full-block">
-                  <input type="text" data-toggle="datepicker" class="input-text" asp-for="birthdate" placeholder="วันเกิด" required />
-                  @Html.ValidationMessageFor(m => m.birthdate, "", new { @class = "warning" })
+               <div class="login-input-block quarter-block">
+                  <select asp-for="birthdateDay" required>
+                     @for (var i = 1; i <= 31; i++)
+                     {
+                        <option value="@i">@i</option>
+                     }
+                  </select>
+                  @Html.ValidationMessageFor(m => m.birthdateDay, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block half-block">
+                  <select asp-for="birthdateMonth" required>
+                     @for (var i = 1; i <= 12; i++)
+                     {
+                        <option value="@i">@DateUtil.GetFullMonth(i)</option>
+                     }
+                  </select>
+                  @Html.ValidationMessageFor(m => m.birthdateMonth, "", new { @class = "warning" })
+               </div>
+               <div class="login-input-block quarter-block">
+                  <select asp-for="birthdateYear" required>
+                     @for (var i = DateUtil.Now().Year; i >= 1960; i--)
+                     {
+                        <option value="@i">@i</option>
+                     }
+                  </select>
+                  @Html.ValidationMessageFor(m => m.birthdateYear, "", new { @class = "warning" })
                </div>
                <div class="login-input-block full-block">
                   <input type="email" placeholder="อีเมล (รหัสผู้ใช้งาน)" asp-for="email" required email autocomplete="off">
@@ -120,7 +143,7 @@
             {
                foreach (var fb in Model.dupFBID)
                {
-                  @("Facebook " + fb ) 
+                  @("Facebook " + fb )
                   <br />
                }
             }

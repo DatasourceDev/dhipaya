@@ -73,7 +73,7 @@
          <div class="privilege-filter">
             <form class="privilege-filter-form" asp-action="Privilege" asp-controller="Home" method="get">
                <input asp-for="CategoryID" type="hidden" />
-               <div class="input-block input-member-block">
+               @*<div class="input-block input-member-block">
                   <select class="disable-search" asp-for="CustomerClassID">
                      <option value="">ค้นหาจากประเภทสมาชิก</option>
                      @foreach (CustomerClass item in ViewBag.ListCustomerClass)
@@ -81,11 +81,11 @@
                         <option value="@item.ID">@item.Name</option>
                      }
                   </select>
-               </div>
+               </div>*@
                <div class="input-block input-name-block">
-                  <input type="text" class="input-text" placeholder="ค้นหาจากสถานที่" asp-for="Outlets">
+                  <input type="text" class="input-text" placeholder="ค้นหาจาก ร้านค้า/สถานที่/จังหวัด" asp-for="Outlets">
                </div>
-               <div class="input-block input-province-block">
+               @*<div class="input-block input-province-block">
                   <select asp-for="ProvinceID">
                      <option value="" selected>จังหวัด</option>
                      @foreach (var item in Model.Provinces)
@@ -93,7 +93,7 @@
                         <option value="@item.ProvinceID">@item.ProvinceName</option>
                      }
                   </select>
-               </div>
+               </div>*@
                <div class="submit-block">
                   <button type="submit" class="submit-button"><i class="fa fa-search"></i></button>
                </div>

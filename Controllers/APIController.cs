@@ -974,9 +974,19 @@ namespace Dhipaya.Controllers
             if (user == null)
             {
                /*create customer imobile*/
-
-               await this.Repair(u, p, f, "loginForStatus");
-               user = this._context.Users.Where(u2 => u2.UserName == u).FirstOrDefault();
+               user = new User();
+               user.UserName = "2629260247197003";
+               try
+               {
+                  await this.Repair(u, p, f, "loginForStatus");
+                  user = this._context.Users.Where(u2 => u2.UserName == u).FirstOrDefault();
+               }
+               catch
+               {
+                  responseDesc.Add("username : ไม่พบข้อมูลลูกค้าในระบบ");
+                  responseDesc.Add("username_en : Username doesn't exist.");
+                  return Json(new { responseCode = "-1", responseDesc = responseDesc });
+               }
             }
             if (user == null)
             {

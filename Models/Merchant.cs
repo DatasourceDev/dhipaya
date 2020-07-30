@@ -37,6 +37,7 @@ namespace Dhipaya.Models
       public string Password { get; set; }
 
 
+      public virtual Province Province { get; set; }
 
       public virtual User User { get; set; }
       public virtual MerchantCategory MerchantCategories { get; set; }

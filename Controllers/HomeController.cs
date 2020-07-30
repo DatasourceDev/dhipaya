@@ -156,7 +156,7 @@ namespace Dhipaya.Controllers
                   }
                }
             }
-               
+
             return Json(new
             {
                msg = error,
@@ -188,6 +188,7 @@ namespace Dhipaya.Controllers
          ViewData["FBAppID"] = this._conf.FBAppID;
          model.Privileges = this._context.Privileges
                                  .Include(s => s.Merchant)
+                                 .Include(s => s.Merchant.Province)
                                  .Include(s => s.PrivilegeImages)
                                  .Include(s => s.PrivilegeCustomerClasses)
                                  .Include(s => s.MerchantCategory)
@@ -196,8 +197,15 @@ namespace Dhipaya.Controllers
 
          if (model.CategoryID.HasValue)
             model.Privileges = model.Privileges.Where(w => w.CategoryID == model.CategoryID);
-         if (!string.IsNullOrEmpty(model.Outlets))
-            model.Privileges = model.Privileges.Where(w => (!string.IsNullOrEmpty(w.Allowable_Outlet) && w.Allowable_Outlet.ToLower().Contains(model.Outlets.ToLower())) | (!string.IsNullOrEmpty(w.Merchant.MerchantName) && w.Merchant.MerchantName.ToLower().Contains(model.Outlets.ToLower())));
+         if (!string.IsNullOrEmpty(model.Outlets)){
+            model.Privileges = model.Privileges.Where(w =>
+               (w.Merchant.Province != null && w.Merchant.Province.ProvinceName.ToLower().Contains(model.Outlets.ToLower())) |
+               (!string.IsNullOrEmpty(w.Allowable_Outlet) && w.Allowable_Outlet.ToLower().Contains(model.Outlets.ToLower())) |
+               (!string.IsNullOrEmpty(w.Merchant.MerchantName) && w.Merchant.MerchantName.ToLower().Contains(model.Outlets.ToLower())));
+
+         }
+
+
          if (model.ProvinceID.HasValue)
             model.Privileges = model.Privileges.Where(w => w.Merchant.ProvinceID == model.ProvinceID);
 
@@ -234,7 +242,7 @@ namespace Dhipaya.Controllers
             model.Privileges = model.Privileges.Where(w => w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 1) | w.PrivilegeCustomerClasses.Any(s => s.CustomerClassID == 2));
             ViewBag.ListCustomerClass = this._context.CustomerClasses.Where(w => w.Status == StatusType.Active & (w.ID == 1 | w.ID == 2));
          }
-         
+
 
          model.AllPrivilegeCnt = model.Privileges.Count();
          model.Privileges = model.Privileges.OrderBy(c => c.Index).ThenByDescending(o => o.PrivilegeID).Take(12);

@@ -272,6 +272,11 @@ namespace Dhipaya.DTO
 
       public bool isDhiMember { get; set; }
 
+      public int birthdateDay { get; set; }
+      public int birthdateMonth { get; set; }
+      public int birthdateYear { get; set; }
+
+
       public string birthdate { get; set; }
       public string customerNo { get; set; }
       public string refCode { get; set; }
@@ -552,6 +557,9 @@ namespace Dhipaya.DTO
 
          if (!string.IsNullOrEmpty(model.birthdate))
             customer.DOB = DateUtil.ToDate(model.birthdate);
+         else if (model.birthdateDay > 0 && model.birthdateMonth> 0 && model.birthdateYear > 0)
+            customer.DOB = DateUtil.ToDate(model.birthdateDay, model.birthdateMonth, model.birthdateYear);
+
 
          if (!string.IsNullOrEmpty(model.status))
             customer.Status = model.status.toUserStatus();
